@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Войти</title>
+</head>
+<body>
+<h1>Войти</h1>
+<form method="post" action="/login">
+    <div>
+        <label for="login">Логин:</label>
+        <input type="text" id="login" name="login" required>
+    </div>
+    <div>
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    {{if .Error}}
+    <div style="color: red;">
+        {{.Error}}
+    </div>
+    {{end}}
+    <div>
+        <button type="submit">Войти</button>
+    </div>
+</form>
+</body>
+</html>
