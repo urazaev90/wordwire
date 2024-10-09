@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Изучение английских слов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #current-word {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #translation {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Изучение английских слов</h1>
+<div>Осталось слов: <span id="words-left">0</span></div>
+<div id="word-view">
+    <p id="current-word">Загрузка...</p>
+    <button id="show-translation">Посмотреть перевод</button>
+    <div id="translation"></div>
+</div>
+<div>
+    <button id="back" disabled>Назад</button>
+    <button id="forward">Вперед</button>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let words = [];
+        let currentIndex = 0;
+        let history = [];
+
+        async function fetchWords() {
+            try {
+                console.log("Fetching words from server...");
+                const response = await fetch('/api/words');
+                if (!response.ok) {
+                    throw new Error(`Ошибка загрузки слов: ${response.statusText}`);
+                }
+                words = await response.json();
+                shuffle(words);  // Перемешиваем слова, чтобы они были в случайном порядке
+                document.getElementById("words-left").textContent = words.length - currentIndex;
+                showWord();
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function showWord() {
+            if (currentIndex >= 0 && currentIndex < words.length) {
+                const word = words[currentIndex];
+                document.getElementById("current-word").textContent = word.word;
+                document.getElementById("translation").innerHTML = "";
+                document.getElementById("back").disabled = currentIndex === 0;
+                document.getElementById("words-left").textContent = words.length - currentIndex;
+            }
+        }
+
+        document.getElementById("forward").addEventListener("click", () => {
+            if (currentIndex < words.length - 1) {
+                history.push(currentIndex);
+                currentIndex++;
+                document.getElementById("back").disabled = false;
+                showWord();
+            }
+        });
+
+        document.getElementById("back").addEventListener("click", () => {
+            if (history.length > 0) {
+                currentIndex = history.pop();
+                showWord();
+            }
+        });
+
+        document.getElementById("show-translation").addEventListener("click", () => {
+            const word = words[currentIndex];
+            document.getElementById("translation").innerHTML = `
+            <p>Транскрипция: ${word.transcription}</p>
+            <p>Перевод: ${word.translation}</p>
+        `;
+        });
+
+        fetchWords();
+    });
+</script>
+</body>
+</html>

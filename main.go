@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	_ "github.com/lib/pq"
@@ -32,6 +33,8 @@ func main() {
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/register", RegisterHandler).Methods("GET", "POST")
 	router.HandleFunc("/profile", ProfileHandler).Methods("GET", "POST")
+	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET") // Render HTML
+	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")    // Return JSON data
 	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
 
 	log.Println("Server started at :8080")
@@ -162,18 +165,13 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			wordID, err := strconv.Atoi(key)
-			if err != nil {
-				log.Println("Error converting wordID:", err)
-				continue
-			}
 			label, err := strconv.Atoi(values[0])
 			if err != nil {
 				log.Println("Error converting label:", err)
 				continue
 			}
 
-			_, err = tx.Exec(`UPDATE user_word_labels SET label = $1 WHERE user_id = $2 AND word_id = $3`, label, userID, wordID)
+			_, err = tx.Exec(`UPDATE user_word_labels SET label = $1 WHERE user_id = $2 AND word_id = $3`, label, userID, key)
 			if err != nil {
 				tx.Rollback()
 				log.Println("Error updating label:", err)
@@ -224,7 +222,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		if label.Valid {
 			word.Label = int(label.Int64)
 		} else {
-			word.Label = 1 // Временно устанавливаем 1, если метка NULL
+			word.Label = 1 // Use 1 if NULL
 		}
 		words = append(words, word)
 	}
@@ -253,7 +251,7 @@ func getUserIDFromSession(r *http.Request) int {
 	session, _ := store.Get(r, "session-name")
 	userID, ok := session.Values["user_id"].(int)
 	if !ok {
-		return 0 // Или другая логика для неавторизованных пользователей
+		return 0
 	}
 	return userID
 }
@@ -270,4 +268,68 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session.Save(r, w)
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func TeachingPageHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthorized(r) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("templates/teaching.html")
+	if err != nil {
+		log.Println("Error parsing template:", err)
+		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl.Execute(w, nil)
+}
+
+func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthorized(r) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userID := getUserIDFromSession(r)
+
+	rows, err := Database.Query(`
+		SELECT ew.word, ew.transcription, ew.translation
+		FROM english_words ew
+		INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
+		WHERE uwl.user_id = $1 AND uwl.label = 2
+	`, userID)
+	if err != nil {
+		log.Println("Error querying database:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type Word struct {
+		Word          string `json:"word"`
+		Transcription string `json:"transcription"`
+		Translation   string `json:"translation"`
+	}
+
+	var words []Word
+	for rows.Next() {
+		var word Word
+		if err := rows.Scan(&word.Word, &word.Transcription, &word.Translation); err != nil {
+			log.Println("Error scanning row:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+		words = append(words, word)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Println("Error with rows:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(words)
 }
