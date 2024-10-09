@@ -8,6 +8,19 @@
 <body>
 <h1>Вы успешно вошли в свой личный кабинет</h1>
 <p>Вы успешно вошли в систему.</p>
+
+<form action="/profile" method="post">
+    {{range .}}
+    <div>
+        <span>{{.Word}}</span>
+        <input type="radio" name="{{.ID}}" value="1" {{if eq .Label 1}}checked{{end}}> буду изучать
+        <input type="radio" name="{{.ID}}" value="2" {{if eq .Label 2}}checked{{end}}> поставить на изучение
+        <input type="radio" name="{{.ID}}" value="3" {{if eq .Label 3}}checked{{end}}> это слово знаю
+    </div>
+    {{end}}
+    <button type="submit">Сохранить изменения</button>
+</form>
+
 <form action="/logout" method="post">
     <button type="submit">Выход</button>
 </form>

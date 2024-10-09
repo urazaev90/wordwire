@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -28,9 +29,10 @@ func main() {
 	router.HandleFunc("/", RedirectHandler).Methods("GET")
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/register", RegisterHandler).Methods("GET", "POST")
-	router.HandleFunc("/profile", ProfileHandler).Methods("GET")
+	router.HandleFunc("/profile", ProfileHandler).Methods("GET", "POST")
 	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
 
+	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
 }
 
@@ -107,7 +109,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = Database.Exec("INSERT INTO user_accounts (login, password_hash) VALUES ($1, $2)", login, passwordHash)
+		var userID int
+		err = Database.QueryRow("INSERT INTO user_accounts (login, password_hash) VALUES ($1, $2) RETURNING id", login, passwordHash).Scan(&userID)
+		if err != nil {
+			fmt.Fprintf(w, "Error: %v", err)
+			return
+		}
+
+		_, err = Database.Exec(`
+            INSERT INTO user_word_labels (user_id, word_id, label)
+            SELECT $1, id, 1 FROM english_words
+        `, userID)
 		if err != nil {
 			fmt.Fprintf(w, "Error: %v", err)
 			return
@@ -123,12 +135,112 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Method == http.MethodPost {
+		r.ParseForm()
+		userID := getUserIDFromSession(r)
+
+		tx, err := Database.Begin()
+		if err != nil {
+			log.Println("Error starting transaction:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+
+		for key, values := range r.Form {
+			if len(values) == 0 {
+				continue
+			}
+
+			wordID, err := strconv.Atoi(key)
+			if err != nil {
+				log.Println("Error converting wordID:", err)
+				continue
+			}
+			label, err := strconv.Atoi(values[0])
+			if err != nil {
+				log.Println("Error converting label:", err)
+				continue
+			}
+
+			_, err = tx.Exec(`UPDATE user_word_labels SET label = $1 WHERE user_id = $2 AND word_id = $3`, label, userID, wordID)
+			if err != nil {
+				tx.Rollback()
+				log.Println("Error updating label:", err)
+				http.Error(w, "Server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if err := tx.Commit(); err != nil {
+			log.Println("Error committing transaction:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/profile", http.StatusSeeOther)
+		return
+	}
+
+	userID := getUserIDFromSession(r)
+	rows, err := Database.Query(`
+        SELECT ew.id, ew.word, uwl.label
+        FROM english_words ew
+        LEFT JOIN user_word_labels uwl ON ew.id = uwl.word_id AND uwl.user_id = $1
+        ORDER BY ew.usage_per_billion DESC
+    `, userID)
+	if err != nil {
+		log.Println("Error querying database:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type Word struct {
+		ID    int
+		Word  string
+		Label int
+	}
+
+	var words []Word
+	for rows.Next() {
+		var word Word
+		var label sql.NullInt64
+		if err := rows.Scan(&word.ID, &word.Word, &label); err != nil {
+			log.Println("Error scanning row:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+		if label.Valid {
+			word.Label = int(label.Int64)
+		} else {
+			word.Label = 1 // Временно устанавливаем 1, если метка NULL
+		}
+		words = append(words, word)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Println("Error with rows:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
 	tmpl, err := template.ParseFiles("templates/profile.html")
 	if err != nil {
+		log.Println("Error parsing template:", err)
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+
+	err = tmpl.Execute(w, words)
+	if err != nil {
+		log.Println("Error executing template:", err)
+		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
+	}
+}
+
+func getUserIDFromSession(r *http.Request) int {
+	// В реальном приложении здесь будет логика получения userID на основе куки сессии
+	return 1 // Для примера возвращаем user_id = 1
 }
 
 func isAuthorized(r *http.Request) bool {
@@ -140,7 +252,6 @@ func isAuthorized(r *http.Request) bool {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	// Удалить куку сессии
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   "",
