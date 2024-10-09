@@ -2,18 +2,20 @@ package main
 
 import (
 	"database/sql"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-	"time"
-
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"golang.org/x/crypto/bcrypt"
 )
 
-var Database *sql.DB
+var (
+	Database *sql.DB
+	store    = sessions.NewCookieStore([]byte("your-secret-key"))
+)
 
 func main() {
 	connStr := "user=urazaev90 password=Grr(-87He dbname=app_database sslmode=disable"
@@ -58,7 +60,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		password := r.FormValue("password")
 
 		var dbPasswordHash string
-		err := Database.QueryRow("SELECT password_hash FROM user_accounts WHERE login=$1", login).Scan(&dbPasswordHash)
+		var userID int
+		err := Database.QueryRow("SELECT id, password_hash FROM user_accounts WHERE login=$1", login).Scan(&userID, &dbPasswordHash)
 		if err != nil {
 			renderLoginTemplate(w, map[string]string{"Error": "Такого логина не существует"})
 			return
@@ -70,12 +73,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Установить куку сессии
-		http.SetCookie(w, &http.Cookie{
-			Name:    "session_token",
-			Value:   "example-session-token",
-			Expires: time.Now().Add(1 * time.Hour),
-		})
+		session, _ := store.Get(r, "session-name")
+		session.Values["user_id"] = userID
+		session.Save(r, w)
 
 		http.Redirect(w, r, "/profile", http.StatusSeeOther)
 	}
@@ -98,10 +98,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		login := r.FormValue("login")
 		password := r.FormValue("password")
 
-		// Проверка на существующий логин
 		var existingUser string
 		err := Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
-		if err == nil { // if no error, it means the user exists
+		if err == nil {
 			renderRegisterTemplate(w, map[string]string{"Error": "Извините, такой логин занят, придумайте другой"})
 			return
 		}
@@ -120,9 +119,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		_, err = Database.Exec(`
-            INSERT INTO user_word_labels (user_id, word_id, label)
-            SELECT $1, id, 1 FROM english_words
-        `, userID)
+			INSERT INTO user_word_labels (user_id, word_id, label)
+			SELECT $1, id, 1 FROM english_words
+		`, userID)
 		if err != nil {
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
@@ -195,11 +194,11 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID := getUserIDFromSession(r)
 	rows, err := Database.Query(`
-        SELECT ew.id, ew.word, uwl.label
-        FROM english_words ew
-        LEFT JOIN user_word_labels uwl ON ew.id = uwl.word_id AND uwl.user_id = $1
-        ORDER BY ew.usage_per_billion DESC
-    `, userID)
+		SELECT ew.id, ew.word, uwl.label
+		FROM english_words ew
+		LEFT JOIN user_word_labels uwl ON ew.id = uwl.word_id AND uwl.user_id = $1
+		ORDER BY ew.usage_per_billion DESC
+	`, userID)
 	if err != nil {
 		log.Println("Error querying database:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
@@ -251,24 +250,24 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUserIDFromSession(r *http.Request) int {
-	// В реальном приложении здесь будет логика получения userID на основе куки сессии
-	return 1 // Для примера возвращаем user_id = 1
+	session, _ := store.Get(r, "session-name")
+	userID, ok := session.Values["user_id"].(int)
+	if !ok {
+		return 0 // Или другая логика для неавторизованных пользователей
+	}
+	return userID
 }
 
 func isAuthorized(r *http.Request) bool {
-	cookie, err := r.Cookie("session_token")
-	if err != nil || cookie.Value != "example-session-token" {
-		return false
-	}
-	return true
+	session, _ := store.Get(r, "session-name")
+	_, ok := session.Values["user_id"].(int)
+	return ok
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   "",
-		Expires: time.Now(),
-	})
+	session, _ := store.Get(r, "session-name")
+	delete(session.Values, "user_id")
+	session.Save(r, w)
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
