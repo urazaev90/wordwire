@@ -2,15 +2,15 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var Database *sql.DB
@@ -92,16 +92,19 @@ func renderLoginTemplate(w http.ResponseWriter, data interface{}) {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("templates/register.html")
-		if err != nil {
-			http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-			return
-		}
-		tmpl.Execute(w, nil)
+		renderRegisterTemplate(w, nil)
 	} else if r.Method == http.MethodPost {
 		r.ParseForm()
 		login := r.FormValue("login")
 		password := r.FormValue("password")
+
+		// Проверка на существующий логин
+		var existingUser string
+		err := Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
+		if err == nil { // if no error, it means the user exists
+			renderRegisterTemplate(w, map[string]string{"Error": "Извините, такой логин занят, придумайте другой"})
+			return
+		}
 
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
@@ -112,7 +115,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		var userID int
 		err = Database.QueryRow("INSERT INTO user_accounts (login, password_hash) VALUES ($1, $2) RETURNING id", login, passwordHash).Scan(&userID)
 		if err != nil {
-			fmt.Fprintf(w, "Error: %v", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
 
@@ -121,12 +124,21 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
             SELECT $1, id, 1 FROM english_words
         `, userID)
 		if err != nil {
-			fmt.Fprintf(w, "Error: %v", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
 
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
+}
+
+func renderRegisterTemplate(w http.ResponseWriter, data interface{}) {
+	tmpl, err := template.ParseFiles("templates/register.html")
+	if err != nil {
+		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, data)
 }
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
