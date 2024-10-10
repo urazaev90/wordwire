@@ -26,9 +26,15 @@ func main() {
 	}
 	defer db.Close()
 
+	err = db.Ping()
+	if err != nil {
+		log.Fatal("Cannot connect to database:", err)
+	}
+
 	Database = db
 
 	router := mux.NewRouter()
+
 	router.HandleFunc("/", RegisterHandler).Methods("GET", "POST")
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/setting", SettingHandler).Methods("GET", "POST")
@@ -104,20 +110,31 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		renderRegisterTemplate(w, nil)
-	} else if r.Method == http.MethodPost {
-		r.ParseForm()
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		err := r.ParseForm()
+		if err != nil {
+			log.Println("Register: Error parsing form:", err)
+			http.Error(w, "Invalid form data", http.StatusBadRequest)
+			return
+		}
+
 		login := r.FormValue("login")
 		password := r.FormValue("password")
 
 		var existingUser string
-		err := Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
+		err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
 		if err == nil {
+			log.Println("Register: User already exists")
 			renderRegisterTemplate(w, map[string]string{"Error": "Извините, такой логин занят, придумайте другой"})
 			return
 		}
 
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
+			log.Println("Register: Error hashing password:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
@@ -125,20 +142,35 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		var userID int
 		err = Database.QueryRow("INSERT INTO user_accounts (login, password_hash) VALUES ($1, $2) RETURNING id", login, passwordHash).Scan(&userID)
 		if err != nil {
+			log.Println("Register: Error inserting user to database:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
 
 		_, err = Database.Exec(`
 			INSERT INTO user_word_labels (user_id, word_id, label)
-			SELECT $1, id, 1 FROM english_words
+			SELECT $1, id, CASE 
+				WHEN id IN (31, 32, 33, 34, 35, 36, 37, 38, 39, 40) THEN 2
+				ELSE 1
+			END
+			FROM english_words
 		`, userID)
 		if err != nil {
+			log.Println("Register: Error inserting labels:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
 
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		session, _ := store.Get(r, "session-name")
+		session.Values["user_id"] = userID
+		err = session.Save(r, w)
+		if err != nil {
+			log.Println("Register: Error saving session:", err)
+			http.Error(w, "Cannot save session", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
 	}
 }
 
