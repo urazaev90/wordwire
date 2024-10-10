@@ -22,7 +22,7 @@
                     const wordId = this.name;
                     const label = this.checked ? 2 : 1;
 
-                    fetch(`/profile`, {
+                    fetch(`/setting`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -47,7 +47,7 @@
                     const wordId = this.getAttribute('data-archive');
                     const checkbox = this.parentElement.querySelector(`input[type="checkbox"]`);
 
-                    fetch(`/profile`, {
+                    fetch(`/setting`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -87,7 +87,7 @@
             <td><input type="checkbox" id="word-{{.ID}}" name="{{.ID}}" {{if eq .Label 2}}checked{{end}}></td>
             <td><label for="word-{{.ID}}">{{.Word}}</label></td>
             <td>
-                <button type="button" data-archive="{{.ID}}">Добавить в архив</button>
+                <button type="button" data-archive="{{.ID}}">Убрать в архив</button>
             </td>
         </div>
     </tr>

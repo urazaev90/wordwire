@@ -29,10 +29,9 @@ func main() {
 	Database = db
 
 	router := mux.NewRouter()
-	router.HandleFunc("/", RedirectHandler).Methods("GET")
+	router.HandleFunc("/", RegisterHandler).Methods("GET", "POST")
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
-	router.HandleFunc("/register", RegisterHandler).Methods("GET", "POST")
-	router.HandleFunc("/profile", ProfileHandler).Methods("GET", "POST")
+	router.HandleFunc("/setting", SettingHandler).Methods("GET", "POST")
 	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET")
 	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")
 	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
@@ -43,17 +42,19 @@ func main() {
 	http.ListenAndServe(":8080", router)
 }
 
-func RedirectHandler(w http.ResponseWriter, r *http.Request) {
-	if isAuthorized(r) {
-		http.Redirect(w, r, "/profile", http.StatusSeeOther)
-	} else {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-	}
+func RedirectToLoginIfUnauthorized(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !isAuthorized(r) && r.URL.Path != "/login" {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if isAuthorized(r) {
-		http.Redirect(w, r, "/profile", http.StatusSeeOther)
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
 		return
 	}
 
@@ -82,7 +83,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		session.Values["user_id"] = userID
 		session.Save(r, w)
 
-		http.Redirect(w, r, "/profile", http.StatusSeeOther)
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
 	}
 }
 
@@ -96,6 +97,11 @@ func renderLoginTemplate(w http.ResponseWriter, data interface{}) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	if isAuthorized(r) {
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		return
+	}
+
 	if r.Method == http.MethodGet {
 		renderRegisterTemplate(w, nil)
 	} else if r.Method == http.MethodPost {
@@ -137,7 +143,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func renderRegisterTemplate(w http.ResponseWriter, data interface{}) {
-	tmpl, err := template.ParseFiles("templates/register.html")
+	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
 		return
@@ -145,9 +151,9 @@ func renderRegisterTemplate(w http.ResponseWriter, data interface{}) {
 	tmpl.Execute(w, data)
 }
 
-func ProfileHandler(w http.ResponseWriter, r *http.Request) {
+func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
@@ -241,7 +247,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/profile.html")
+	tmpl, err := template.ParseFiles("templates/setting.html")
 	if err != nil {
 		log.Println("Error parsing template:", err)
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
@@ -280,7 +286,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 func TeachingPageHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
@@ -344,7 +350,7 @@ func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
