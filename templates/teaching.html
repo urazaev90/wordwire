@@ -23,13 +23,19 @@
 <div>Осталось слов: <span id="words-left">0</span></div>
 <div id="word-view">
     <p id="current-word">Загрузка...</p>
-    <button id="show-translation">Посмотреть перевод</button>
-    <div id="translation"></div>
 </div>
 <div>
     <button id="back" disabled>Назад</button>
     <button id="forward">Вперед</button>
 </div>
+<div>
+    <p></p>
+</div>
+<div>
+    <button id="show-translation">Посмотреть перевод</button>
+    <div id="translation"></div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         let words = [];
