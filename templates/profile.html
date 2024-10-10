@@ -4,22 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Личный кабинет</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectedCountElement = document.getElementById('selected-word-count');
+
+            // Функция для обновления количества выбранных слов
+            function updateSelectedCount() {
+                const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked').length;
+                selectedCountElement.textContent = checkedCheckboxes;
+            }
+
+            // Устанавливаем начальное значение количества выбранных слов
+            updateSelectedCount();
+
+            document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+                checkbox.addEventListener('change', function () {
+                    const wordId = this.name;
+                    const label = this.checked ? 2 : 1;
+
+                    fetch(`/profile`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: `id=${wordId}&label=${label}`
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                console.error('Failed to update word label:', response.statusText);
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+
+                    // Обновляем количество выбранных слов
+                    updateSelectedCount();
+                });
+            });
+
+            document.querySelectorAll('[data-archive]').forEach((button) => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const wordId = this.getAttribute('data-archive');
+                    const checkbox = this.parentElement.querySelector(`input[type="checkbox"]`);
+
+                    fetch(`/profile`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: `archive_word_id=${wordId}`
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                console.error('Failed to archive word:', response.statusText);
+                            } else {
+                                // Убираем элемент из интерфейса
+                                this.parentElement.parentElement.remove();
+
+                                // Обновляем количество выбранных слов
+                                // убавляем количество в случае если флажок был отмечен
+                                if (checkbox && checkbox.checked) {
+                                    checkbox.checked = false;
+                                    updateSelectedCount();
+                                }
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                });
+            });
+        });
+    </script>
 </head>
 <body>
 <h1>Вы успешно вошли в свой личный кабинет</h1>
 <p>Вы успешно вошли в систему.</p>
+<p>Выбрано слов: <span id="selected-word-count">0</span></p> <!-- Добавленный элемент -->
 
-<form action="/profile" method="post">
+<table>
     {{range .}}
-    <div>
-        <span>{{.Word}}</span>
-        <input type="radio" name="{{.ID}}" value="1" {{if eq .Label 1}}checked{{end}}> буду изучать
-        <input type="radio" name="{{.ID}}" value="2" {{if eq .Label 2}}checked{{end}}> поставить на изучение
-        <input type="radio" name="{{.ID}}" value="3" {{if eq .Label 3}}checked{{end}}> это слово знаю
-    </div>
+    <tr>
+        <div>
+            <td><input type="checkbox" id="word-{{.ID}}" name="{{.ID}}" {{if eq .Label 2}}checked{{end}}></td>
+            <td><label for="word-{{.ID}}">{{.Word}}</label></td>
+            <td>
+                <button type="button" data-archive="{{.ID}}">Добавить в архив</button>
+            </td>
+        </div>
+    </tr>
     {{end}}
-    <button type="submit">Сохранить изменения</button>
-</form>
+</table>
 
 <form action="/logout" method="post">
     <button type="submit">Выход</button>

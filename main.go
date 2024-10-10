@@ -151,54 +151,66 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := getUserIDFromSession(r)
+
 	if r.Method == http.MethodPost {
 		r.ParseForm()
-		userID := getUserIDFromSession(r)
 
-		tx, err := Database.Begin()
-		if err != nil {
-			log.Println("Error starting transaction:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-
-		for key, values := range r.Form {
-			if len(values) == 0 {
-				continue
+		if archiveWordID := r.FormValue("archive_word_id"); archiveWordID != "" {
+			wordID, err := strconv.Atoi(archiveWordID)
+			if err != nil {
+				log.Println("Invalid word ID:", err)
+				http.Error(w, "Invalid request", http.StatusBadRequest)
+				return
 			}
 
-			label, err := strconv.Atoi(values[0])
+			_, err = Database.Exec(`
+                UPDATE user_word_labels SET label = 3
+                WHERE user_id = $1 AND word_id = $2
+            `, userID, wordID)
 			if err != nil {
-				log.Println("Error converting label:", err)
-				continue
-			}
-
-			_, err = tx.Exec(`UPDATE user_word_labels SET label = $1 WHERE user_id = $2 AND word_id = $3`, label, userID, key)
-			if err != nil {
-				tx.Rollback()
-				log.Println("Error updating label:", err)
+				log.Println("Error updating label for archive:", err)
 				http.Error(w, "Server error", http.StatusInternalServerError)
 				return
 			}
+
+			w.WriteHeader(http.StatusOK)
+			return
 		}
 
-		if err := tx.Commit(); err != nil {
-			log.Println("Error committing transaction:", err)
+		wordID, err := strconv.Atoi(r.FormValue("id"))
+		if err != nil {
+			http.Error(w, "Invalid word ID", http.StatusBadRequest)
+			return
+		}
+
+		label, err := strconv.Atoi(r.FormValue("label"))
+		if err != nil || (label != 1 && label != 2) {
+			http.Error(w, "Invalid label", http.StatusBadRequest)
+			return
+		}
+
+		_, err = Database.Exec(`
+            UPDATE user_word_labels SET label = $1
+            WHERE user_id = $2 AND word_id = $3
+        `, label, userID, wordID)
+		if err != nil {
+			log.Println("Error updating label:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
 
-		http.Redirect(w, r, "/profile", http.StatusSeeOther)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	userID := getUserIDFromSession(r)
 	rows, err := Database.Query(`
-		SELECT ew.id, ew.word, uwl.label
-		FROM english_words ew
-		LEFT JOIN user_word_labels uwl ON ew.id = uwl.word_id AND uwl.user_id = $1
-		ORDER BY ew.usage_per_billion DESC
-	`, userID)
+        SELECT ew.id, ew.word, uwl.label
+        FROM english_words ew
+        INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
+        WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
+        ORDER BY ew.usage_per_billion DESC
+    `, userID)
 	if err != nil {
 		log.Println("Error querying database:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
@@ -215,16 +227,10 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var words []Word
 	for rows.Next() {
 		var word Word
-		var label sql.NullInt64
-		if err := rows.Scan(&word.ID, &word.Word, &label); err != nil {
+		if err := rows.Scan(&word.ID, &word.Word, &word.Label); err != nil {
 			log.Println("Error scanning row:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
-		}
-		if label.Valid {
-			word.Label = int(label.Int64)
-		} else {
-			word.Label = 1 // Use 1 if NULL
 		}
 		words = append(words, word)
 	}
