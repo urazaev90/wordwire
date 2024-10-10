@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Личный кабинет</title>
+    <title>WordWire - учим английский легко</title>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const selectedCountElement = document.getElementById('selected-word-count');
@@ -76,9 +76,17 @@
     </script>
 </head>
 <body>
-<h1>Вы успешно вошли в свой личный кабинет</h1>
-<p>Вы успешно вошли в систему.</p>
-<p>Выбрано слов: <span id="selected-word-count">0</span></p> <!-- Добавленный элемент -->
+<h1>Настройка изучаемых слов</h1>
+
+<div>
+    <button onclick="location.href='/teaching'">Перейти к изучению</button>
+    <button onclick="location.href='/archive'">Войти в словарный архив</button>
+    <form action="/logout" method="post" style="display: inline;">
+        <button type="submit">Выйти из аккаунта</button>
+    </form>
+</div>
+
+<p>Выбрано слов для изучения: <span id="selected-word-count">0</span></p> <!-- Добавленный элемент -->
 
 <table>
     {{range .}}
@@ -94,8 +102,5 @@
     {{end}}
 </table>
 
-<form action="/logout" method="post">
-    <button type="submit">Выход</button>
-</form>
 </body>
 </html>

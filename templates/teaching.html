@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Изучение английских слов</title>
+    <title>WordWire - учим английский легко</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,14 +19,28 @@
     </style>
 </head>
 <body>
-<h1>Изучение английских слов</h1>
+<div>
+    <button onclick="location.href='/setting'">Настроить изучаемые слова</button>
+    <form action="/logout" method="post" style="display: inline;">
+        <button type="submit">Выйти из аккаунта</button>
+    </form>
+</div>
+<div>
+    <p></p>
+</div>
+<div>
+    <button onclick="location.reload()">Начать сначала</button>
+</div>
+<div>
+    <p></p>
+</div>
 <div>Осталось слов: <span id="words-left">0</span></div>
 <div id="word-view">
-    <p id="current-word">Не выбрано ни одного слова. Зайдите в "Настроить слова для обучения" и выбирете что мы будем учить.</p>
+    <p id="current-word">Не выбрано ни одного слова. Зайдите в "Настроить изучаемые слова" и выбирете что будете учить.</p>
 </div>
 <div>
     <button id="back" disabled>Назад</button>
-    <button id="forward">Вперед</button>
+    <button id="forward" disabled>Вперед</button>
 </div>
 <div>
     <p></p>
@@ -71,6 +85,7 @@
                 document.getElementById("current-word").textContent = word.word;
                 document.getElementById("translation").innerHTML = "";
                 document.getElementById("back").disabled = currentIndex === 0;
+                document.getElementById("forward").disabled = currentIndex >= words.length - 1;
                 document.getElementById("words-left").textContent = words.length - currentIndex;
             }
         }
@@ -79,7 +94,6 @@
             if (currentIndex < words.length - 1) {
                 history.push(currentIndex);
                 currentIndex++;
-                document.getElementById("back").disabled = false;
                 showWord();
             }
         });
@@ -94,8 +108,8 @@
         document.getElementById("show-translation").addEventListener("click", () => {
             const word = words[currentIndex];
             document.getElementById("translation").innerHTML = `
-            <p>Транскрипция: ${word.transcription}</p>
-            <p>Перевод: ${word.translation}</p>
+            <p>${word.transcription}</p>
+            <p>${word.translation}</p>
         `;
         });
 

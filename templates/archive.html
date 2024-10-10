@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив слов</title>
+    <title>WordWire - учим английский легко</title>
 </head>
 <body>
-<h1>Архив слов</h1>
+<h1>Словарный архив</h1>
+
+<div>
+    <button onclick="location.href='/setting'">Вернуть в настройки изучения слов</button>
+</div>
+
+<div>
+    <p></p>
+</div>
 
 <table>
     {{range .}}
@@ -21,9 +29,5 @@
     {{end}}
 </table>
 
-<p><a href="/profile">Вернуться в личный кабинет</a></p>
-<form action="/logout" method="post">
-    <button type="submit">Выход</button>
-</form>
 </body>
 </html>
