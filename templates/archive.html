@@ -10,6 +10,7 @@
 
 <div>
     <button onclick="location.href='/setting'">Вернуть в настройки изучения слов</button>
+    <p>Ваш словарный запас: {{.WordCount}}</p>
 </div>
 
 <div>
@@ -17,12 +18,12 @@
 </div>
 
 <table>
-    {{range .}}
+    {{range .Words}}
     <tr>
         <td>{{.Word}}</td>
         <td>
             <form action="/remove_from_archive/{{.ID}}" method="post" style="display:inline;">
-                <button type="submit">Восстановить с архива</button>
+                <button type="submit">Убрать с архива</button>
             </form>
         </td>
     </tr>

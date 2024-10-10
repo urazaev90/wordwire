@@ -423,6 +423,15 @@ func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Подсчитать количество слов.
+	wordCount := len(words)
+
+	// Используем map для передачи значений в шаблон.
+	data := map[string]interface{}{
+		"Words":     words,
+		"WordCount": wordCount,
+	}
+
 	tmpl, err := template.ParseFiles("templates/archive.html")
 	if err != nil {
 		log.Println("Error parsing template:", err)
@@ -430,7 +439,7 @@ func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = tmpl.Execute(w, words)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println("Error executing template:", err)
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
