@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Архив слов</title>
+</head>
+<body>
+<h1>Архив слов</h1>
+
+<table>
+    <thead><th>Слово</th><th>Действие</th></thead>
+    {{range .}}
+    <tr>
+        <td>{{.Word}}</td>
+        <td>
+            <form action="/remove_from_archive/{{.ID}}" method="post" style="display:inline;">
+                <button type="submit">Убрать с архива</button>
+            </form>
+        </td>
+    </tr>
+    {{end}}
+</table>
+
+<p><a href="/profile">Вернуться в личный кабинет</a></p>
+<form action="/logout" method="post">
+    <button type="submit">Выход</button>
+</form>
+</body>
+</html>

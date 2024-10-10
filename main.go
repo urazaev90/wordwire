@@ -33,9 +33,11 @@ func main() {
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/register", RegisterHandler).Methods("GET", "POST")
 	router.HandleFunc("/profile", ProfileHandler).Methods("GET", "POST")
-	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET") // Render HTML
-	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")    // Return JSON data
+	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET")
+	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")
 	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
+	router.HandleFunc("/archive", ArchiveHandler).Methods("GET")
+	router.HandleFunc("/remove_from_archive/{id:[0-9]+}", RemoveFromArchiveHandler).Methods("POST")
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
@@ -332,4 +334,90 @@ func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(words)
+}
+
+func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthorized(r) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	userID := getUserIDFromSession(r)
+	rows, err := Database.Query(`
+		SELECT ew.id, ew.word
+		FROM english_words ew
+		INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
+		WHERE uwl.user_id = $1 AND uwl.label = 3
+		ORDER BY ew.usage_per_billion DESC
+	`, userID)
+	if err != nil {
+		log.Println("Error querying database:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type Word struct {
+		ID   int
+		Word string
+	}
+
+	var words []Word
+	for rows.Next() {
+		var word Word
+		if err := rows.Scan(&word.ID, &word.Word); err != nil {
+			log.Println("Error scanning row:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+		words = append(words, word)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Println("Error with rows:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("templates/archive.html")
+	if err != nil {
+		log.Println("Error parsing template:", err)
+		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, words)
+	if err != nil {
+		log.Println("Error executing template:", err)
+		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
+	}
+}
+
+func RemoveFromArchiveHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthorized(r) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(r)
+	wordID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println("Invalid word ID:", err)
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	userID := getUserIDFromSession(r)
+
+	_, err = Database.Exec(`
+		UPDATE user_word_labels SET label = 1
+		WHERE user_id = $1 AND word_id = $2
+	`, userID, wordID)
+	if err != nil {
+		log.Println("Error updating label:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/archive", http.StatusSeeOther)
 }
