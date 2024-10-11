@@ -9,27 +9,31 @@
             cursor: pointer;
         }
 
-        /* Увеличиваем размер кнопки и добавляем отступ сверху */
         .large-button {
-            font-size: 1em; /* Увеличиваем размер текста, чтобы кнопка стала больше */
+            font-size: 1em;
             padding-top: 5px;
             padding-bottom: 5px;
             padding-left: 40px;
             padding-right: 40px;
-            margin-top: 10px; /* Добавляем отступ сверху для смещения вниз */
+            margin-top: 10px;
         }
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const selectedCountElement = document.getElementById('selected-word-count');
+            const totalWordCountElement = document.getElementById('total-word-count'); // Новый элемент
 
-            // Функция для обновления количества выбранных слов
             function updateSelectedCount() {
                 const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked').length;
                 selectedCountElement.textContent = checkedCheckboxes;
             }
 
-            // Устанавливаем начальное значение количества выбранных слов
+            // Обновите значение от сервера:
+            function incrementTotalWordCount() { // Изменила название и логику функции
+                let currentCount = parseInt(totalWordCountElement.textContent, 10);
+                totalWordCountElement.textContent = currentCount + 1;
+            }
+
             updateSelectedCount();
 
             document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
@@ -51,7 +55,6 @@
                         })
                         .catch(error => console.error('Error:', error));
 
-                    // Обновляем количество выбранных слов
                     updateSelectedCount();
                 });
             });
@@ -73,15 +76,12 @@
                             if (!response.ok) {
                                 console.error('Failed to archive word:', response.statusText);
                             } else {
-                                // Убираем элемент из интерфейса
                                 this.parentElement.parentElement.remove();
-
-                                // Обновляем количество выбранных слов
-                                // убавляем количество в случае если флажок был отмечен
                                 if (checkbox && checkbox.checked) {
                                     checkbox.checked = false;
                                     updateSelectedCount();
                                 }
+                                incrementTotalWordCount(); // Увеличить счетчик запаса слов
                             }
                         })
                         .catch(error => console.error('Error:', error));
@@ -104,10 +104,12 @@
     <button class="large-button" onclick="location.href='/teaching'">Перейти к изучению</button>
 </div>
 
-<p>Выбрано слов для изучения: <span id="selected-word-count">0</span></p> <!-- Добавленный элемент -->
+<p>Ваш словарный запас: <span id="total-word-count">{{.WordCount}}</span></p> <!-- Добавленный id -->
+
+<p>Выбрано слов для изучения: <span id="selected-word-count">0</span></p>
 
 <table>
-    {{range .}}
+    {{range .Words}}
     <tr>
         <div>
             <td><input type="checkbox" id="word-{{.ID}}" name="{{.ID}}" {{if eq .Label 2}}checked{{end}}></td>

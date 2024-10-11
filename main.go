@@ -191,23 +191,36 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID := getUserIDFromSession(r)
 
+	var wordCount int
+	err := Database.QueryRow(`
+		SELECT COUNT(*)
+		FROM user_word_labels
+		WHERE user_id = $1 AND label = 3
+	`, userID).Scan(&wordCount)
+	if err != nil {
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
 	if r.Method == http.MethodPost {
-		r.ParseForm()
+		err := r.ParseForm() // Разборка формы, если этого ещё не сделано.
+		if err != nil {
+			http.Error(w, "Invalid form", http.StatusBadRequest)
+			return
+		}
 
 		if archiveWordID := r.FormValue("archive_word_id"); archiveWordID != "" {
 			wordID, err := strconv.Atoi(archiveWordID)
 			if err != nil {
-				log.Println("Invalid word ID:", err)
 				http.Error(w, "Invalid request", http.StatusBadRequest)
 				return
 			}
 
 			_, err = Database.Exec(`
-                UPDATE user_word_labels SET label = 3
-                WHERE user_id = $1 AND word_id = $2
-            `, userID, wordID)
+				UPDATE user_word_labels SET label = 3
+				WHERE user_id = $1 AND word_id = $2
+			`, userID, wordID)
 			if err != nil {
-				log.Println("Error updating label for archive:", err)
 				http.Error(w, "Server error", http.StatusInternalServerError)
 				return
 			}
@@ -216,6 +229,7 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Обработка изменения метки слова
 		wordID, err := strconv.Atoi(r.FormValue("id"))
 		if err != nil {
 			http.Error(w, "Invalid word ID", http.StatusBadRequest)
@@ -229,11 +243,10 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		_, err = Database.Exec(`
-            UPDATE user_word_labels SET label = $1
-            WHERE user_id = $2 AND word_id = $3
-        `, label, userID, wordID)
+			UPDATE user_word_labels SET label = $1
+			WHERE user_id = $2 AND word_id = $3
+		`, label, userID, wordID)
 		if err != nil {
-			log.Println("Error updating label:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
@@ -243,14 +256,13 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rows, err := Database.Query(`
-        SELECT ew.id, ew.word, uwl.label
-        FROM english_words ew
-        INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
-        WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
-        ORDER BY ew.usage_per_billion DESC
-    `, userID)
+		SELECT ew.id, ew.word, uwl.label
+		FROM english_words ew
+		INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
+		WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
+		ORDER BY ew.usage_per_billion DESC
+	`, userID)
 	if err != nil {
-		log.Println("Error querying database:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 		return
 	}
@@ -266,7 +278,6 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var word Word
 		if err := rows.Scan(&word.ID, &word.Word, &word.Label); err != nil {
-			log.Println("Error scanning row:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
@@ -274,21 +285,23 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = rows.Err(); err != nil {
-		log.Println("Error with rows:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("templates/setting.html")
 	if err != nil {
-		log.Println("Error parsing template:", err)
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
 		return
 	}
 
-	err = tmpl.Execute(w, words)
+	data := map[string]interface{}{
+		"Words":     words,
+		"WordCount": wordCount,
+	}
+
+	err = tmpl.Execute(w, data)
 	if err != nil {
-		log.Println("Error executing template:", err)
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
 }
