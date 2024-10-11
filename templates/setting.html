@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
+    <style>
+        button {
+            cursor: pointer;
+        }
+
+        /* Увеличиваем размер кнопки и добавляем отступ сверху */
+        .large-button {
+            font-size: 1em; /* Увеличиваем размер текста, чтобы кнопка стала больше */
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 40px;
+            padding-right: 40px;
+            margin-top: 10px; /* Добавляем отступ сверху для смещения вниз */
+        }
+    </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const selectedCountElement = document.getElementById('selected-word-count');
@@ -79,11 +94,14 @@
 <h1>Настройка изучаемых слов</h1>
 
 <div>
-    <button onclick="location.href='/teaching'">Перейти к изучению</button>
     <button onclick="location.href='/archive'">Войти в архив</button>
     <form action="/logout" method="post" style="display: inline;">
         <button type="submit">Выйти из аккаунта</button>
     </form>
+</div>
+
+<div>
+    <button class="large-button" onclick="location.href='/teaching'">Перейти к изучению</button>
 </div>
 
 <p>Выбрано слов для изучения: <span id="selected-word-count">0</span></p> <!-- Добавленный элемент -->
@@ -101,6 +119,10 @@
     </tr>
     {{end}}
 </table>
+
+<div>
+    <p><br/>WordWire. Powered by Urazaev Amir © 2024</p>
+</div>
 
 </body>
 </html>

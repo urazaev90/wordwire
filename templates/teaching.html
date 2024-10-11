@@ -1,120 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
+
     <style>
+        button {
+            cursor: pointer;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow: hidden;
         }
-        #current-word {
-            font-size: 24px;
+
+        #control-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+        }
+
+        #central-content {
+            text-align: center;
+            position: relative;
+            margin-top: 70px;
+        }
+
+        #central-content>div:first-child {
+            margin-bottom: 20px;
+        }
+
+        #central-content>div:nth-child(4) {
+            margin-bottom: 20px;
+        }
+
+        /* Изменение стиля и размера текста для слова */
+        #word-view #current-word {
+            font-size: 4em;
             font-weight: bold;
+            margin: 35px;
         }
-        #translation {
+
+        /* Стили для транскрипции */
+        #transcription {
+            font-size: 3em;
+            color: gray;
+            margin: 0px;
+        }
+
+        /* Стили для перевода */
+        #translation-text {
+            font-size: 3em;
             margin-top: 10px;
         }
+
+        /* Изменение размера текста для контейнера перевода */
+        #translation {
+            width: max-content;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 20px;
+            visibility: hidden;
+        }
+
+        /* Общие стили для всех кнопок */
+        button {}
+
+        /* Стили для кнопок "Настроить изучаемые слова" и "Выйти из аккаунта" */
+        button.control {}
+
+        /* Стили для кнопки "Начать сначала" */
+        button.restart {
+            padding: 5px 10px;
+            font-size: 1.5em;
+        }
+
+        /* Стили для кнопки "Посмотреть перевод" */
+        button.translation {
+            padding: 10px 20px;
+            font-size: 2em;
+        }
+
+        /* Увеличение размера кнопок "Назад" и "Вперед" в 4 раза */
+        #back,
+        #forward {
+            padding: 10px 20px;
+            font-size: 3em;
+        }
+
+        #loading {
+            font-size: 2em;
+            display: none;
+        }
     </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let words = [];
+            let currentIndex = 0;
+            let history = [];
+
+            async function fetchWords() {
+                try {
+                    document.getElementById("loading").style.display = "block";
+                    document.getElementById("current-word").style.display = "none";
+
+                    console.log("Fetching words from server...");
+                    const response = await fetch('/api/words');
+                    if (!response.ok) {
+                        throw new Error(`Ошибка загрузки слов: ${response.statusText}`);
+                    }
+
+                    words = await response.json();
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("current-word").style.display = "block";
+
+                    shuffle(words);
+                    document.getElementById("words-left").textContent = words.length - currentIndex;
+                    showWord();
+                } catch (error) {
+                    console.error("Ошибка:", error);
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("current-word").style.display = "block";
+                    document.getElementById("current-word").textContent = "Не выбрано ни одного слова. Зайдите в 'Настроить изучаемые слова' и выберите, что будете учить.";
+                }
+            }
+
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            function showWord() {
+                if (words.length === 0) {
+                    document.getElementById("current-word").textContent =
+                        "Не выбрано ни одного слова. Зайдите в 'Настроить изучаемые слова' и выберите, что будете учить.";
+                    return;
+                }
+
+                if (currentIndex >= 0 && currentIndex < words.length) {
+                    const word = words[currentIndex];
+                    document.getElementById("current-word").textContent = word.word;
+                    document.getElementById("translation").style.visibility = "hidden";
+                    document.getElementById("back").disabled = currentIndex === 0;
+                    document.getElementById("forward").disabled = currentIndex >= words.length - 1;
+                    document.getElementById("words-left").textContent = words.length - currentIndex;
+                }
+            }
+
+            document.getElementById("forward").addEventListener("click", () => {
+                if (currentIndex < words.length - 1) {
+                    history.push(currentIndex);
+                    currentIndex++;
+                    showWord();
+                }
+            });
+
+            document.getElementById("back").addEventListener("click", () => {
+                if (history.length > 0) {
+                    currentIndex = history.pop();
+                    showWord();
+                }
+            });
+
+            document.getElementById("show-translation").addEventListener("click", () => {
+                const translationElement = document.getElementById("translation");
+                if (translationElement.style.visibility === "hidden") {
+                    const word = words[currentIndex];
+                    translationElement.innerHTML = `
+                        <p id="transcription">${word.transcription}</p>
+                        <p id="translation-text">${word.translation}</p>
+                    `;
+                    translationElement.style.visibility = "visible";
+                } else {
+                    translationElement.style.visibility = "hidden";
+                }
+            });
+
+            fetchWords();
+        });
+    </script>
+
 </head>
+
 <body>
-<div>
-    <button onclick="location.href='/setting'">Настроить изучаемые слова</button>
+<div id="control-buttons">
+    <button class="control" onclick="location.href='/setting'">Настроить изучаемые слова</button>
     <form action="/logout" method="post" style="display: inline;">
-        <button type="submit">Выйти из аккаунта</button>
+        <button class="control" type="submit">Выйти из аккаунта</button>
     </form>
 </div>
-<div>
-    <p></p>
-</div>
-<div>
-    <button onclick="location.reload()">Начать сначала</button>
-</div>
-<div>
-    <p></p>
-</div>
-<div>Осталось слов: <span id="words-left">0</span></div>
-<div id="word-view">
-    <p id="current-word">Не выбрано ни одного слова. Зайдите в "Настроить изучаемые слова" и выберите что будете учить.</p>
-</div>
-<div>
-    <button id="back" disabled>Назад</button>
-    <button id="forward" disabled>Вперед</button>
-</div>
-<div>
-    <p></p>
-</div>
-<div>
-    <button id="show-translation">Посмотреть перевод</button>
-    <div id="translation"></div>
+
+<div id="central-content">
+    <div>
+        <button class="restart" onclick="location.reload()">Начать сначала</button>
+    </div>
+    <div>Осталось слов: <span id="words-left">0</span></div>
+    <div id="word-view">
+        <p id="current-word"></p>
+        <p id="loading">Загрузка данных...</p>
+    </div>
+    <div>
+        <button id="back" disabled>Назад</button>
+        <button id="forward" disabled>Вперед</button>
+    </div>
+    <div>
+        <button class="translation" id="show-translation">Посмотреть перевод</button>
+        <div id="translation"></div>
+    </div>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let words = [];
-        let currentIndex = 0;
-        let history = [];
-
-        async function fetchWords() {
-            try {
-                console.log("Fetching words from server...");
-                const response = await fetch('/api/words');
-                if (!response.ok) {
-                    throw new Error(`Ошибка загрузки слов: ${response.statusText}`);
-                }
-                words = await response.json();
-                shuffle(words);  // Перемешиваем слова, чтобы они были в случайном порядке
-                document.getElementById("words-left").textContent = words.length - currentIndex;
-                showWord();
-            } catch (error) {
-                console.error("Ошибка:", error);
-            }
-        }
-
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
-        function showWord() {
-            if (currentIndex >= 0 && currentIndex < words.length) {
-                const word = words[currentIndex];
-                document.getElementById("current-word").textContent = word.word;
-                document.getElementById("translation").innerHTML = "";
-                document.getElementById("back").disabled = currentIndex === 0;
-                document.getElementById("forward").disabled = currentIndex >= words.length - 1;
-                document.getElementById("words-left").textContent = words.length - currentIndex;
-            }
-        }
-
-        document.getElementById("forward").addEventListener("click", () => {
-            if (currentIndex < words.length - 1) {
-                history.push(currentIndex);
-                currentIndex++;
-                showWord();
-            }
-        });
-
-        document.getElementById("back").addEventListener("click", () => {
-            if (history.length > 0) {
-                currentIndex = history.pop();
-                showWord();
-            }
-        });
-
-        document.getElementById("show-translation").addEventListener("click", () => {
-            const word = words[currentIndex];
-            document.getElementById("translation").innerHTML = `
-            <p>${word.transcription}</p>
-            <p>${word.translation}</p>
-        `;
-        });
-
-        fetchWords();
-    });
-</script>
 </body>
+
 </html>

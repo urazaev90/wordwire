@@ -313,7 +313,8 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	delete(session.Values, "user_id")
 	session.Save(r, w)
 
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	// Изменяем перенаправление на "/"
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func TeachingPageHandler(w http.ResponseWriter, r *http.Request) {
