@@ -21,17 +21,21 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const selectedCountElement = document.getElementById('selected-word-count');
-            const totalWordCountElement = document.getElementById('total-word-count'); // Новый элемент
+            const totalWordCountElement = document.getElementById('total-word-count');
 
             function updateSelectedCount() {
                 const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked').length;
                 selectedCountElement.textContent = checkedCheckboxes;
             }
 
-            // Обновите значение от сервера:
-            function incrementTotalWordCount() { // Изменила название и логику функции
-                let currentCount = parseInt(totalWordCountElement.textContent, 10);
+            function incrementTotalWordCount() {
+                let currentCount = parseInt(totalWordCountElement.textContent, 10) || 0;
                 totalWordCountElement.textContent = currentCount + 1;
+            }
+
+            function decrementSelectedCount() {
+                let currentCount = parseInt(selectedCountElement.textContent, 10) || 0;
+                selectedCountElement.textContent = currentCount - 1;
             }
 
             updateSelectedCount();
@@ -63,7 +67,7 @@
                 button.addEventListener('click', function (event) {
                     event.preventDefault();
                     const wordId = this.getAttribute('data-archive');
-                    const checkbox = this.parentElement.querySelector(`input[type="checkbox"]`);
+                    const checkbox = this.closest('tr').querySelector(`input[type="checkbox"]`);
 
                     fetch(`/setting`, {
                         method: 'POST',
@@ -76,11 +80,13 @@
                             if (!response.ok) {
                                 console.error('Failed to archive word:', response.statusText);
                             } else {
-                                this.parentElement.parentElement.remove();
+                                // Удаление строки из таблицы
+                                this.closest('tr').remove();
+
                                 if (checkbox && checkbox.checked) {
-                                    checkbox.checked = false;
-                                    updateSelectedCount();
+                                    decrementSelectedCount(); // Уменьшить счетчик "Выбрано слов для изучения"
                                 }
+
                                 incrementTotalWordCount(); // Увеличить счетчик запаса слов
                             }
                         })
@@ -104,20 +110,18 @@
     <button class="large-button" onclick="location.href='/teaching'">Перейти к изучению</button>
 </div>
 
-<p>Ваш словарный запас: <span id="total-word-count">{{.WordCount}}</span></p> <!-- Добавленный id -->
+<p>Ваш словарный запас: <span id="total-word-count">{{.WordCount}}</span></p>
 
 <p>Выбрано слов для изучения: <span id="selected-word-count">0</span></p>
 
 <table>
     {{range .Words}}
     <tr>
-        <div>
-            <td><input type="checkbox" id="word-{{.ID}}" name="{{.ID}}" {{if eq .Label 2}}checked{{end}}></td>
-            <td><label for="word-{{.ID}}">{{.Word}}</label></td>
-            <td>
-                <button type="button" data-archive="{{.ID}}">Убрать в архив (это слово я хорошо знаю)</button>
-            </td>
-        </div>
+        <td><input type="checkbox" id="word-{{.ID}}" name="{{.ID}}" {{if eq .Label 2}}checked{{end}}></td>
+        <td><label for="word-{{.ID}}">{{.Word}}</label></td>
+        <td>
+            <button type="button" data-archive="{{.ID}}">Убрать в архив (это слово я хорошо знаю)</button>
+        </td>
     </tr>
     {{end}}
 </table>
