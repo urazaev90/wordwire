@@ -41,8 +41,9 @@ func main() {
 	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET")
 	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")
 	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
-	router.HandleFunc("/archive", ArchiveHandler).Methods("GET")
+	router.HandleFunc("/archive", ArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/remove_from_archive/{id:[0-9]+}", RemoveFromArchiveHandler).Methods("POST")
+	router.HandleFunc("/api/next_word", NextWordHandler).Methods("GET")
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
@@ -183,87 +184,67 @@ func renderRegisterTemplate(w http.ResponseWriter, data interface{}) {
 	tmpl.Execute(w, data)
 }
 
+const wordsPerPage = 10 // Число слов на странице
+
 func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
+	if r.Method == http.MethodPost {
+		updateWordLabel(w, r)
+		return
+	}
+
+	// Существующая логика для GET-запроса
 	userID := getUserIDFromSession(r)
 
-	var wordCount int
+	// Fetch total words with labels 1 or 2
+	var totalWords int
 	err := Database.QueryRow(`
-		SELECT COUNT(*)
-		FROM user_word_labels
-		WHERE user_id = $1 AND label = 3
-	`, userID).Scan(&wordCount)
+        SELECT COUNT(*)
+        FROM user_word_labels
+        WHERE user_id = $1 AND label IN (1, 2)
+    `, userID).Scan(&totalWords)
 	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		http.Error(w, "Server error: unable to count words", http.StatusInternalServerError)
 		return
 	}
 
-	if r.Method == http.MethodPost {
-		err := r.ParseForm() // Разборка формы, если этого ещё не сделано.
-		if err != nil {
-			http.Error(w, "Invalid form", http.StatusBadRequest)
-			return
+	// Calculate max pages
+	maxPages := (totalWords + wordsPerPage - 1) / wordsPerPage
+
+	// Get and parse page number from URL
+	var page int
+	pageParam := r.URL.Query().Get("page")
+	if pageParam != "" {
+		page, err = strconv.Atoi(pageParam)
+		if err != nil || page < 0 {
+			page = 0
 		}
-
-		if archiveWordID := r.FormValue("archive_word_id"); archiveWordID != "" {
-			wordID, err := strconv.Atoi(archiveWordID)
-			if err != nil {
-				http.Error(w, "Invalid request", http.StatusBadRequest)
-				return
-			}
-
-			_, err = Database.Exec(`
-				UPDATE user_word_labels SET label = 3
-				WHERE user_id = $1 AND word_id = $2
-			`, userID, wordID)
-			if err != nil {
-				http.Error(w, "Server error", http.StatusInternalServerError)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		// Обработка изменения метки слова
-		wordID, err := strconv.Atoi(r.FormValue("id"))
-		if err != nil {
-			http.Error(w, "Invalid word ID", http.StatusBadRequest)
-			return
-		}
-
-		label, err := strconv.Atoi(r.FormValue("label"))
-		if err != nil || (label != 1 && label != 2) {
-			http.Error(w, "Invalid label", http.StatusBadRequest)
-			return
-		}
-
-		_, err = Database.Exec(`
-			UPDATE user_word_labels SET label = $1
-			WHERE user_id = $2 AND word_id = $3
-		`, label, userID, wordID)
-		if err != nil {
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-		return
 	}
+
+	// Adjust page number
+	if page >= maxPages {
+		page = maxPages - 1
+	}
+	if page < 0 {
+		page = 0
+	}
+
+	offset := page * wordsPerPage
 
 	rows, err := Database.Query(`
-		SELECT ew.id, ew.word, uwl.label
-		FROM english_words ew
-		INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
-		WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
-		ORDER BY ew.usage_per_billion DESC
-	`, userID)
+        SELECT ew.id, ew.word, uwl.label
+        FROM english_words ew
+        INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
+        WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
+        ORDER BY ew.usage_per_billion DESC
+        LIMIT $2 OFFSET $3
+    `, userID, wordsPerPage, offset)
 	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		http.Error(w, "Server error: unable to fetch words", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -274,22 +255,25 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 		Label int
 	}
 
-	var words []Word
+	words := make([]Word, 0, wordsPerPage)
 	for rows.Next() {
 		var word Word
 		if err := rows.Scan(&word.ID, &word.Word, &word.Label); err != nil {
-			http.Error(w, "Server error", http.StatusInternalServerError)
+			http.Error(w, "Server error: unable to scan words", http.StatusInternalServerError)
 			return
 		}
 		words = append(words, word)
 	}
 
 	if err = rows.Err(); err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		http.Error(w, "Server error: problems with rows", http.StatusInternalServerError)
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/setting.html")
+	tmpl, err := template.New("setting.html").Funcs(template.FuncMap{
+		"add": func(a, b int) int { return a + b },
+		"sub": func(a, b int) int { return a - b },
+	}).ParseFiles("templates/setting.html")
 	if err != nil {
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
 		return
@@ -297,13 +281,45 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := map[string]interface{}{
 		"Words":     words,
-		"WordCount": wordCount,
+		"WordCount": totalWords,
+		"Page":      page,
+		"LastPage":  page == maxPages-1,
+		"HasNext":   page < maxPages-1,
+		"HasPrev":   page > 0,
 	}
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
+}
+
+func updateWordLabel(w http.ResponseWriter, r *http.Request) {
+	userID := getUserIDFromSession(r)
+
+	wordID, err := strconv.Atoi(r.FormValue("id"))
+	if err != nil {
+		log.Println("Invalid word ID:", err)
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	label, err := strconv.Atoi(r.FormValue("label"))
+	if err != nil || (label != 1 && label != 2) {
+		log.Println("Invalid label value:", err)
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	_, err = Database.Exec(`
+		UPDATE user_word_labels SET label = $1
+		WHERE user_id = $2 AND word_id = $3
+	`, label, userID, wordID)
+	if err != nil {
+		log.Println("Error updating word label:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func getUserIDFromSession(r *http.Request) int {
@@ -401,6 +417,31 @@ func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := getUserIDFromSession(r)
+
+	if r.Method == http.MethodPost {
+		// Это часть для обновления метки на 3
+		wordID, err := strconv.Atoi(r.FormValue("archive_word_id"))
+		if err != nil {
+			log.Println("Invalid word ID:", err)
+			http.Error(w, "Invalid request", http.StatusBadRequest)
+			return
+		}
+
+		_, err = Database.Exec(`
+			UPDATE user_word_labels SET label = 3
+			WHERE user_id = $1 AND word_id = $2
+		`, userID, wordID)
+		if err != nil {
+			log.Println("Error updating label to archive:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	// Оригинальный код для GET-запросов остаётся неизменным:
 	rows, err := Database.Query(`
 		SELECT ew.id, ew.word
 		FROM english_words ew
@@ -437,10 +478,8 @@ func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Подсчитать количество слов.
 	wordCount := len(words)
 
-	// Используем map для передачи значений в шаблон.
 	data := map[string]interface{}{
 		"Words":     words,
 		"WordCount": wordCount,
@@ -458,6 +497,55 @@ func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error executing template:", err)
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
+}
+
+func NextWordHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthorized(r) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	pageQuery := r.URL.Query().Get("page")
+	page, err := strconv.Atoi(pageQuery)
+	if err != nil {
+		http.Error(w, "Invalid page number", http.StatusBadRequest)
+		return
+	}
+
+	userID := getUserIDFromSession(r)
+	offset := (page + 1) * wordsPerPage // Ищем следующее слово на следующей странице
+
+	rows, err := Database.Query(`
+        SELECT ew.id, ew.word, uwl.label
+        FROM english_words ew
+        INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
+        WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
+        ORDER BY ew.usage_per_billion DESC
+        LIMIT 1 OFFSET $2
+    `, userID, offset)
+	if err != nil {
+		http.Error(w, "Server error: unable to fetch next word", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		var word struct {
+			ID    int    `json:"ID"`
+			Word  string `json:"Word"`
+			Label int    `json:"Label"`
+		}
+		if err := rows.Scan(&word.ID, &word.Word, &word.Label); err != nil {
+			http.Error(w, "Server error: unable to scan next word", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(word)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func RemoveFromArchiveHandler(w http.ResponseWriter, r *http.Request) {

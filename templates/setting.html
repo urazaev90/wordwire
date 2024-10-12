@@ -5,45 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
     <style>
-        button {
-            cursor: pointer;
+        .header {
+            margin-bottom: 10px;
+        }
+
+        .top-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
         }
 
         .large-button {
             font-size: 1em;
-            padding-top: 5px;
-            padding-bottom: 5px;
-            padding-left: 40px;
-            padding-right: 40px;
+            padding: 5px 40px;
             margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .settings-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 0px;
+        }
+
+        table {
+            margin: 0 auto;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .pagination-item {
+            margin: 0 20px;
+        }
+
+        .pagination a,
+        .pagination .inactive-link {
+            color: #0000FF;
+            text-decoration: underline;
+            font-size: 1.5em;
+        }
+
+        .pagination .inactive-link {
+            color: transparent;
+        }
+
+        .pagination a:hover {
+            color: #3333FF;
+        }
+
+        .archive-link {
+            font-style: italic;
+            color: #0000FF;
+        }
+
+        .archive-link:hover {
+            color: #3333FF;
+        }
+
+        table td label {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .arrow-link {
+            font-size: 1.5em;
+            color: #FF6347;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .arrow-link:hover {
+            color: #FF4500;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            background-color: #f1f1f1;
+            padding: 10px 0;
         }
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const selectedCountElement = document.getElementById('selected-word-count');
-            const totalWordCountElement = document.getElementById('total-word-count');
-
-            function updateSelectedCount() {
-                const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked').length;
-                selectedCountElement.textContent = checkedCheckboxes;
+            // Function to update row numbers
+            function updateRowNumbers() {
+                const rows = document.querySelectorAll('table tr');
+                rows.forEach((row, index) => {
+                    const cell = row.querySelector('.row-number');
+                    if (cell) {
+                        cell.textContent = index + 1;
+                    }
+                });
             }
 
-            function incrementTotalWordCount() {
-                let currentCount = parseInt(totalWordCountElement.textContent, 10) || 0;
-                totalWordCountElement.textContent = currentCount + 1;
-            }
-
-            function decrementSelectedCount() {
-                let currentCount = parseInt(selectedCountElement.textContent, 10) || 0;
-                selectedCountElement.textContent = currentCount - 1;
-            }
-
-            updateSelectedCount();
-
+            // Add event listeners to checkboxes
             document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
-                checkbox.addEventListener('change', function () {
-                    const wordId = this.name;
-                    const label = this.checked ? 2 : 1;
+                checkbox.addEventListener('change', function (event) {
+                    const wordId = event.target.name;
+                    const label = event.target.checked ? 2 : 1;
 
                     fetch(`/setting`, {
                         method: 'POST',
@@ -56,20 +129,19 @@
                             if (!response.ok) {
                                 console.error('Failed to update word label:', response.statusText);
                             }
+                            location.reload(); // Refresh page to update counts
                         })
                         .catch(error => console.error('Error:', error));
-
-                    updateSelectedCount();
                 });
             });
 
-            document.querySelectorAll('[data-archive]').forEach((button) => {
-                button.addEventListener('click', function (event) {
+            // Add event listeners to archive links
+            document.querySelectorAll('[data-archive]').forEach((link) => {
+                link.addEventListener('click', function (event) {
                     event.preventDefault();
                     const wordId = this.getAttribute('data-archive');
-                    const checkbox = this.closest('tr').querySelector(`input[type="checkbox"]`);
 
-                    fetch(`/setting`, {
+                    fetch(`/archive`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -79,55 +151,69 @@
                         .then(response => {
                             if (!response.ok) {
                                 console.error('Failed to archive word:', response.statusText);
-                            } else {
-                                // Удаление строки из таблицы
-                                this.closest('tr').remove();
-
-                                if (checkbox && checkbox.checked) {
-                                    decrementSelectedCount(); // Уменьшить счетчик "Выбрано слов для изучения"
-                                }
-
-                                incrementTotalWordCount(); // Увеличить счетчик запаса слов
                             }
+                            location.reload(); // Refresh page to update words
                         })
                         .catch(error => console.error('Error:', error));
                 });
             });
+
+            // Initialize row numbers
+            updateRowNumbers();
         });
     </script>
 </head>
 <body>
-<h1>Настройка изучаемых слов</h1>
-
-<div>
+<div class="top-buttons">
     <button onclick="location.href='/archive'">Войти в архив</button>
     <form action="/logout" method="post" style="display: inline;">
         <button type="submit">Выйти из аккаунта</button>
     </form>
 </div>
 
-<div>
-    <button class="large-button" onclick="location.href='/teaching'">Перейти к изучению</button>
+<div class="settings-container">
+    <h1 class="header">Выбрать изучаемые слова</h1>
+
+    <div>
+        <button class="large-button" onclick="location.href='/teaching'">Перейти к изучению</button>
+    </div>
+
+    <p>Ваш словарный запас (в архиве): <span id="total-word-count">0</span></br></br>
+        Выбрано слов для изучения: <span id="selected-word-count">0</span></p>
+
+    <table>
+        {{range .Words}}
+        <tr>
+            <td class="row-number"></td>
+            <td><input type="checkbox" id="word-{{.ID}}" name="{{.ID}}" {{if eq .Label 2}}checked{{end}}></td>
+            <td><label for="word-{{.ID}}">{{.Word}}</label></td>
+            <td>
+                <a href="#" class="archive-link" data-archive="{{.ID}}">Убрать в архив</a>
+            </td>
+        </tr>
+        {{end}}
+    </table>
+
+    <div class="pagination">
+        <div class="pagination-item">
+            {{if .HasPrev}}
+            <a href="/setting?page={{sub .Page 1}}" class="arrow-link"><<<<<</a>
+            {{else}}
+            <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            {{end}}
+        </div>
+        <div class="pagination-item">
+            {{if .HasNext}}
+            <a href="/setting?page={{add .Page 1}}" class="arrow-link">>>>>></a>
+            {{else}}
+            <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            {{end}}
+        </div>
+    </div>
 </div>
 
-<p>Ваш словарный запас: <span id="total-word-count">{{.WordCount}}</span></p>
-
-<p>Выбрано слов для изучения: <span id="selected-word-count">0</span></p>
-
-<table>
-    {{range .Words}}
-    <tr>
-        <td><input type="checkbox" id="word-{{.ID}}" name="{{.ID}}" {{if eq .Label 2}}checked{{end}}></td>
-        <td><label for="word-{{.ID}}">{{.Word}}</label></td>
-        <td>
-            <button type="button" data-archive="{{.ID}}">Убрать в архив (это слово я хорошо знаю)</button>
-        </td>
-    </tr>
-    {{end}}
-</table>
-
-<div>
-    <p><br/>WordWire. Powered by Urazaev Amir © 2024</p>
+<div class="footer">
+    <p>WordWire. Powered by Urazaev Amir © 2024</p>
 </div>
 
 </body>
