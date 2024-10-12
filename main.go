@@ -184,7 +184,7 @@ func renderRegisterTemplate(w http.ResponseWriter, data interface{}) {
 	tmpl.Execute(w, data)
 }
 
-const wordsPerPage = 10 // Число слов на странице
+const wordsPerPage = 10 // Количество слов на странице
 
 func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
@@ -197,35 +197,29 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Существующая логика для GET-запроса
 	userID := getUserIDFromSession(r)
 
-	// Fetch total words with labels 1 or 2
 	var totalWords int
-	err := Database.QueryRow(`
+	dbErr := Database.QueryRow(`
         SELECT COUNT(*)
         FROM user_word_labels
         WHERE user_id = $1 AND label IN (1, 2)
     `, userID).Scan(&totalWords)
-	if err != nil {
+	if dbErr != nil {
 		http.Error(w, "Server error: unable to count words", http.StatusInternalServerError)
 		return
 	}
-
-	// Calculate max pages
 	maxPages := (totalWords + wordsPerPage - 1) / wordsPerPage
 
-	// Get and parse page number from URL
 	var page int
 	pageParam := r.URL.Query().Get("page")
 	if pageParam != "" {
-		page, err = strconv.Atoi(pageParam)
-		if err != nil || page < 0 {
+		page, dbErr = strconv.Atoi(pageParam)
+		if dbErr != nil || page < 0 {
 			page = 0
 		}
 	}
 
-	// Adjust page number
 	if page >= maxPages {
 		page = maxPages - 1
 	}
@@ -235,7 +229,7 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 
 	offset := page * wordsPerPage
 
-	rows, err := Database.Query(`
+	rows, queryErr := Database.Query(`
         SELECT ew.id, ew.word, uwl.label
         FROM english_words ew
         INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
@@ -243,7 +237,7 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
         ORDER BY ew.usage_per_billion DESC
         LIMIT $2 OFFSET $3
     `, userID, wordsPerPage, offset)
-	if err != nil {
+	if queryErr != nil {
 		http.Error(w, "Server error: unable to fetch words", http.StatusInternalServerError)
 		return
 	}
@@ -258,38 +252,38 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	words := make([]Word, 0, wordsPerPage)
 	for rows.Next() {
 		var word Word
-		if err := rows.Scan(&word.ID, &word.Word, &word.Label); err != nil {
+		if scanErr := rows.Scan(&word.ID, &word.Word, &word.Label); scanErr != nil {
 			http.Error(w, "Server error: unable to scan words", http.StatusInternalServerError)
 			return
 		}
 		words = append(words, word)
 	}
 
-	if err = rows.Err(); err != nil {
+	if rowErr := rows.Err(); rowErr != nil {
 		http.Error(w, "Server error: problems with rows", http.StatusInternalServerError)
 		return
 	}
 
-	tmpl, err := template.New("setting.html").Funcs(template.FuncMap{
+	tmpl, tmplErr := template.New("setting.html").Funcs(template.FuncMap{
 		"add": func(a, b int) int { return a + b },
 		"sub": func(a, b int) int { return a - b },
 	}).ParseFiles("templates/header.html", "templates/setting.html", "templates/footer.html")
-	if err != nil {
+	if tmplErr != nil {
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
 		return
 	}
 
 	data := map[string]interface{}{
-		"Words":     words,
-		"WordCount": totalWords,
-		"Page":      page,
-		"LastPage":  page == maxPages-1,
-		"HasNext":   page < maxPages-1,
-		"HasPrev":   page > 0,
+		"Words":       words,
+		"WordCount":   totalWords,
+		"Page":        page,
+		"LastPage":    page == maxPages-1,
+		"HasNext":     page < maxPages-1,
+		"HasPrev":     page > 0,
+		"FirstNumber": page*wordsPerPage + 1,
 	}
 
-	err = tmpl.Execute(w, data)
-	if err != nil {
+	if execErr := tmpl.Execute(w, data); execErr != nil {
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
 }

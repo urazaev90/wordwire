@@ -1,72 +1,64 @@
-<!-- templates/footer.html -->
-<style>
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 15px;
-    }
+<footer>
+    <style>
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
 
-    .pagination-item {
-        margin: 0 20px;
-    }
+        .pagination-item {
+            margin: 0 20px;
+        }
 
-    .pagination a,
-    .pagination .inactive-link {
-        color: #0000FF;
-        text-decoration: underline;
-        font-size: 1.5em;
-    }
+        .pagination a,
+        .pagination .inactive-link {
+            color: #0000FF;
+            text-decoration: underline;
+            font-size: 1.5em;
+        }
 
-    .pagination .inactive-link {
-        color: transparent;
-    }
+        .pagination .inactive-link {
+            color: transparent;
+        }
 
-    .pagination a:hover {
-        color: #3333FF;
-    }
+        .pagination a:hover {
+            color: #3333FF;
+        }
 
-    .arrow-link {
-        font-size: 1.5em;
-        color: #FF6347;
-        font-weight: bold;
-        text-decoration: none;
-    }
+        .arrow-link {
+            font-size: 1.5em;
+            color: #FF6347;
+            font-weight: bold;
+            text-decoration: none;
+        }
 
-    .arrow-link:hover {
-        color: #FF4500;
-    }
+        .arrow-link:hover {
+            color: #FF4500;
+        }
 
-    .footer {
-        width: 100%;
-        text-align: center;
-        padding: 10px 0;
-    }
-
-    /* Стили, специфичные только для footer */
-</style>
-<script>
-    // Любой специфичный для footer скрипт может находиться здесь
-</script>
-<div class="pagination">
-    <div class="pagination-item">
-        {{if .HasPrev}}
-        <a href="/setting?page={{sub .Page 1}}" class="arrow-link"><<<<<</a>
-        {{else}}
-        <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        {{end}}
+        .wordwire-footer {
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+        }
+    </style>
+    <div class="pagination">
+        <div class="pagination-item">
+            {{if .HasPrev}}
+            <a href="{{.CurrentURL}}?page={{sub .Page 1}}" class="arrow-link"><<<<<</a>
+            {{else}}
+            <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            {{end}}
+        </div>
+        <div class="pagination-item">
+            {{if .HasNext}}
+            <a href="{{.CurrentURL}}?page={{add .Page 1}}" class="arrow-link">>>>>></a>
+            {{else}}
+            <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            {{end}}
+        </div>
     </div>
-    <div class="pagination-item">
-        {{if .HasNext}}
-        <a href="/setting?page={{add .Page 1}}" class="arrow-link">>>>>></a>
-        {{else}}
-        <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        {{end}}
+    <div class="wordwire-footer">
+        <p>WordWire. Powered by Urazaev Amir © 2024</p>
     </div>
-</div>
-</div>
-
-<div class="footer">
-    <p>WordWire. Powered by Urazaev Amir © 2024</p>
-</div>
-</body>
-</html>
+</footer>

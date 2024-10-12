@@ -1,6 +1,6 @@
-<!-- templates/setting.html -->
 {{ template "header.html" . }}
 
+<body>
 <style>
     table {
         margin: 0 auto;
@@ -13,25 +13,12 @@
         padding-right: 20px;
     }
 
-    /* Добавьте этот новый стиль для чекбоксов */
     input[type="checkbox"]:hover {
         cursor: pointer;
     }
 </style>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Функция для обновления номеров строк
-        function updateRowNumbers() {
-            const rows = document.querySelectorAll('table tr');
-            rows.forEach((row, index) => {
-                const cell = row.querySelector('.row-number');
-                if (cell) {
-                    cell.textContent = index + 1;
-                }
-            });
-        }
-
-        // Добавить обработчики событий для чекбоксов
         document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
             checkbox.addEventListener('change', function (event) {
                 const wordId = event.target.name;
@@ -48,13 +35,12 @@
                         if (!response.ok) {
                             console.error('Не удалось обновить метку слова:', response.statusText);
                         }
-                        location.reload(); // Обновить страницу, чтобы обновить количество
+                        location.reload();
                     })
                     .catch(error => console.error('Ошибка:', error));
             });
         });
 
-        // Добавить обработчики событий для ссылок на архив
         document.querySelectorAll('[data-archive]').forEach((link) => {
             link.addEventListener('click', function (event) {
                 event.preventDefault();
@@ -71,30 +57,28 @@
                         if (!response.ok) {
                             console.error('Не удалось архивировать слово:', response.statusText);
                         }
-                        location.reload(); // Обновить страницу, чтобы обновить слова
+                        location.reload();
                     })
                     .catch(error => console.error('Ошибка:', error));
             });
         });
-
-        // Инициализировать номера строк
-        updateRowNumbers();
     });
 </script>
 
 <div class="settings-container">
     <table>
-        {{range .Words}}
+        {{range $index, $word := .Words}}
         <tr>
-            <td class="row-number"></td>
-            <td><input type="checkbox" id="word-{{.ID}}" name="{{.ID}}" {{if eq .Label 2}}checked{{end}}></td>
-            <td><label for="word-{{.ID}}">{{.Word}}</label></td>
+            <td class="row-number">{{add $.FirstNumber $index}}</td>
+            <td><input type="checkbox" id="word-{{$word.ID}}" name="{{$word.ID}}" {{if eq $word.Label 2}}checked{{end}}></td>
+            <td><label for="word-{{$word.ID}}">{{$word.Word}}</label></td>
             <td>
-                <a href="#" class="archive-link" data-archive="{{.ID}}">Убрать в архив</a>
+                <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать в архив</a>
             </td>
         </tr>
         {{end}}
     </table>
 </div>
+</body>
 
 {{ template "footer.html" . }}
