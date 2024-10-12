@@ -1,191 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WordWire - учим английский легко</title>
-    <style>
-        .header {
-            margin-bottom: 10px;
-        }
+<!-- templates/setting.html -->
+{{ template "header.html" . }}
 
-        .top-buttons {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-            position: absolute;
-            top: 0;
-        }
+<style>
+    table {
+        margin: 0 auto;
+    }
 
-        .large-button {
-            font-size: 1em;
-            padding: 5px 40px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
+    table td label {
+        font-size: 1.5em;
+        font-weight: bold;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
 
-        .settings-container {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 0px;
-        }
-
-        table {
-            margin: 0 auto;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 15px;
-        }
-
-        .pagination-item {
-            margin: 0 20px;
-        }
-
-        .pagination a,
-        .pagination .inactive-link {
-            color: #0000FF;
-            text-decoration: underline;
-            font-size: 1.5em;
-        }
-
-        .pagination .inactive-link {
-            color: transparent;
-        }
-
-        .pagination a:hover {
-            color: #3333FF;
-        }
-
-        .archive-link {
-            font-style: italic;
-            color: #0000FF;
-        }
-
-        .archive-link:hover {
-            color: #3333FF;
-        }
-
-        table td label {
-            font-size: 1.5em;
-            font-weight: bold;
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-
-        .arrow-link {
-            font-size: 1.5em;
-            color: #FF6347;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .arrow-link:hover {
-            color: #FF4500;
-        }
-
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            text-align: center;
-            background-color: #f1f1f1;
-            padding: 10px 0;
-        }
-
-        /* Add this new style for checkboxes */
-        input[type="checkbox"]:hover {
-            cursor: pointer;
-        }
-    </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Function to update row numbers
-            function updateRowNumbers() {
-                const rows = document.querySelectorAll('table tr');
-                rows.forEach((row, index) => {
-                    const cell = row.querySelector('.row-number');
-                    if (cell) {
-                        cell.textContent = index + 1;
-                    }
-                });
-            }
-
-            // Add event listeners to checkboxes
-            document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
-                checkbox.addEventListener('change', function (event) {
-                    const wordId = event.target.name;
-                    const label = event.target.checked ? 2 : 1;
-
-                    fetch(`/setting`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-                        },
-                        body: `id=${wordId}&label=${label}`
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                console.error('Failed to update word label:', response.statusText);
-                            }
-                            location.reload(); // Refresh page to update counts
-                        })
-                        .catch(error => console.error('Error:', error));
-                });
+    /* Добавьте этот новый стиль для чекбоксов */
+    input[type="checkbox"]:hover {
+        cursor: pointer;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Функция для обновления номеров строк
+        function updateRowNumbers() {
+            const rows = document.querySelectorAll('table tr');
+            rows.forEach((row, index) => {
+                const cell = row.querySelector('.row-number');
+                if (cell) {
+                    cell.textContent = index + 1;
+                }
             });
+        }
 
-            // Add event listeners to archive links
-            document.querySelectorAll('[data-archive]').forEach((link) => {
-                link.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    const wordId = this.getAttribute('data-archive');
+        // Добавить обработчики событий для чекбоксов
+        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+            checkbox.addEventListener('change', function (event) {
+                const wordId = event.target.name;
+                const label = event.target.checked ? 2 : 1;
 
-                    fetch(`/archive`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-                        },
-                        body: `archive_word_id=${wordId}`
+                fetch(`/setting`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                    },
+                    body: `id=${wordId}&label=${label}`
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error('Не удалось обновить метку слова:', response.statusText);
+                        }
+                        location.reload(); // Обновить страницу, чтобы обновить количество
                     })
-                        .then(response => {
-                            if (!response.ok) {
-                                console.error('Failed to archive word:', response.statusText);
-                            }
-                            location.reload(); // Refresh page to update words
-                        })
-                        .catch(error => console.error('Error:', error));
-                });
+                    .catch(error => console.error('Ошибка:', error));
             });
-
-            // Initialize row numbers
-            updateRowNumbers();
         });
-    </script>
-</head>
-<body>
-<div class="top-buttons">
-    <button onclick="location.href='/archive'">Войти в архив</button>
-    <form action="/logout" method="post" style="display: inline;">
-        <button type="submit">Выйти из аккаунта</button>
-    </form>
-</div>
+
+        // Добавить обработчики событий для ссылок на архив
+        document.querySelectorAll('[data-archive]').forEach((link) => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const wordId = this.getAttribute('data-archive');
+
+                fetch(`/archive`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                    },
+                    body: `archive_word_id=${wordId}`
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error('Не удалось архивировать слово:', response.statusText);
+                        }
+                        location.reload(); // Обновить страницу, чтобы обновить слова
+                    })
+                    .catch(error => console.error('Ошибка:', error));
+            });
+        });
+
+        // Инициализировать номера строк
+        updateRowNumbers();
+    });
+</script>
 
 <div class="settings-container">
-    <h1 class="header">Выбрать изучаемые слова</h1>
-
-    <div>
-        <button class="large-button" onclick="location.href='/teaching'">Перейти к изучению</button>
-    </div>
-
-    <p>Ваш словарный запас (в архиве): <span id="total-word-count">0</span></br></br>
-        Выбрано слов для изучения: <span id="selected-word-count">0</span></p>
-
     <table>
         {{range .Words}}
         <tr>
@@ -198,28 +95,6 @@
         </tr>
         {{end}}
     </table>
-
-    <div class="pagination">
-        <div class="pagination-item">
-            {{if .HasPrev}}
-            <a href="/setting?page={{sub .Page 1}}" class="arrow-link"><<<<<</a>
-            {{else}}
-            <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            {{end}}
-        </div>
-        <div class="pagination-item">
-            {{if .HasNext}}
-            <a href="/setting?page={{add .Page 1}}" class="arrow-link">>>>>></a>
-            {{else}}
-            <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            {{end}}
-        </div>
-    </div>
 </div>
 
-<div class="footer">
-    <p>WordWire. Powered by Urazaev Amir © 2024</p>
-</div>
-
-</body>
-</html>
+{{ template "footer.html" . }}

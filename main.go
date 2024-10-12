@@ -273,7 +273,7 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.New("setting.html").Funcs(template.FuncMap{
 		"add": func(a, b int) int { return a + b },
 		"sub": func(a, b int) int { return a - b },
-	}).ParseFiles("templates/setting.html")
+	}).ParseFiles("templates/header.html", "templates/setting.html", "templates/footer.html")
 	if err != nil {
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
 		return
