@@ -7,7 +7,7 @@
                 const wordId = event.target.name;
                 const label = event.target.checked ? 2 : 1;
 
-                fetch(`/setting`, {
+                fetch(`/archive2`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -29,7 +29,7 @@
                 event.preventDefault();
                 const wordId = this.getAttribute('data-archive');
 
-                fetch(`/archive`, {
+                fetch(`/archive3`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -58,7 +58,7 @@
             <td><input type="checkbox" id="word-{{$word.ID}}" name="{{$word.ID}}" {{if eq $word.Label 2}}checked{{end}}></td>
             <td><label for="word-{{$word.ID}}">{{$word.Word}}</label></td>
             <td>
-                <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать в архив</a>
+                <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать с архива</a>
             </td>
         </tr>
         {{end}}

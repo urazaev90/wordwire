@@ -4,9 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Управление для ссылки 'В архиве' (если еще не добавлено)
+            const archiveLink = document.querySelector('a[href="/archive2"]');
+            let isArchivePage = window.location.pathname === "/archive2";
+            archiveLink.addEventListener('click', function(event) {
+                if (isArchivePage) {
+                    event.preventDefault();
+                    window.location.href = "/setting";
+                }
+                isArchivePage = !isArchivePage;
+            });
+
+            // Управление для ссылки 'Выбранные слова'
+            const selectedLink = document.querySelector('a[href="/selected"]');
+            let isSelectedPage = window.location.pathname === "/selected";
+            selectedLink.addEventListener('click', function(event) {
+                if (isSelectedPage) {
+                    event.preventDefault();
+                    window.location.href = "/setting";
+                }
+                isSelectedPage = !isSelectedPage;
+            });
+        });
+    </script>
     <style>
         button {
             cursor: pointer;
+        }
+
+        .content {
+            height: 320px; /* Пример содержимого, которое больше, чем высота body */
+            padding: 15px;
+        }
+
+        .contentheader {
+            height: 170px; /* Пример содержимого, которое больше, чем высота body */
+            background: #f3f3f3;
+        }
+
+        .contentfooter {
+            padding: 8px;
+            background: #f3f3f3;
         }
 
         .top-buttons {
@@ -35,9 +75,33 @@
             align-items: center;
             margin-top: 0px;
         }
+
+        table {
+            margin: 0 auto;
+        }
+
+        table td label {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        input[type="checkbox"]:hover {
+            cursor: pointer;
+        }
+
+        .active-link {
+            color: red; /* Или любой другой цвет для выделения активной ссылки */
+        }
+        .inactive-link {
+            color: black; /* Цвет для неактивных ссылок */
+        }
+
     </style>
 </head>
 <header>
+    <div class="contentheader">
     <div class="top-buttons">
         <button class="large-button" onclick="location.href='/teaching'">Перейти к изучению</button>
 
@@ -46,7 +110,11 @@
         </form>
     </div>
     <div class="settings-container">
-        <p>Ваш словарный запас (в архиве): <span id="total-word-count">0</span></br></br>
-            Выбрано слов для изучения: <span id="selected-word-count">0</span></p>
+        <p>
+            <a href="/archive2" class="{{if eq .CurrentURL "/archive2"}}active-link{{else}}inactive-link{{end}}">Ваш словарный запас (в архиве): {{.ArchivedCount}}</a>
+            <br/><br/>
+            <a href="/selected" class="{{if eq .CurrentURL "/selected"}}active-link{{else}}inactive-link{{end}}">Выбрано слов для изучения: {{.SelectedCount}}</a>
+        </p>
+    </div>
     </div>
 </header>
