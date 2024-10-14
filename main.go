@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 var (
@@ -54,9 +55,23 @@ func main() {
 
 func isAuthorized(r *http.Request) bool {
 	session, _ := store.Get(r, "session-name")
-	_, ok := session.Values["user_id"].(int)
+	userID, ok := session.Values["user_id"].(int)
+	if ok {
+		updateLastVisitDate(userID)
+	}
 	return ok
 } //сообщает статус посетителя на авторизацию
+
+func updateLastVisitDate(userID int) { //записывает дату последнего посещения пользователя в SQL
+	_, err := Database.Exec(`
+		UPDATE user_accounts 
+		SET last_visit_date = $1 
+		WHERE id = $2`,
+		time.Now().Format("2006-01-02"), userID)
+	if err != nil {
+		log.Println("Error updating last visit date:", err)
+	}
+}
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if isAuthorized(r) {
@@ -108,7 +123,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var userID int
-		err = Database.QueryRow("INSERT INTO user_accounts (login, password_hash) VALUES ($1, $2) RETURNING id", login, passwordHash).Scan(&userID)
+		err = Database.QueryRow(` 
+			INSERT INTO user_accounts (login, password_hash, registration_date) 
+			VALUES ($1, $2, $3) RETURNING id`,
+			login, passwordHash, time.Now().Format("2006-01-02")).Scan(&userID)
 		if err != nil {
 			log.Println("Register: Error inserting user to database:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
