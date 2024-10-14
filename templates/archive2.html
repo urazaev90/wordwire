@@ -58,7 +58,7 @@
             <td><input type="checkbox" id="word-{{$word.ID}}" name="{{$word.ID}}" {{if eq $word.Label 2}}checked{{end}}></td>
             <td><label for="word-{{$word.ID}}">{{$word.Word}}</label></td>
             <td>
-                <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать с архива</a>
+                <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать из архива</a>
             </td>
         </tr>
         {{end}}
