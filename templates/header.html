@@ -7,8 +7,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Управление для ссылки 'В архиве' (если еще не добавлено)
-            const archiveLink = document.querySelector('a[href="/archive2"]');
-            let isArchivePage = window.location.pathname === "/archive2";
+            const archiveLink = document.querySelector('a[href="/archive"]');
+            let isArchivePage = window.location.pathname === "/archive";
             archiveLink.addEventListener('click', function(event) {
                 if (isArchivePage) {
                     event.preventDefault();
@@ -120,7 +120,7 @@
     </div>
     <div class="settings-container">
         <p>
-            <a href="/archive2" class="{{if eq .CurrentURL "/archive2"}}active-link{{else}}inactive-link{{end}}">Ваш словарный запас (в архиве): {{.ArchivedCount}}</a>
+            <a href="/archive" class="{{if eq .CurrentURL "/archive"}}active-link{{else}}inactive-link{{end}}">Ваш словарный запас (в архиве): {{.ArchivedCount}}</a>
             <br/><br/>
             <a href="/selected" class="{{if eq .CurrentURL "/selected"}}active-link{{else}}inactive-link{{end}}">Выбрано слов для изучения: {{.SelectedCount}}</a>
         </p>

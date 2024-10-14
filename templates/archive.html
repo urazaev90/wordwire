@@ -1,40 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WordWire - учим английский легко</title>
-    <style>
-        button {
-            cursor: pointer;
-        }
-    </style>
+{{ template "header.html" . }}
 
-</head>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+            checkbox.addEventListener('change', function (event) {
+                const wordId = event.target.name;
+                const label = event.target.checked ? 2 : 1;
+
+                fetch(`/archive`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                    },
+                    body: `id=${wordId}&label=${label}`
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error('Не удалось обновить метку слова:', response.statusText);
+                        }
+                        location.reload();
+                    })
+                    .catch(error => console.error('Ошибка:', error));
+            });
+        });
+
+        document.querySelectorAll('[data-archive]').forEach((link) => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const wordId = this.getAttribute('data-archive');
+
+                fetch(`/remove_from_archive`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                    },
+                    body: `archive_word_id=${wordId}`
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error('Не удалось архивировать слово:', response.statusText);
+                        }
+                        location.reload();
+                    })
+                    .catch(error => console.error('Ошибка:', error));
+            });
+        });
+    });
+</script>
+
 <body>
-<h1>Архив</h1>
-
-<div>
-    <button onclick="location.href='/setting'">Вернуть в настройки изучения слов</button>
-    <p>Ваш словарный запас: {{.WordCount}}</p>
+<div class="content">
+<div class="settings-container">
+    <table>
+        {{range $index, $word := .Words}}
+        <tr>
+            <td class="row-number">{{add $.FirstNumber $index}}</td>
+            <td><input type="checkbox" id="word-{{$word.ID}}" name="{{$word.ID}}" {{if eq $word.Label 2}}checked{{end}}></td>
+            <td><label for="word-{{$word.ID}}">{{$word.Word}}</label></td>
+            <td>
+                <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать из архива</a>
+            </td>
+        </tr>
+        {{end}}
+    </table>
 </div>
-
-<div>
-    <p></p>
 </div>
-
-<table>
-    {{range .Words}}
-    <tr>
-        <td>{{.Word}}</td>
-        <td>
-            <form action="/remove_from_archive/{{.ID}}" method="post" style="display:inline;">
-                <button type="submit">Убрать с архива</button>
-            </form>
-        </td>
-    </tr>
-    {{end}}
-</table>
-
 </body>
-</html>
+
+{{ template "footer.html" . }}

@@ -18,6 +18,8 @@ var (
 	store    = sessions.NewCookieStore([]byte("your-secret-key"))
 )
 
+const wordsPerPage = 10 // Количество слов в списках
+
 func main() {
 	connStr := "user=urazaev90 password=Grr(-87He dbname=app_database sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
@@ -35,24 +37,173 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/setting", SettingHandler).Methods("GET", "POST")
-	router.HandleFunc("/archive", ArchiveHandler).Methods("GET", "POST")
-	router.HandleFunc("/archive2", Archive2Handler).Methods("GET", "POST")
-	router.HandleFunc("/selected", SelectedHandler).Methods("GET", "POST")
-	router.HandleFunc("/archive3", Archive3Handler).Methods("GET", "POST")
-
 	router.HandleFunc("/", RegisterHandler).Methods("GET", "POST")
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
+	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
+	router.HandleFunc("/setting", SettingHandler).Methods("GET", "POST")
+	router.HandleFunc("/archive", ArchiveHandler).Methods("GET", "POST")
+	router.HandleFunc("/selected", SelectedHandler).Methods("GET", "POST")
+	router.HandleFunc("/remove_from_archive", RemoveFromArchiveHandler).Methods("GET", "POST")
+	router.HandleFunc("/add_to_archive", AddToArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET")
 	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")
-	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
-	router.HandleFunc("/api/next_word", NextWordHandler).Methods("GET")
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
 }
 
-const wordsPerPage = 10 // Количество слов на странице
+func isAuthorized(r *http.Request) bool {
+	session, _ := store.Get(r, "session-name")
+	_, ok := session.Values["user_id"].(int)
+	return ok
+} //сообщает статус посетителя на авторизацию
+
+func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	if isAuthorized(r) {
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		// Вставляем код из renderRegisterTemplate
+		tmpl, err := template.ParseFiles("templates/index.html")
+		if err != nil {
+			http.Error(w, "Cannot parse template", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		err := r.ParseForm()
+		if err != nil {
+			log.Println("Register: Error parsing form:", err)
+			http.Error(w, "Invalid form data", http.StatusBadRequest)
+			return
+		}
+
+		login := r.FormValue("login")
+		password := r.FormValue("password")
+
+		var existingUser string
+		err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
+		if err == nil {
+			log.Println("Register: User already exists")
+			// Вставляем код из renderRegisterTemplate
+			tmpl, err := template.ParseFiles("templates/index.html")
+			if err != nil {
+				http.Error(w, "Cannot parse template", http.StatusInternalServerError)
+				return
+			}
+			tmpl.Execute(w, map[string]string{"Error": "Извините, такой логин занят, придумайте другой"})
+			return
+		}
+
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			log.Println("Register: Error hashing password:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+
+		var userID int
+		err = Database.QueryRow("INSERT INTO user_accounts (login, password_hash) VALUES ($1, $2) RETURNING id", login, passwordHash).Scan(&userID)
+		if err != nil {
+			log.Println("Register: Error inserting user to database:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+
+		_, err = Database.Exec(`
+			INSERT INTO user_word_labels (user_id, word_id, label)
+			SELECT $1, id, CASE 
+				WHEN id IN (31, 32, 33, 34, 35, 36, 37, 38, 39, 40) THEN 2
+				ELSE 1
+			END
+			FROM english_words
+		`, userID)
+		if err != nil {
+			log.Println("Register: Error inserting labels:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+
+		session, _ := store.Get(r, "session-name")
+		session.Values["user_id"] = userID
+		err = session.Save(r, w)
+		if err != nil {
+			log.Println("Register: Error saving session:", err)
+			http.Error(w, "Cannot save session", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+	}
+} // 1 Регистрация нового пользователя (главная стр.)
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	if isAuthorized(r) {
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		return
+	}
+
+	// Функция для рендеринга шаблона встроена
+	renderTemplate := func(data interface{}) {
+		tmpl, err := template.ParseFiles("templates/login.html")
+		if err != nil {
+			http.Error(w, "Cannot parse template", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, data)
+	}
+
+	if r.Method == http.MethodGet {
+		renderTemplate(nil)
+	} else if r.Method == http.MethodPost {
+		r.ParseForm()
+		login := r.FormValue("login")
+		password := r.FormValue("password")
+
+		var dbPasswordHash string
+		var userID int
+		err := Database.QueryRow("SELECT id, password_hash FROM user_accounts WHERE login=$1", login).Scan(&userID, &dbPasswordHash)
+		if err != nil {
+			renderTemplate(map[string]string{"Error": "Такого логина не существует"})
+			return
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(dbPasswordHash), []byte(password))
+		if err != nil {
+			renderTemplate(map[string]string{"Error": "Неверный пароль"})
+			return
+		}
+
+		session, _ := store.Get(r, "session-name")
+		session.Values["user_id"] = userID
+		session.Save(r, w)
+
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+	}
+} // 1 Вход в аккаунт
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session-name")
+	delete(session.Values, "user_id")
+	session.Save(r, w)
+
+	// Изменяем перенаправление на "/"
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+} //1 Выйти из аккаунта
+
+func getUserIDFromSession(r *http.Request) int {
+	session, _ := store.Get(r, "session-name")
+	userID, ok := session.Values["user_id"].(int)
+	if !ok {
+		return 0
+	}
+	return userID
+} //вещание id авторизированного пользователя
 
 func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
@@ -163,33 +314,9 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	if execErr := tmpl.Execute(w, data); execErr != nil {
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
-}
+} //1 Список всех слов
 
-func getWordCounts(userID int) (int, int, error) {
-	var selectedCount, archivedCount int
-
-	err := Database.QueryRow(`
-		SELECT COUNT(*)
-		FROM user_word_labels
-		WHERE user_id = $1 AND label = 2
-	`, userID).Scan(&selectedCount)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	err = Database.QueryRow(`
-		SELECT COUNT(*)
-		FROM user_word_labels
-		WHERE user_id = $1 AND label = 3
-	`, userID).Scan(&archivedCount)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	return selectedCount, archivedCount, nil
-}
-
-func Archive2Handler(w http.ResponseWriter, r *http.Request) {
+func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -273,10 +400,10 @@ func Archive2Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, tmplErr := template.New("archive2.html").Funcs(template.FuncMap{
+	tmpl, tmplErr := template.New("archive.html").Funcs(template.FuncMap{
 		"add": func(a, b int) int { return a + b },
 		"sub": func(a, b int) int { return a - b },
-	}).ParseFiles("templates/header.html", "templates/archive2.html", "templates/footer.html")
+	}).ParseFiles("templates/header.html", "templates/archive.html", "templates/footer.html")
 	if tmplErr != nil {
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
 		return
@@ -298,7 +425,7 @@ func Archive2Handler(w http.ResponseWriter, r *http.Request) {
 	if execErr := tmpl.Execute(w, data); execErr != nil {
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
-}
+} //1 Список архивированных слов
 
 func SelectedHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
@@ -409,13 +536,31 @@ func SelectedHandler(w http.ResponseWriter, r *http.Request) {
 	if execErr := tmpl.Execute(w, data); execErr != nil {
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
-}
+} //1 Список избранных слов
 
-func isAuthorized(r *http.Request) bool {
-	session, _ := store.Get(r, "session-name")
-	_, ok := session.Values["user_id"].(int)
-	return ok
-}
+func getWordCounts(userID int) (int, int, error) {
+	var selectedCount, archivedCount int
+
+	err := Database.QueryRow(`
+		SELECT COUNT(*)
+		FROM user_word_labels
+		WHERE user_id = $1 AND label = 2
+	`, userID).Scan(&selectedCount)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	err = Database.QueryRow(`
+		SELECT COUNT(*)
+		FROM user_word_labels
+		WHERE user_id = $1 AND label = 3
+	`, userID).Scan(&archivedCount)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return selectedCount, archivedCount, nil
+} //считает сколько у пользователя слов с label 2, с label 3
 
 func updateWordLabel(w http.ResponseWriter, r *http.Request) {
 	userID := getUserIDFromSession(r)
@@ -443,22 +588,9 @@ func updateWordLabel(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Server error", http.StatusInternalServerError)
 	}
 	w.WriteHeader(http.StatusNoContent)
-}
+} // Изменения label на 1 или 2 (при удалении и установки галочки в чекбоксах списков)
 
-func getUserIDFromSession(r *http.Request) int {
-	session, _ := store.Get(r, "session-name")
-	userID, ok := session.Values["user_id"].(int)
-	if !ok {
-		return 0
-	}
-	return userID
-}
-
-func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthorized(r) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
+func AddToArchiveHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID := getUserIDFromSession(r)
 
@@ -481,69 +613,10 @@ func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.WriteHeader(http.StatusNoContent)
-		return
 	}
+} //2 Добавить в архив слово (присвоение label 3)
 
-	// Оригинальный код для GET-запросов остаётся неизменным:
-	rows, err := Database.Query(`
-		SELECT ew.id, ew.word
-		FROM english_words ew
-		INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
-		WHERE uwl.user_id = $1 AND uwl.label = 3
-		ORDER BY ew.usage_per_billion DESC
-	`, userID)
-	if err != nil {
-		log.Println("Error querying database:", err)
-		http.Error(w, "Server error", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	type Word struct {
-		ID   int
-		Word string
-	}
-
-	var words []Word
-	for rows.Next() {
-		var word Word
-		if err := rows.Scan(&word.ID, &word.Word); err != nil {
-			log.Println("Error scanning row:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-		words = append(words, word)
-	}
-
-	if err = rows.Err(); err != nil {
-		log.Println("Error with rows:", err)
-		http.Error(w, "Server error", http.StatusInternalServerError)
-		return
-	}
-
-	wordCount := len(words)
-
-	data := map[string]interface{}{
-		"Words":     words,
-		"WordCount": wordCount,
-	}
-
-	tmpl, err := template.ParseFiles("templates/archive.html")
-	if err != nil {
-		log.Println("Error parsing template:", err)
-		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		log.Println("Error executing template:", err)
-		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
-	}
-}
-
-func Archive3Handler(w http.ResponseWriter, r *http.Request) {
+func RemoveFromArchiveHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -618,7 +691,7 @@ func Archive3Handler(w http.ResponseWriter, r *http.Request) {
 		"WordCount": wordCount,
 	}
 
-	tmpl, err := template.ParseFiles("templates/archive3.html")
+	tmpl, err := template.ParseFiles("templates/remove_from_archive.html")
 	if err != nil {
 		log.Println("Error parsing template:", err)
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
@@ -630,142 +703,7 @@ func Archive3Handler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error executing template:", err)
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
-}
-
-func RedirectToLoginIfUnauthorized(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !isAuthorized(r) && r.URL.Path != "/login" {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	if isAuthorized(r) {
-		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
-		return
-	}
-
-	if r.Method == http.MethodGet {
-		renderLoginTemplate(w, nil)
-	} else if r.Method == http.MethodPost {
-		r.ParseForm()
-		login := r.FormValue("login")
-		password := r.FormValue("password")
-
-		var dbPasswordHash string
-		var userID int
-		err := Database.QueryRow("SELECT id, password_hash FROM user_accounts WHERE login=$1", login).Scan(&userID, &dbPasswordHash)
-		if err != nil {
-			renderLoginTemplate(w, map[string]string{"Error": "Такого логина не существует"})
-			return
-		}
-
-		err = bcrypt.CompareHashAndPassword([]byte(dbPasswordHash), []byte(password))
-		if err != nil {
-			renderLoginTemplate(w, map[string]string{"Error": "Неверный пароль"})
-			return
-		}
-
-		session, _ := store.Get(r, "session-name")
-		session.Values["user_id"] = userID
-		session.Save(r, w)
-
-		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
-	}
-}
-
-func renderLoginTemplate(w http.ResponseWriter, data interface{}) {
-	tmpl, err := template.ParseFiles("templates/login.html")
-	if err != nil {
-		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, data)
-}
-
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	if isAuthorized(r) {
-		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
-		return
-	}
-
-	if r.Method == http.MethodGet {
-		renderRegisterTemplate(w, nil)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		err := r.ParseForm()
-		if err != nil {
-			log.Println("Register: Error parsing form:", err)
-			http.Error(w, "Invalid form data", http.StatusBadRequest)
-			return
-		}
-
-		login := r.FormValue("login")
-		password := r.FormValue("password")
-
-		var existingUser string
-		err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
-		if err == nil {
-			log.Println("Register: User already exists")
-			renderRegisterTemplate(w, map[string]string{"Error": "Извините, такой логин занят, придумайте другой"})
-			return
-		}
-
-		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		if err != nil {
-			log.Println("Register: Error hashing password:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-
-		var userID int
-		err = Database.QueryRow("INSERT INTO user_accounts (login, password_hash) VALUES ($1, $2) RETURNING id", login, passwordHash).Scan(&userID)
-		if err != nil {
-			log.Println("Register: Error inserting user to database:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-
-		_, err = Database.Exec(`
-			INSERT INTO user_word_labels (user_id, word_id, label)
-			SELECT $1, id, CASE 
-				WHEN id IN (31, 32, 33, 34, 35, 36, 37, 38, 39, 40) THEN 2
-				ELSE 1
-			END
-			FROM english_words
-		`, userID)
-		if err != nil {
-			log.Println("Register: Error inserting labels:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-
-		session, _ := store.Get(r, "session-name")
-		session.Values["user_id"] = userID
-		err = session.Save(r, w)
-		if err != nil {
-			log.Println("Register: Error saving session:", err)
-			http.Error(w, "Cannot save session", http.StatusInternalServerError)
-			return
-		}
-
-		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
-	}
-}
-
-func renderRegisterTemplate(w http.ResponseWriter, data interface{}) {
-	tmpl, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, data)
-}
+} //2 Убрать из архива слово (присвоение label 1)
 
 func TeachingPageHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
@@ -781,7 +719,7 @@ func TeachingPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl.Execute(w, nil)
-}
+} //1 Страница обучения
 
 func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
@@ -829,62 +767,4 @@ func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(words)
-}
-
-func NextWordHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthorized(r) {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	pageQuery := r.URL.Query().Get("page")
-	page, err := strconv.Atoi(pageQuery)
-	if err != nil {
-		http.Error(w, "Invalid page number", http.StatusBadRequest)
-		return
-	}
-
-	userID := getUserIDFromSession(r)
-	offset := (page + 1) * wordsPerPage // Ищем следующее слово на следующей странице
-
-	rows, err := Database.Query(`
-        SELECT ew.id, ew.word, uwl.label
-        FROM english_words ew
-        INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
-        WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
-        ORDER BY ew.usage_per_billion DESC
-        LIMIT 1 OFFSET $2
-    `, userID, offset)
-	if err != nil {
-		http.Error(w, "Server error: unable to fetch next word", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	if rows.Next() {
-		var word struct {
-			ID    int    `json:"ID"`
-			Word  string `json:"Word"`
-			Label int    `json:"Label"`
-		}
-		if err := rows.Scan(&word.ID, &word.Word, &word.Label); err != nil {
-			http.Error(w, "Server error: unable to scan next word", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(word)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session-name")
-	delete(session.Values, "user_id")
-	session.Save(r, w)
-
-	// Изменяем перенаправление на "/"
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
+} //генератор json данных для страницы обучения (слова, транскрипции, перевод)
