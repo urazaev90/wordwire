@@ -62,7 +62,7 @@ func isAuthorized(r *http.Request) bool {
 	return ok
 } //сообщает статус посетителя на авторизацию
 
-func updateLastVisitDate(userID int) { //записывает дату последнего посещения пользователя в SQL
+func updateLastVisitDate(userID int) {
 	_, err := Database.Exec(`
 		UPDATE user_accounts 
 		SET last_visit_date = $1 
@@ -71,7 +71,7 @@ func updateLastVisitDate(userID int) { //записывает дату посл�
 	if err != nil {
 		log.Println("Error updating last visit date:", err)
 	}
-}
+} //записывает дату последнего посещения пользователя (в SQL)
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if isAuthorized(r) {
