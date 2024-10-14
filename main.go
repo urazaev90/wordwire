@@ -134,13 +134,16 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		_, err = Database.Exec(`
-			INSERT INTO user_word_labels (user_id, word_id, label)
-			SELECT $1, id, CASE 
-				WHEN id IN (31, 32, 33, 34, 35, 36, 37, 38, 39, 40) THEN 2
-				ELSE 1
-			END
-			FROM english_words
-		`, userID)
+    		WITH ranked_words AS (
+        	SELECT id,
+               ROW_NUMBER() OVER (ORDER BY usage_per_billion DESC) as rank
+        	FROM english_words
+    		)
+    		INSERT INTO user_word_labels (user_id, word_id, label)
+    		SELECT $1, id, CASE WHEN rank <= 5 THEN 2 ELSE 1 END
+    		FROM ranked_words
+    		WHERE rank <= 10
+			`, userID)
 		if err != nil {
 			log.Println("Register: Error inserting labels:", err)
 			http.Error(w, "Server error", http.StatusInternalServerError)
@@ -159,6 +162,34 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
 	}
 } // 1 Регистрация нового пользователя (главная стр.)
+
+func loadNextWordForUser(userID int) error {
+	// Выполняем запрос для добавления следующего слова
+	_, err := Database.Exec(`
+        INSERT INTO user_word_labels (user_id, word_id, label)
+        SELECT $1, id, 1
+        FROM english_words
+        WHERE id NOT IN (SELECT word_id FROM user_word_labels WHERE user_id = $1)
+        ORDER BY usage_per_billion DESC
+        LIMIT 1
+    `, userID)
+
+	return err
+}
+
+func loadNextPageWordsForUser(userID int) error {
+	// Выполняем запрос для добавления 10 следующих слов
+	_, err := Database.Exec(`
+        INSERT INTO user_word_labels (user_id, word_id, label)
+        SELECT $1, id, 1
+        FROM english_words
+        WHERE id NOT IN (SELECT word_id FROM user_word_labels WHERE user_id = $1)
+        ORDER BY usage_per_billion DESC
+        LIMIT 10
+    `, userID)
+
+	return err
+}
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if isAuthorized(r) {
@@ -261,6 +292,19 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 		if dbErr != nil || page < 0 {
 			page = 0
 		}
+	}
+
+	if page >= maxPages-1 {
+		err = loadNextPageWordsForUser(userID)
+		if err != nil {
+			log.Println("Error loading next page words:", err)
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+		// Обновляем общее количество слов после подгрузки
+		totalWords += 10
+		// Обновляем количество страниц
+		maxPages = (totalWords + wordsPerPage - 1) / wordsPerPage
 	}
 
 	if page >= maxPages {
@@ -609,28 +653,36 @@ func updateWordLabel(w http.ResponseWriter, r *http.Request) {
 } // Изменения label на 1 или 2 (при удалении и установки галочки в чекбоксах списков)
 
 func AddToArchiveHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthorized(r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 
 	userID := getUserIDFromSession(r)
 
 	if r.Method == http.MethodPost {
-		// Это часть для обновления метки на 3
-		wordID, err := strconv.Atoi(r.FormValue("archive_word_id"))
-		if err != nil {
-			log.Println("Invalid word ID:", err)
-			http.Error(w, "Invalid request", http.StatusBadRequest)
-			return
-		}
+		// Пытаемся подгрузить новое слово, если это необходимо
+		_ = loadNextWordForUser(userID)
 
-		_, err = Database.Exec(`
+		if r.Method == http.MethodPost {
+			// Это часть для обновления метки на 3
+			wordID, err := strconv.Atoi(r.FormValue("archive_word_id"))
+			if err != nil {
+				log.Println("Invalid word ID:", err)
+				http.Error(w, "Invalid request", http.StatusBadRequest)
+				return
+			}
+
+			_, err = Database.Exec(`
 			UPDATE user_word_labels SET label = 3
 			WHERE user_id = $1 AND word_id = $2
 		`, userID, wordID)
-		if err != nil {
-			log.Println("Error updating label to archive:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
+			if err != nil {
+				log.Println("Error updating label to archive:", err)
+				http.Error(w, "Server error", http.StatusInternalServerError)
+				return
+			}
 		}
-
 	}
 } //2 Добавить в архив слово (присвоение label 3)
 

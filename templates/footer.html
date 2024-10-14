@@ -71,6 +71,7 @@
             <div class="pagination-item">
                 {{if .HasNext}}
                 <a href="{{.CurrentURL}}?page={{add .Page 1}}" class="arrow-link">>>>>></a>
+
                 {{else}}
                 <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 {{end}}
