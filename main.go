@@ -41,8 +41,8 @@ func main() {
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
 	router.HandleFunc("/setting", SettingHandler).Methods("GET", "POST")
-	router.HandleFunc("/archive", ArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/selected", SelectedHandler).Methods("GET", "POST")
+	router.HandleFunc("/archive", ArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/remove_from_archive", RemoveFromArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/add_to_archive", AddToArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET")
@@ -316,117 +316,6 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 } //1 Список всех слов
 
-func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthorized(r) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		updateWordLabel(w, r)
-		return
-	}
-
-	userID := getUserIDFromSession(r)
-
-	selectedCount, archivedCount, err := getWordCounts(userID)
-	if err != nil {
-		http.Error(w, "Server error: unable to count words", http.StatusInternalServerError)
-		return
-	}
-
-	var totalWords int
-	dbErr := Database.QueryRow(`
-        SELECT COUNT(*)
-        FROM user_word_labels
-        WHERE user_id = $1 AND label = 3
-    `, userID).Scan(&totalWords)
-	if dbErr != nil {
-		http.Error(w, "Server error: unable to count words", http.StatusInternalServerError)
-		return
-	}
-	maxPages := (totalWords + wordsPerPage - 1) / wordsPerPage
-
-	var page int
-	pageParam := r.URL.Query().Get("page")
-	if pageParam != "" {
-		page, dbErr = strconv.Atoi(pageParam)
-		if dbErr != nil || page < 0 {
-			page = 0
-		}
-	}
-
-	if page >= maxPages {
-		page = maxPages - 1
-	}
-	if page < 0 {
-		page = 0
-	}
-
-	offset := page * wordsPerPage
-
-	rows, queryErr := Database.Query(`
-        SELECT ew.id, ew.word, uwl.label
-        FROM english_words ew
-        INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
-        WHERE uwl.user_id = $1 AND uwl.label = 3
-        ORDER BY ew.usage_per_billion DESC
-        LIMIT $2 OFFSET $3
-    `, userID, wordsPerPage, offset)
-	if queryErr != nil {
-		http.Error(w, "Server error: unable to fetch words", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	type Word struct {
-		ID    int
-		Word  string
-		Label int
-	}
-
-	words := make([]Word, 0, wordsPerPage)
-	for rows.Next() {
-		var word Word
-		if scanErr := rows.Scan(&word.ID, &word.Word, &word.Label); scanErr != nil {
-			http.Error(w, "Server error: unable to scan words", http.StatusInternalServerError)
-			return
-		}
-		words = append(words, word)
-	}
-
-	if rowErr := rows.Err(); rowErr != nil {
-		http.Error(w, "Server error: problems with rows", http.StatusInternalServerError)
-		return
-	}
-
-	tmpl, tmplErr := template.New("archive.html").Funcs(template.FuncMap{
-		"add": func(a, b int) int { return a + b },
-		"sub": func(a, b int) int { return a - b },
-	}).ParseFiles("templates/header.html", "templates/archive.html", "templates/footer.html")
-	if tmplErr != nil {
-		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-		return
-	}
-
-	data := map[string]interface{}{
-		"Words":         words,
-		"WordCount":     totalWords,
-		"Page":          page,
-		"LastPage":      page == maxPages-1,
-		"HasNext":       page < maxPages-1,
-		"HasPrev":       page > 0,
-		"FirstNumber":   page*wordsPerPage + 1,
-		"CurrentURL":    r.URL.Path,
-		"SelectedCount": selectedCount,
-		"ArchivedCount": archivedCount,
-	}
-
-	if execErr := tmpl.Execute(w, data); execErr != nil {
-		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
-	}
-} //1 Список архивированных слов
-
 func SelectedHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -536,7 +425,118 @@ func SelectedHandler(w http.ResponseWriter, r *http.Request) {
 	if execErr := tmpl.Execute(w, data); execErr != nil {
 		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
 	}
-} //1 Список избранных слов
+} //1 Список избранных слов для обучения (label 2)
+
+func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthorized(r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		updateWordLabel(w, r)
+		return
+	}
+
+	userID := getUserIDFromSession(r)
+
+	selectedCount, archivedCount, err := getWordCounts(userID)
+	if err != nil {
+		http.Error(w, "Server error: unable to count words", http.StatusInternalServerError)
+		return
+	}
+
+	var totalWords int
+	dbErr := Database.QueryRow(`
+        SELECT COUNT(*)
+        FROM user_word_labels
+        WHERE user_id = $1 AND label = 3
+    `, userID).Scan(&totalWords)
+	if dbErr != nil {
+		http.Error(w, "Server error: unable to count words", http.StatusInternalServerError)
+		return
+	}
+	maxPages := (totalWords + wordsPerPage - 1) / wordsPerPage
+
+	var page int
+	pageParam := r.URL.Query().Get("page")
+	if pageParam != "" {
+		page, dbErr = strconv.Atoi(pageParam)
+		if dbErr != nil || page < 0 {
+			page = 0
+		}
+	}
+
+	if page >= maxPages {
+		page = maxPages - 1
+	}
+	if page < 0 {
+		page = 0
+	}
+
+	offset := page * wordsPerPage
+
+	rows, queryErr := Database.Query(`
+        SELECT ew.id, ew.word, uwl.label
+        FROM english_words ew
+        INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
+        WHERE uwl.user_id = $1 AND uwl.label = 3
+        ORDER BY ew.usage_per_billion DESC
+        LIMIT $2 OFFSET $3
+    `, userID, wordsPerPage, offset)
+	if queryErr != nil {
+		http.Error(w, "Server error: unable to fetch words", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type Word struct {
+		ID    int
+		Word  string
+		Label int
+	}
+
+	words := make([]Word, 0, wordsPerPage)
+	for rows.Next() {
+		var word Word
+		if scanErr := rows.Scan(&word.ID, &word.Word, &word.Label); scanErr != nil {
+			http.Error(w, "Server error: unable to scan words", http.StatusInternalServerError)
+			return
+		}
+		words = append(words, word)
+	}
+
+	if rowErr := rows.Err(); rowErr != nil {
+		http.Error(w, "Server error: problems with rows", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, tmplErr := template.New("archive.html").Funcs(template.FuncMap{
+		"add": func(a, b int) int { return a + b },
+		"sub": func(a, b int) int { return a - b },
+	}).ParseFiles("templates/header.html", "templates/archive.html", "templates/footer.html")
+	if tmplErr != nil {
+		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Words":         words,
+		"WordCount":     totalWords,
+		"Page":          page,
+		"LastPage":      page == maxPages-1,
+		"HasNext":       page < maxPages-1,
+		"HasPrev":       page > 0,
+		"FirstNumber":   page*wordsPerPage + 1,
+		"CurrentURL":    r.URL.Path,
+		"SelectedCount": selectedCount,
+		"ArchivedCount": archivedCount,
+	}
+
+	if execErr := tmpl.Execute(w, data); execErr != nil {
+		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
+	}
+} //1 Список архивированных слов (label 3)
 
 func getWordCounts(userID int) (int, int, error) {
 	var selectedCount, archivedCount int
@@ -642,67 +642,8 @@ func RemoveFromArchiveHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
-
-		w.WriteHeader(http.StatusNoContent)
-		return
 	}
 
-	// Оригинальный код для GET-запросов остаётся неизменным:
-	rows, err := Database.Query(`
-		SELECT ew.id, ew.word
-		FROM english_words ew
-		INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
-		WHERE uwl.user_id = $1 AND uwl.label = 3
-		ORDER BY ew.usage_per_billion DESC
-	`, userID)
-	if err != nil {
-		log.Println("Error querying database:", err)
-		http.Error(w, "Server error", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	type Word struct {
-		ID   int
-		Word string
-	}
-
-	var words []Word
-	for rows.Next() {
-		var word Word
-		if err := rows.Scan(&word.ID, &word.Word); err != nil {
-			log.Println("Error scanning row:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-		words = append(words, word)
-	}
-
-	if err = rows.Err(); err != nil {
-		log.Println("Error with rows:", err)
-		http.Error(w, "Server error", http.StatusInternalServerError)
-		return
-	}
-
-	wordCount := len(words)
-
-	data := map[string]interface{}{
-		"Words":     words,
-		"WordCount": wordCount,
-	}
-
-	tmpl, err := template.ParseFiles("templates/remove_from_archive.html")
-	if err != nil {
-		log.Println("Error parsing template:", err)
-		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		log.Println("Error executing template:", err)
-		http.Error(w, "Cannot execute template", http.StatusInternalServerError)
-	}
 } //2 Убрать из архива слово (присвоение label 1)
 
 func TeachingPageHandler(w http.ResponseWriter, r *http.Request) {

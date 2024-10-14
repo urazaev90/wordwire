@@ -50,20 +50,20 @@
 
 <body>
 <div class="content">
-<div class="settings-container">
-    <table>
-        {{range $index, $word := .Words}}
-        <tr>
-            <td class="row-number">{{add $.FirstNumber $index}}</td>
-            <td><input type="checkbox" id="word-{{$word.ID}}" name="{{$word.ID}}" {{if eq $word.Label 2}}checked{{end}}></td>
-            <td><label for="word-{{$word.ID}}">{{$word.Word}}</label></td>
-            <td>
-                <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать в архив</a>
-            </td>
-        </tr>
-        {{end}}
-    </table>
-</div>
+    <div class="settings-container">
+        <table>
+            {{range $index, $word := .Words}}
+            <tr>
+                <td class="row-number">{{add $.FirstNumber $index}}</td>
+                <td><input type="checkbox" id="word-{{$word.ID}}" name="{{$word.ID}}" {{if eq $word.Label 2}}checked{{end}}></td>
+                <td class="fixed-width"><label for="word-{{$word.ID}}">{{$word.Word}}</label></td>
+                <td>
+                    <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать в архив</a>
+                </td>
+            </tr>
+            {{end}}
+        </table>
+    </div>
 </div>
 </body>
 

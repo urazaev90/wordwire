@@ -2,11 +2,19 @@
     .pagination {
         display: flex;
         justify-content: center;
+        align-items: center;
         margin-top: 15px;
+    }
+
+    .pagination-item-start {
+        color: #0000FF;
+        font-size: 15px;
+        font-style: italic;
     }
 
     .pagination-item {
         margin: 0 20px;
+        font-weight: bold;
     }
 
     .pagination a,
@@ -27,7 +35,7 @@
     .arrow-link {
         font-size: 1.5em;
         color: #FF6347;
-        font-weight: bold;
+
         text-decoration: none;
     }
 
@@ -41,7 +49,6 @@
         padding: 10px 0;
     }
 
-
 </style>
 <footer>
     <div class="contentfooter">
@@ -49,6 +56,14 @@
             <div class="pagination-item">
                 {{if .HasPrev}}
                 <a href="{{.CurrentURL}}?page={{sub .Page 1}}" class="arrow-link"><<<<<</a>
+                {{else}}
+                <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                {{end}}
+            </div>
+            <!-- Новый элемент для "В начало" -->
+            <div class="pagination-item-start">
+                {{if gt .Page 0}}
+                <a href="{{.CurrentURL}}?page=0" class="arrow-link">В начало</a>
                 {{else}}
                 <span class="inactive-link">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 {{end}}
