@@ -48,6 +48,8 @@ func main() {
 	router.HandleFunc("/add_to_archive", AddToArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET")
 	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")
+	router.PathPrefix("/images/").Handler(http.StripPrefix("/images/", http.FileServer(http.Dir("images/"))))
+	router.PathPrefix("/sounds/").Handler(http.StripPrefix("/sounds/", http.FileServer(http.Dir("sounds/"))))
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)

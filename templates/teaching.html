@@ -106,6 +106,14 @@
             font-size: 2em;
             display: none;
         }
+
+        /* Стиль для изображения динамика */
+        #sound-icon {
+            width: 50px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 
     <script>
@@ -164,6 +172,17 @@
                 }
             }
 
+            function playSound(word) {
+                const audio = new Audio(`/sounds/${word}.mp3`);
+                audio.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
+            }
+
+            document.getElementById("sound-icon").addEventListener("click", () => {
+                if (currentIndex >= 0 && currentIndex < words.length) {
+                    playSound(words[currentIndex].word);
+                }
+            });
+
             document.getElementById("forward").addEventListener("click", () => {
                 if (currentIndex < words.length - 1) {
                     history.push(currentIndex);
@@ -214,6 +233,9 @@
         <p id="current-word"></p>
         <p id="loading">Загрузка данных...</p>
     </div>
+    <div>
+        <img id="sound-icon" src="/images/dinamik.png" alt="Play Sound">
+    </div> <!-- Добавлено изображение с иконкой динамика -->
     <div>
         <button id="back" disabled>Назад</button>
         <button id="forward" disabled>Вперед</button>
