@@ -50,20 +50,54 @@
 
 <body>
 <div class="content">
-<div class="settings-container">
-    <table>
-        {{range $index, $word := .Words}}
-        <tr>
-            <td class="row-number">{{add $.FirstNumber $index}}</td>
-            <td><input type="checkbox" id="word-{{$word.ID}}" name="{{$word.ID}}" {{if eq $word.Label 2}}checked{{end}}></td>
-            <td class="fixed-width"><label for="word-{{$word.ID}}">{{$word.Word}}</label></td>
-            <td>
-                <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать в архив</a>
-            </td>
-        </tr>
-        {{end}}
-    </table>
-</div>
+    <div class="settings-container">
+        <div class="container-height">
+            <table>
+                {{range $index, $word := .Words}}
+                <tr>
+                    <td class="row-number">{{add $.FirstNumber $index}}</td>
+                    <td><input type="checkbox" id="word-{{$word.ID}}" name="{{$word.ID}}" {{if eq $word.Label
+                               2}}checked{{end}}></td>
+                    <td class="fixed-width"><label for="word-{{$word.ID}}">{{$word.Word}}</label></td>
+                    <td>
+                        <a href="#" class="archive-link" data-archive="{{$word.ID}}">Убрать в архив</a>
+                    </td>
+                </tr>
+                {{end}}
+            </table>
+        </div>
+        <div class="pagination">
+            <!-- Влево -->
+            <div class="pagination-item">
+                {{if .HasPrev}}
+                <a href="{{.CurrentURL}}?page={{sub .Page 1}}" class="arrow-link arrow-link-left">
+                    <img src="/images/arrow_left.png" alt="Previous">
+                </a>
+                {{else}}
+                <span class="arrow-placeholder"></span>
+                {{end}}
+            </div>
+            <!-- Новый элемент для "В начало" -->
+            <div class="pagination-item-start">
+                {{if gt .Page 0}}
+                <a href="{{.CurrentURL}}?page=0" class="arrow-link">В начало</a>
+                </a>
+                {{else}}
+                <span class="arrow-placeholder2"></span>
+                {{end}}
+            </div>
+            <!-- Вправо -->
+            <div class="pagination-item">
+                {{if .HasNext}}
+                <a href="{{.CurrentURL}}?page={{add .Page 1}}" class="arrow-link arrow-link-right">
+                    <img src="/images/arrow_right.png" alt="Next">
+                </a>
+                {{else}}
+                <span class="arrow-placeholder"></span>
+                {{end}}
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 
