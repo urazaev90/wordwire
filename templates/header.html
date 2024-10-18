@@ -5,11 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
 
+    <script>
+
+        // Обработчик звука клика (начало)
+        document.addEventListener('DOMContentLoaded', function () {
+            const clickSound = document.getElementById('click-sound');
+
+            // Воспроизведение звука при загрузке страницы
+            clickSound.play().catch(error => console.error("Ошибка воспроизведения звука при загрузке страницы:", error));
+        });
+        // Обработчик звука клика (конец)
+
+    </script>
+
     <style>
 
         body {
             background-color: #da9bff;
-            color: white; /* Если нужно, измените цвет текста на более светлый для лучшей читаемости */
+            color: #e1e1e1; /* Если нужно, измените цвет текста на более светлый для лучшей читаемости */
             font-family: 'Comic Sans MS', cursive, sans-serif;
         }
 
@@ -68,7 +81,6 @@
         .large-button:hover, .exit-button:hover {
             background-color: #efca86;
             transform: scale(1.1);
-
         }
 
         .exit-button {
@@ -94,9 +106,7 @@
         }
 
         .container-height {
-
             height: 370px; /*Пример содержимого, которое больше, чем высота body */
-
         }
 
         table {
@@ -217,6 +227,7 @@
             text-decoration: none;
             color: #3600c7;
             font-weight: bold;
+            opacity: 0.9;
         }
 
         .pagination .inactive-link {
@@ -226,12 +237,12 @@
         .pagination a:hover {
             color: #dcdcdc;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            opacity: 0.8;
         }
 
         .arrow-link {
             font-size: 1.5em;
             color: #FF6347;
-
             text-decoration: none;
         }
 
@@ -250,18 +261,17 @@
             transition: opacity 0.3s; /* Переход для плавного изменения прозрачности */
         }
 
-        /* Стили для пустого контейнера */
+        /* Стили для пустого контейнера стрелок */
         .arrow-placeholder {
             display: inline-block;
             width: 80px; /* Задаем фиксированную ширину */
         }
 
-
-
         /* Стиль для нормального состояния */
         .arrow-link-left img {
             content: url('/images/arrow_left.png');
         }
+
         .arrow-link-right img {
             content: url('/images/arrow_right.png');
         }
@@ -270,6 +280,7 @@
         .arrow-link-left:hover img {
             content: url('/images/arrow_left_hover.png');
         }
+
         .arrow-link-right:hover img {
             content: url('/images/arrow_right_hover.png');
         }
@@ -277,22 +288,26 @@
     </style>
 </head>
 <header>
+    <audio id="click-sound" src="/sounds/_click_sound.mp3" preload="auto"></audio>
     <div class="contentheader">
         <div class="top-buttons">
 
-        <button class="large-button" onclick="location.href='/teaching'">Перейти к обучению🧑‍🎓</button>
+            <button class="large-button" onclick="location.href='/teaching'">Перейти к обучению🧑‍🎓</button>
 
-        <form action="/logout" method="post" style="margin: 0; position: absolute; right: 20px;">
-            <button class="exit-button" type="submit">Выйти из аккаунта📴</button>
-        </form>
-    </div>
+            <form action="/logout" method="post" style="margin: 0; position: absolute; right: 20px;">
+                <button class="exit-button" type="submit">Выйти из аккаунта📴</button>
+            </form>
+        </div>
         <div class="settings-container">
             <p>
-                <a href="/setting" class="{{if eq .CurrentURL "/setting"}}active-link{{else}}inactive-link{{end}}">Весь словарь</a>
+                <a href="/setting" class="{{if eq .CurrentURL "/setting"}}active-link{{else}}inactive-link{{end}}">Весь
+                словарь</a>
                 <br/>
-                <a href="/archive" class="{{if eq .CurrentURL "/archive"}}active-link{{else}}inactive-link{{end}}">Ваш словарный запас (архив) ({{.ArchivedCount}})</a>
+                <a href="/archive" class="{{if eq .CurrentURL "/archive"}}active-link{{else}}inactive-link{{end}}">Ваш
+                словарный запас (архив) ({{.ArchivedCount}})</a>
                 <br/>
-                <a href="/selected" class="{{if eq .CurrentURL "/selected"}}active-link{{else}}inactive-link{{end}}">Избранные слова для обучения ({{.SelectedCount}})</a>
+                <a href="/selected" class="{{if eq .CurrentURL "/selected"}}active-link{{else}}inactive-link{{end}}">Избранные
+                слова для обучения ({{.SelectedCount}})</a>
             </p>
         </div>
     </div>

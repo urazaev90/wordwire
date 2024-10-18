@@ -7,113 +7,192 @@
     <title>WordWire - учим английский легко</title>
 
     <style>
+        /* Стили остаются такими же, как были */
         button {
             cursor: pointer;
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            overflow: hidden;
+        /* Стили для кнопок "Настроить изучаемые слова" и "Выйти из аккаунта" */
+        .control {
+            font-size: 1.5em;
+            padding: 5px 40px;
+            cursor: pointer;
+            margin-left: 0;
+            margin-right: 0;
+            background-color: #efbb51;
+            border-radius: 10px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-weight: bold;
+            transition-delay: 0.8s;
+            transition: box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Переход с измененной длительностью и функцией времени */
         }
 
-        #control-buttons {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-            position: absolute;
-            top: 0;
+        .control:hover {
+            background-color: #efca86;
+            transform: scale(1.1);
+        }
+
+        .words-left {
+            text-decoration: none;
+            font-size: 1.7em;
+            color: #e1e1e1; /* Цвет для неактивных ссылок */
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Смещения, размытие и цвет тени */
+            padding: 10px;
+        }
+
+        body {
+            background-color: #da9bff;
+            color: white;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
         }
 
         #central-content {
             text-align: center;
             position: relative;
-            margin-top: 70px;
         }
 
-        #central-content>div:first-child {
-            margin-bottom: 20px;
+        .dinamik-and-translate {
+            padding: 10px;
         }
 
-        #central-content>div:nth-child(4) {
-            margin-bottom: 20px;
-        }
-
-        /* Изменение стиля и размера текста для слова */
-        #word-view #current-word {
-            font-size: 4em;
+        #word-view #current-word { /* Стиль английского слова" */
+            font-size: 5em;
             font-weight: bold;
-            margin: 35px;
+            margin: 2px;
+            color: #333; /* Цвет текста для лучшей читаемости на "бумаге" */
         }
 
-        /* Стили для транскрипции */
         #transcription {
-            font-size: 3em;
-            color: gray;
+            font-size: 2em;
+            color: #793785;
             margin: 0px;
         }
 
-        /* Стили для перевода */
         #translation-text {
-            font-size: 3em;
-            margin-top: 10px;
+            font-size: 2.2em;
+            margin-top: 0px;
+            color: #3600c7;
         }
 
-        /* Изменение размера текста для контейнера перевода */
-        #translation {
-            width: max-content;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
+        #translation { /* Блок транскрипции и перевода */
             margin-top: 20px;
             visibility: hidden;
+            min-height: 100px; /* Минимальная высота для резервирования пространства */
         }
 
-        /* Общие стили для всех кнопок */
-        button {}
 
-        /* Стили для кнопок "Настроить изучаемые слова" и "Выйти из аккаунта" */
-        button.control {}
+        .paper-display {
+            position: relative; /* Для использования псевдоэлемента */
+            background-color: white; /* Ярко выраженный белый фон */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 0 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2d3ba;
+            margin: 10px auto;
+            width: 80%;
+            max-width: 600px;
+            font-family: 'Georgia', serif;
+            z-index: 1; /* Для обеспечения видимости текста над псевдоэлементом */
+            min-height: 220px; /* Задание начальной высоты */
+            height: auto; /* Позволяет блоку увеличиваться по мере добавления содержимого */
 
-        /* Стили для кнопки "Начать сначала" */
-        button.restart {
-            padding: 5px 10px;
-            font-size: 1.5em;
         }
 
-        /* Стили для кнопки "Посмотреть перевод" */
-        button.translation {
-            padding: 10px 20px;
-            font-size: 2em;
+        .paper-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('/images/paper-texture.png');
+            background-size: 350px 350px;
+            background-repeat: repeat;
+            opacity: 0.3; /* Прозрачность текстуры */
+            z-index: -1; /* Чтобы текстура была за текстом */
+            border-radius: 10px; /* Повторяем закругление углов */
         }
 
-        /* Увеличение размера кнопок "Назад" и "Вперед" в 4 раза */
-        #back,
-        #forward {
-            padding: 10px 20px;
-            font-size: 3em;
+        img.button {
+            width: 120px;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
         }
 
-        #loading {
-            font-size: 2em;
-            display: none;
+        img.button:hover {
+            opacity: 0.8;
         }
 
-        /* Стиль для изображения динамика */
+        img.not-active {
+            cursor: default;
+            opacity: 0.5;
+        }
+
         #sound-icon {
-            width: 50px;
+            width: 180px;
             cursor: pointer;
             display: block;
             margin: 0 auto;
+            transition: transform 0.2s ease, opacity 0.2s ease;
         }
+
+        #sound-icon:hover {
+            opacity: 0.8;
+        }
+
+        #translate-icon {
+            width: 180px; /* Устанавливаем ширину только для этой иконки */
+            height: auto; /* Высота будет рассчитываться пропорционально ширине */
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+
+        .panel-top {
+            background-color: #a63ab2;
+            border-radius: 15px;
+            padding-top: 15px;
+            padding-bottom: 5px;
+            margin: 12px;
+            width: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 3px solid #2d2d2d;
+        }
+
+        .panel-central {
+            background-color: #efbb51;
+            border-radius: 15px;
+            margin: 12px;
+            width: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 3px solid #2d2d2d;
+            min-height: 520px;
+        }
+
+        .flipping {
+            height: 100px;
+        }
+
+        img.button, /* кнопка "Показать перевод*/
+        img.not-active {
+            width: 120px;
+            height: auto;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        img.not-active {
+            cursor: default;
+            opacity: 0.5;
+        }
+
+        img.button:hover {
+            opacity: 0.8;
+        }
+
+
+
     </style>
 
     <script>
@@ -127,7 +206,6 @@
                     document.getElementById("loading").style.display = "block";
                     document.getElementById("current-word").style.display = "none";
 
-                    console.log("Fetching words from server...");
                     const response = await fetch('/api/words');
                     if (!response.ok) {
                         throw new Error(`Ошибка загрузки слов: ${response.statusText}`);
@@ -144,7 +222,7 @@
                     console.error("Ошибка:", error);
                     document.getElementById("loading").style.display = "none";
                     document.getElementById("current-word").style.display = "block";
-                    document.getElementById("current-word").textContent = "Не выбрано ни одного слова. Зайдите в 'Настроить изучаемые слова' и выберите, что будете учить.";
+                    document.getElementById("current-word").textContent = "Не выбрано ни одного слова.";
                 }
             }
 
@@ -157,17 +235,24 @@
 
             function showWord() {
                 if (words.length === 0) {
-                    document.getElementById("current-word").textContent =
-                        "Не выбрано ни одного слова. Зайдите в 'Настроить изучаемые слова' и выберите, что будете учить.";
+                    document.getElementById("current-word").textContent = "Не выбрано ни одного слова.";
                     return;
+                }
+
+                const backIcon = document.getElementById("back-icon");
+                const forwardIcon = document.getElementById("forward-icon");
+
+                if (currentIndex < words.length) {
+                    backIcon.src = currentIndex > 0 ? '/images/left.png' : '/images/left_not_active.png';
+                    backIcon.className = currentIndex > 0 ? 'button' : 'not-active';
+                    forwardIcon.src = currentIndex < words.length - 1 ? '/images/right.png' : '/images/right_not_active.png';
+                    forwardIcon.className = currentIndex < words.length - 1 ? 'button' : 'not-active';
                 }
 
                 if (currentIndex >= 0 && currentIndex < words.length) {
                     const word = words[currentIndex];
                     document.getElementById("current-word").textContent = word.word;
                     document.getElementById("translation").style.visibility = "hidden";
-                    document.getElementById("back").disabled = currentIndex === 0;
-                    document.getElementById("forward").disabled = currentIndex >= words.length - 1;
                     document.getElementById("words-left").textContent = words.length - currentIndex;
                 }
             }
@@ -183,7 +268,7 @@
                 }
             });
 
-            document.getElementById("forward").addEventListener("click", () => {
+            document.getElementById("forward-icon").addEventListener("click", () => {
                 if (currentIndex < words.length - 1) {
                     history.push(currentIndex);
                     currentIndex++;
@@ -191,14 +276,18 @@
                 }
             });
 
-            document.getElementById("back").addEventListener("click", () => {
+            document.getElementById("back-icon").addEventListener("click", () => {
                 if (history.length > 0) {
                     currentIndex = history.pop();
                     showWord();
                 }
             });
 
-            document.getElementById("show-translation").addEventListener("click", () => {
+            document.getElementById("restart-icon").addEventListener("click", () => {
+                location.reload();
+            });
+
+            document.getElementById("translate-icon").addEventListener("click", () => {
                 const translationElement = document.getElementById("translation");
                 if (translationElement.style.visibility === "hidden") {
                     const word = words[currentIndex];
@@ -214,35 +303,78 @@
 
             fetchWords();
         });
-    </script>
 
+
+        // Обработчик звука клика (начало)
+        document.addEventListener('DOMContentLoaded', function () {
+            const clickSound = document.getElementById('click-sound');
+
+            // Воспроизведение звука при загрузке страницы
+            clickSound.play().catch(error => console.error("Ошибка воспроизведения звука при загрузке страницы:", error));
+
+            document.body.addEventListener('click', function (event) {
+                // Ищем ближайший элемент, который необходимо отслеживать
+                const target = event.target.closest('button, a, .play-sound, .translate, #back-icon, #forward-icon, #restart-text, #translate-icon');
+
+                // Убедимся, что наш элемент действительно найден, это не значок звука,
+                // не кнопка с классом .control и не изображения left_not_active/right_not_active
+                const isControlButton = target && target.classList.contains('control') && target.getAttribute('onclick') === "location.href='/setting'";
+                const isInactiveImage = target && (target.src && (target.src.includes('left_not_active.png') || target.src.includes('right_not_active.png')));
+                const isTranslateIcon = target && target.id === 'translate-icon'; // Проверка на элемент с id translate-icon
+
+                if (target && target.id !== 'sound-icon' && !isControlButton && (!isInactiveImage || isTranslateIcon)) {
+                    clickSound.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
+                    console.log('Клик по элементу:', target); // Вывод в консоль для проверки
+                }
+            });
+        });
+
+        // Обработчик звука клика (конец)
+
+    </script>
 </head>
 
 <body>
-<div id="control-buttons">
-    <button class="control" onclick="location.href='/setting'">Выбрать изучаемые слова</button>
 
-</div>
+<audio id="click-sound" src="/sounds/_click_sound.mp3" preload="auto"></audio>
 
 <div id="central-content">
-    <div>
-        <button class="restart" onclick="location.reload()">Начать сначала</button>
+    <div class="panel-top">
+        <div>
+            <button class="control" onclick="location.href='/setting'">Выбрать изучаемые слова</button>
+        </div>
+        <div class="words-left">Осталось слов: <span id="words-left">0</span></div>
     </div>
-    <div>Осталось слов: <span id="words-left">0</span></div>
-    <div id="word-view">
-        <p id="current-word"></p>
-        <p id="loading">Загрузка данных...</p>
-    </div>
-    <div>
-        <img id="sound-icon" src="/images/dinamik.png" alt="Play Sound">
-    </div> <!-- Добавлено изображение с иконкой динамика -->
-    <div>
-        <button id="back" disabled>Назад</button>
-        <button id="forward" disabled>Вперед</button>
-    </div>
-    <div>
-        <button class="translation" id="show-translation">Посмотреть перевод</button>
-        <div id="translation"></div>
+
+    <div class="panel-central">
+
+
+        <div class="paper-display">
+
+            <div id="word-view">
+                <p id="current-word"></p>
+                <p id="loading">Загрузка данных...</p>
+            </div>
+
+            <!-- Перенесенный блок для перевода -->
+            <div id="translation"></div>
+
+        </div>
+
+        <div class="flipping">
+            <img id="back-icon" src="/images/left_not_active.png" alt="Back" class="not-active">
+            <img id="restart-icon" src="/images/restart.png" alt="Restart" class="button">
+            <img id="forward-icon" src="/images/right_not_active.png" alt="Forward" class="not-active">
+        </div>
+
+        <div class="dinamik-and-translate" style="text-align: center;">
+            <div style="display: inline-block;">
+                <img id="sound-icon" src="/images/dinamik.png" alt="Play Sound">
+            </div>
+            <div style="display: inline-block;">
+                <img id="translate-icon" src="/images/translate.png" alt="Посмотреть перевод" class="button">
+            </div>
+        </div>
     </div>
 </div>
 

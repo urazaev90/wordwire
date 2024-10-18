@@ -55,6 +55,12 @@ func main() {
 	http.ListenAndServe(":8080", router)
 }
 
+func RestartSoundHandler(w http.ResponseWriter, r *http.Request) {
+	// Просто возвращаем статус 200 для подтверждения нажатия
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
 func isAuthorized(r *http.Request) bool {
 	session, _ := store.Get(r, "session-name")
 	userID, ok := session.Values["user_id"].(int)
