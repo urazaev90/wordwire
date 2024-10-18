@@ -193,6 +193,116 @@
 
 
 
+
+        /* Стили для модального окна */
+
+             /* Стили для модального окна */
+         #registration-modal {
+             display: none;
+             position: fixed;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%);
+             background-color: white;
+             padding: 20px;
+             border-radius: 10px;
+             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+             z-index: 1001; /* Впереди затемненного фона */
+             width: 400px;
+             max-width: 100%;
+             font-family: Arial, sans-serif;
+         }
+
+        #registration-modal h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        #registration-modal form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #registration-modal form div {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        #registration-modal label {
+            font-size: 1em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        #registration-modal input[type="text"],
+        #registration-modal input[type="password"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #registration-modal button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #registration-modal button:hover {
+            background-color: #45a049;
+        }
+
+        /* Стили для кнопки закрытия */
+        #registration-modal .close-btn {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        #registration-modal .close-btn button {
+            background-color: transparent;
+            color: #333;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #registration-modal .close-btn button:hover {
+            color: #f44336;
+        }
+
+        /* Стили для текста "Приложение абсолютно бесплатное!" */
+        #registration-modal p {
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        /* Затемнение фона при открытом модальном окне */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000; /* Позади модального окна */
+        }
+
+
+
     </style>
 
     <script>
@@ -206,13 +316,6 @@
             ];
             let currentIndex = 0;
             let history = [];
-
-            function shuffle(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-            }
 
             function showWord() {
                 if (words.length === 0) {
@@ -273,18 +376,41 @@
                 if (translationElement.style.visibility === "hidden") {
                     const word = words[currentIndex];
                     translationElement.innerHTML = `
-                    <p id="transcription">${word.transcription}</p>
-                    <p id="translation-text">${word.translation}</p>
-                `;
+            <p id="transcription">${word.transcription}</p>
+            <p id="translation-text">${word.translation}</p>
+        `;
                     translationElement.style.visibility = "visible";
                 } else {
                     translationElement.style.visibility = "hidden";
                 }
             });
 
-            shuffle(words);
-            document.getElementById("words-left").textContent = words.length - currentIndex;
             showWord();
+
+            // Добавляем логику для открытия и закрытия модального окна
+            const modal = document.getElementById('registration-modal');
+            const overlay = document.getElementById('modal-overlay');
+            const openModalButton = document.getElementById('open-modal-button'); // Изменили на кнопку с ID "open-modal-button"
+            const closeModalButton = document.getElementById('close-modal');
+
+            // Открытие модального окна по клику на кнопку
+            openModalButton.addEventListener('click', function (event) {
+                event.preventDefault(); // Отключаем стандартное действие кнопки
+                modal.style.display = 'block';
+                overlay.style.display = 'block';
+            });
+
+            // Закрытие модального окна по клику на крестик
+            closeModalButton.addEventListener('click', function () {
+                modal.style.display = 'none';
+                overlay.style.display = 'none';
+            });
+
+            // Закрытие модального окна по клику на затемненный фон
+            overlay.addEventListener('click', function () {
+                modal.style.display = 'none';
+                overlay.style.display = 'none';
+            });
         });
 
         // Обработчик звука клика (начало)
@@ -324,7 +450,7 @@
 <div id="central-content">
     <div class="panel-top">
         <div>
-            <button class="control" onclick="location.href='/setting'">Выбрать изучаемые слова</button>
+            <button class="control" id="open-modal-button">Выбрать изучаемые слова</button>
         </div>
         <div class="words-left">Осталось слов: <span id="words-left">0</span></div>
     </div>
@@ -359,6 +485,45 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- Ссылка для открытия модального окна -->
+<a href="#" id="open-modal-link">Регистрация</a>
+
+<!-- Затемнение фона -->
+<div id="modal-overlay"></div>
+
+<!-- Всплывающее окно для регистрации -->
+<div id="registration-modal">
+    <div class="close-btn">
+        <button id="close-modal">&times;</button>
+    </div>
+    <h2>Чтобы продолжать пользоваться приложением, нужно зарегистрироваться</h2>
+    <form id="registration-form" action="/" method="POST">
+        <input type="hidden" name="source" value="modal">
+        <div>
+            <label for="login">Придумайте свой уникальный логин</label>
+            <input type="text" id="login" name="login" required>
+        </div>
+        <div>
+            <label for="password">Придумайте свой пароль</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <label for="confirm-password">Повторите пароль</label>
+            <input type="password" id="confirm-password" name="confirm-password" required>
+        </div>
+        <div>
+            <button type="submit">Регистрация</button>
+        </div>
+    </form>
+    <p>Приложение абсолютно бесплатное!</p>
+</div>
+
+
+
+
 
 </body>
 

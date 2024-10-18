@@ -110,6 +110,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 		login := r.FormValue("login")
 		password := r.FormValue("password")
+		source := r.FormValue("source") // Получаем значение поля source
 
 		var existingUser string
 		err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
@@ -169,7 +170,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		// Проверяем источник регистрации и перенаправляем на нужную страницу
+		if source == "modal" {
+			// Если регистрация из модального окна
+			http.Redirect(w, r, "/setting", http.StatusSeeOther)
+		} else {
+			// Если регистрация с главной страницы
+			http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		}
 	}
 } // 1 Регистрация нового пользователя (главная стр.)
 
