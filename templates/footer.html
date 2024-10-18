@@ -1,10 +1,66 @@
 <footer>
+    <script>
+
+            document.addEventListener('DOMContentLoaded', function () {
+            // Открытие модального окна
+            document.getElementById('logout-link').addEventListener('click', function () {
+                // Получаем логин пользователя и вставляем его в модальное окно
+                fetch('/api/get_user_login')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('user-login').innerText = data.login;
+                        document.getElementById('logout-modal').style.display = 'block';
+                    });
+            });
+
+            // Закрытие модального окна при нажатии на крестик
+            document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('logout-modal').style.display = 'none';
+        });
+
+            // Закрытие модального окна при нажатии на "Нет"
+            document.getElementById('cancel-logout').addEventListener('click', function() {
+            document.getElementById('logout-modal').style.display = 'none';
+        });
+
+            // Подтверждение выхода
+            document.getElementById('confirm-logout').addEventListener('click', function() {
+            fetch('/logout', {method: 'POST'})  // Обращаемся к вашему обработчику выхода
+            .then(() => {
+            window.location.href = '/';  // Перенаправляем пользователя на главную страницу после выхода
+        });
+        });
+
+            // Закрытие модального окна при клике вне его
+            window.onclick = function(event) {
+            if (event.target == document.getElementById('logout-modal')) {
+            document.getElementById('logout-modal').style.display = 'none';
+        }
+        };
+        });
+
+
+    </script>
+
+
     <div class="contentfooter">
-
         <div class="wordwire-footer">
-            <p>Сотрудничество | Предложения | Сказать спасибо | Выйти из аккаунта</p>
-            <p>Created by Urazaev Amir<br>WordWire © 2024</p>
+            <p>Сотрудничество | Предложения по сервису | <a href="javascript:void(0)" id="logout-link">Выйти из аккаунта</a>
+            </p>
+            <p>Created by Urazaev Amir. Powered by Golang, PostgreSQL.<br>WordWire © 2024</p>
         </div>
+    </div>
 
+    <!-- Модальное окно -->
+    <div id="logout-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Если вы действительно хотите произвести выход из аккаунта на этом устройстве, запомните ваш логин "<span
+                    id="user-login"></span>" (а свой пароль вы должны помнить) и подтвердите выход нажатием на кнопку "Хочу выйти".</p>
+            <div class="modal-footer">
+                <button id="confirm-logout" class="btn btn-confirm">Хочу выйти</button>
+                <button id="cancel-logout" class="btn btn-cancel">Отмена</button>
+            </div>
+        </div>
     </div>
 </footer>

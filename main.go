@@ -47,9 +47,11 @@ func main() {
 	router.HandleFunc("/remove_from_archive", RemoveFromArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/add_to_archive", AddToArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET")
+	router.HandleFunc("/demonstration", DemonstrationTeachingPageHandler).Methods("GET")
 	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")
 	router.PathPrefix("/images/").Handler(http.StripPrefix("/images/", http.FileServer(http.Dir("images/"))))
 	router.PathPrefix("/sounds/").Handler(http.StripPrefix("/sounds/", http.FileServer(http.Dir("sounds/"))))
+	router.HandleFunc("/api/get_user_login", GetUserLoginHandler).Methods("GET")
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
@@ -740,6 +742,39 @@ func TeachingPageHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 } //1 Страница обучения
 
+func DemonstrationTeachingPageHandler(w http.ResponseWriter, r *http.Request) {
+	if isAuthorized(r) {
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		return
+	}
+
+	// Статические данные для демонстрации
+	demonstrationWords := []map[string]string{
+		{"word": "good", "transcription": "[gud]", "translation": "хороший; добро"},
+		{"word": "long", "transcription": "[lɔŋ]", "translation": "длинный; долго"},
+		{"word": "night", "transcription": "[nait]", "translation": "ночь; вечер"},
+		{"word": "room", "transcription": "[ru:m]", "translation": "комната"},
+		{"word": "place", "transcription": "[pleis]", "translation": "место; помещать"},
+	}
+
+	// Рендеринг HTML страницы
+	tmpl, err := template.ParseFiles("templates/demonstration.html")
+	if err != nil {
+		log.Println("Error parsing template:", err)
+		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
+		return
+	}
+
+	// Отправляем HTML и встраиваем статические данные в JS
+	tmpl.Execute(w, struct {
+		Words []map[string]string
+	}{
+		Words: demonstrationWords,
+	})
+}
+
+//1 Демонстративная страница обучения
+
 func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -787,3 +822,24 @@ func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(words)
 } //генератор json данных для страницы обучения (слова, транскрипции, перевод)
+
+func GetUserLoginHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthorized(r) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userID := getUserIDFromSession(r)
+
+	var login string
+	err := Database.QueryRow("SELECT login FROM user_accounts WHERE id=$1", userID).Scan(&login)
+	if err != nil {
+		log.Println("Error fetching user login:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]string{"login": login}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}

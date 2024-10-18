@@ -253,6 +253,21 @@
         .wordwire-footer {
             width: 100%;
             text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .wordwire-footer a:hover {
+            color: #efbb51 !important;
+        }
+
+        .wordwire-footer a:link {
+            color: #e1e1e1;
+            text-decoration: none;
+        }
+
+        .wordwire-footer a:visited {
+            text-decoration: none;
+            color: #e1e1e1;
         }
 
         /* Стили для стрелок */
@@ -285,6 +300,81 @@
             content: url('/images/arrow_right_hover.png');
         }
 
+
+        /* Стиль модального окна выхода из аккаунта */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #6a0a75;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #aaa;
+            font-size: 50px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #e7e7e7;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            justify-content: space-between;
+        }
+
+        .btn {
+            width: 120px;
+            padding: 10px 10px;
+            cursor: pointer;
+            border-radius: 10px;
+
+        }
+
+        .btn-confirm {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background-color: #ff8178;
+        }
+
+        .btn-cancel:hover {
+            background-color: #8dec91;
+        }
+
+        /* Завершение стиля модального окна выхода из аккаунта */
+
+        #user-login {
+            color: #f5b137;
+font-size: 1.3em;
+        }
+
     </style>
 </head>
 <header>
@@ -294,9 +384,6 @@
 
             <button class="large-button" onclick="location.href='/teaching'">Перейти к обучению🧑‍🎓</button>
 
-            <form action="/logout" method="post" style="margin: 0; position: absolute; right: 20px;">
-                <button class="exit-button" type="submit">Выйти из аккаунта📴</button>
-            </form>
         </div>
         <div class="settings-container">
             <p>
