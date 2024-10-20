@@ -7,14 +7,19 @@
 
     <script>
 
-        // Обработчик звука клика (начало)
-        document.addEventListener('DOMContentLoaded', function () {
-            const clickSound = document.getElementById('click-sound');
+        // Создаем глобальный объект для звука клика
+        const clickSound = new Audio('/sounds/_click_sound.mp3');
 
-            // Воспроизведение звука при загрузке страницы
-            clickSound.play().catch(error => console.error("Ошибка воспроизведения звука при загрузке страницы:", error));
+        // Функция для воспроизведения звука с предотвращением многократного запуска
+        function playClickSound() {
+            clickSound.pause(); // Останавливаем звук, если он уже воспроизводится
+            clickSound.currentTime = 0; // Сбрасываем звук в начало
+            clickSound.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
+        }
+
+        window.addEventListener("load", () => {
+            playClickSound(); // Воспроизведение звука при загрузке страницы
         });
-        // Обработчик звука клика (конец)
 
     </script>
 
@@ -378,7 +383,7 @@ font-size: 1.3em;
     </style>
 </head>
 <header>
-    <audio id="click-sound" src="/sounds/_click_sound.mp3" preload="auto"></audio>
+
     <div class="contentheader">
         <div class="top-buttons">
 

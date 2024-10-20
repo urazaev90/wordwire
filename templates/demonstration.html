@@ -192,6 +192,14 @@
         }
 
 
+        .commentary-on-training {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            color: #793785;
+            font-weight: bold;
+            padding: 0px;
+        }
+
+
 
 
         /* Стили для модального окна */
@@ -203,21 +211,21 @@
              top: 50%;
              left: 50%;
              transform: translate(-50%, -50%);
-             background-color: white;
              padding: 20px;
              border-radius: 10px;
              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-             z-index: 1001; /* Впереди затемненного фона */
+             z-index: 1001;
              width: 400px;
              max-width: 100%;
-             font-family: Arial, sans-serif;
+             background-color: #7b007a;
          }
 
         #registration-modal h2 {
             text-align: center;
             margin-bottom: 20px;
             font-size: 1.5em;
-            color: #333;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         #registration-modal form {
@@ -233,9 +241,10 @@
         }
 
         #registration-modal label {
-            font-size: 1em;
-            color: #333;
+            font-size: 0.9em;
+            color: #ffdf71;
             font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         #registration-modal input[type="text"],
@@ -250,17 +259,19 @@
 
         #registration-modal button {
             padding: 10px;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #ffd566;
+            color: #141414;
             border: none;
             border-radius: 5px;
             font-size: 1em;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgb(197 147 0 / 50%);
         }
 
         #registration-modal button:hover {
-            background-color: #45a049;
+            background-color: #ffe398;
         }
 
         /* Стили для кнопки закрытия */
@@ -285,8 +296,10 @@
         /* Стили для текста "Приложение абсолютно бесплатное!" */
         #registration-modal p {
             text-align: center;
-            color: #777;
-            font-size: 0.9em;
+            color: #ffd74c;
+            font-size: 1.4em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
         }
 
         /* Затемнение фона при открытом модальном окне */
@@ -301,11 +314,48 @@
             z-index: 1000; /* Позади модального окна */
         }
 
+        .modal-text-error {
+            color: #73ffee;
+            font-size: 1.2em;
+            display: block;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+
+
+
 
 
     </style>
 
     <script>
+
+        const clickSound = new Audio('/sounds/_click_sound.mp3');
+
+        function playClickSound() {
+            clickSound.pause();
+            clickSound.currentTime = 0;
+            clickSound.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
+        }
+
+        window.addEventListener("load", () => {
+            playClickSound();
+        });
+
+
+
+        const clickSoundError = new Audio('/sounds/_click_error.mp3');
+
+        function playClickSoundError() {
+            clickSoundError.pause();
+            clickSoundError.currentTime = 0;
+            clickSoundError.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
+        }
+
+
+
         document.addEventListener("DOMContentLoaded", function () {
             let words = [
                 {"word": "good", "transcription": "[gud]", "translation": "хороший; добро"},
@@ -357,6 +407,7 @@
                     history.push(currentIndex);
                     currentIndex++;
                     showWord();
+                    playClickSound();
                 }
             });
 
@@ -364,6 +415,7 @@
                 if (history.length > 0) {
                     currentIndex = history.pop();
                     showWord();
+                    playClickSound();
                 }
             });
 
@@ -373,6 +425,9 @@
 
             document.getElementById("translate-icon").addEventListener("click", () => {
                 const translationElement = document.getElementById("translation");
+
+                playClickSound();
+
                 if (translationElement.style.visibility === "hidden") {
                     const word = words[currentIndex];
                     translationElement.innerHTML = `
@@ -395,6 +450,7 @@
 
             // Открытие модального окна по клику на кнопку
             openModalButton.addEventListener('click', function (event) {
+                playClickSound();
                 event.preventDefault(); // Отключаем стандартное действие кнопки
                 modal.style.display = 'block';
                 overlay.style.display = 'block';
@@ -402,42 +458,106 @@
 
             // Закрытие модального окна по клику на крестик
             closeModalButton.addEventListener('click', function () {
+                playClickSound();
                 modal.style.display = 'none';
                 overlay.style.display = 'none';
             });
 
             // Закрытие модального окна по клику на затемненный фон
             overlay.addEventListener('click', function () {
+                playClickSound();
                 modal.style.display = 'none';
                 overlay.style.display = 'none';
             });
-        });
 
-        // Обработчик звука клика (начало)
-        document.addEventListener('DOMContentLoaded', function () {
-            const clickSound = document.getElementById('click-sound');
 
-            // Воспроизведение звука при загрузке страницы
-            clickSound.play().catch(error => console.error("Ошибка воспроизведения звука при загрузке страницы:", error));
 
-            document.body.addEventListener('click', function (event) {
-                // Ищем ближайший элемент, который необходимо отслеживать
-                const target = event.target.closest('button, a, .play-sound, .translate, #back-icon, #forward-icon, #restart-text, #translate-icon');
 
-                // Убедимся, что наш элемент действительно найден, это не значок звука,
-                // не кнопка с классом .control и не изображения left_not_active/right_not_active
-                const isControlButton = target && target.classList.contains('control') && target.getAttribute('onclick') === "location.href='/setting'";
-                const isInactiveImage = target && (target.src && (target.src.includes('left_not_active.png') || target.src.includes('right_not_active.png')));
-                const isTranslateIcon = target && target.id === 'translate-icon'; // Проверка на элемент с id translate-icon
 
-                if (target && target.id !== 'sound-icon' && !isControlButton && (!isInactiveImage || isTranslateIcon)) {
-                    clickSound.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
-                    console.log('Клик по элементу:', target); // Вывод в консоль для проверки
+
+
+
+
+
+
+
+
+            //валидация полей регистрации (начала)
+            function checkLoginAvailability(login) {
+                return fetch('/check-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ login: login })
+                })
+                    .then(response => response.json());
+            }
+
+            document.getElementById('registration-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const login = document.getElementById('login').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const confirmPassword = document.getElementById('confirm-password').value.trim();
+                const errorMessageDiv = document.getElementById('error-message');
+
+                // Очистка предыдущих сообщений
+                errorMessageDiv.style.display = 'none';
+                errorMessageDiv.textContent = '';
+
+                // Валидация
+                if (!login) {
+                    playClickSoundError();
+                    errorMessageDiv.textContent = 'Логин не должен быть пустым!';
+                    errorMessageDiv.style.display = 'block';
+                    return;
                 }
+
+                if (!password) {
+                    playClickSoundError();
+                    errorMessageDiv.textContent = 'Пароль не должен быть пустым!';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    playClickSoundError();
+                    errorMessageDiv.textContent = 'Пароли не совпадают!';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+
+                // Асинхронная проверка логина
+                checkLoginAvailability(login).then(data => {
+                    if (data.isTaken) {
+                        playClickSoundError();
+                        errorMessageDiv.textContent = 'Извините, такой логин занят, придумайте другой';
+                        errorMessageDiv.style.display = 'block';
+                    } else {
+                        // Если логин свободен, отправляем форму
+                        this.submit();
+                    }
+                }).catch(error => {
+                    playClickSoundError();
+                    errorMessageDiv.textContent = 'Ошибка при проверке логина. Попробуйте позже.';
+                    errorMessageDiv.style.display = 'block';
+                });
             });
+            //валидация полей регистрации (завершено)
+
+
+
+
+
+
         });
 
-        // Обработчик звука клика (конец)
+
+
+
+
+
+
 
     </script>
 
@@ -450,7 +570,7 @@
 <div id="central-content">
     <div class="panel-top">
         <div>
-            <button class="control" id="open-modal-button">Выбрать изучаемые слова</button>
+            <button class="control" id="open-modal-button">Выбрать изучаемые слова⚙️</button>
         </div>
         <div class="words-left">Осталось слов: <span id="words-left">0</span></div>
     </div>
@@ -459,6 +579,8 @@
 
 
         <div class="paper-display">
+
+            <div class="commentary-on-training"><p>Прочтите правильно это слово и переведите его:</p></div>
 
             <div id="word-view">
                 <p id="current-word"></p>
@@ -488,9 +610,6 @@
 
 
 
-<!-- Ссылка для открытия модального окна -->
-<a href="#" id="open-modal-link">Регистрация</a>
-
 <!-- Затемнение фона -->
 <div id="modal-overlay"></div>
 
@@ -499,26 +618,28 @@
     <div class="close-btn">
         <button id="close-modal">&times;</button>
     </div>
-    <h2>Чтобы продолжать пользоваться приложением, нужно зарегистрироваться</h2>
+    <h2>Чтобы добавить слова, необходимо создать учетную запись</h2>
     <form id="registration-form" action="/" method="POST">
         <input type="hidden" name="source" value="modal">
         <div>
             <label for="login">Придумайте свой уникальный логин</label>
-            <input type="text" id="login" name="login" required>
+            <input type="text" id="login" name="login">
         </div>
         <div>
             <label for="password">Придумайте свой пароль</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password">
         </div>
         <div>
             <label for="confirm-password">Повторите пароль</label>
-            <input type="password" id="confirm-password" name="confirm-password" required>
+            <input type="password" id="confirm-password" name="confirm-password">
         </div>
         <div>
-            <button type="submit">Регистрация</button>
+            <button type="submit">Создать и войти</button>
         </div>
+        <div class="modal-text-error" id="error-message"></div>
+
     </form>
-    <p>Приложение абсолютно бесплатное!</p>
+    <p>ПРИЛОЖЕНИЕ БЕСПЛАТНОЕ</p>
 </div>
 
 

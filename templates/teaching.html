@@ -191,11 +191,25 @@
             opacity: 0.8;
         }
 
-
-
     </style>
 
     <script>
+
+        // Создаем глобальный объект для звука клика
+        const clickSound = new Audio('/sounds/_click_sound.mp3');
+
+        // Функция для воспроизведения звука с предотвращением многократного запуска
+        function playClickSound() {
+            clickSound.pause(); // Останавливаем звук, если он уже воспроизводится
+            clickSound.currentTime = 0; // Сбрасываем звук в начало
+            clickSound.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
+        }
+
+        window.addEventListener("load", () => {
+            playClickSound(); // Воспроизведение звука при загрузке страницы
+        });
+
+
         document.addEventListener("DOMContentLoaded", function () {
             let words = [];
             let currentIndex = 0;
@@ -233,6 +247,10 @@
                 }
             }
 
+
+
+
+            // Функция для отображения текущего слова и изменения состояния иконок
             function showWord() {
                 if (words.length === 0) {
                     document.getElementById("current-word").textContent = "Не выбрано ни одного слова.";
@@ -243,12 +261,16 @@
                 const forwardIcon = document.getElementById("forward-icon");
 
                 if (currentIndex < words.length) {
+                    // Проверка и смена иконки для кнопки "Назад"
                     backIcon.src = currentIndex > 0 ? '/images/left.png' : '/images/left_not_active.png';
                     backIcon.className = currentIndex > 0 ? 'button' : 'not-active';
+
+                    // Проверка и смена иконки для кнопки "Вперед"
                     forwardIcon.src = currentIndex < words.length - 1 ? '/images/right.png' : '/images/right_not_active.png';
                     forwardIcon.className = currentIndex < words.length - 1 ? 'button' : 'not-active';
                 }
 
+                // Обновление текущего слова на экране
                 if (currentIndex >= 0 && currentIndex < words.length) {
                     const word = words[currentIndex];
                     document.getElementById("current-word").textContent = word.word;
@@ -257,38 +279,40 @@
                 }
             }
 
-            function playSound(word) {
-                const audio = new Audio(`/sounds/${word}.mp3`);
-                audio.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
-            }
-
-            document.getElementById("sound-icon").addEventListener("click", () => {
-                if (currentIndex >= 0 && currentIndex < words.length) {
-                    playSound(words[currentIndex].word);
-                }
-            });
-
+            // Обработчик события для кнопки "Вперед"
             document.getElementById("forward-icon").addEventListener("click", () => {
                 if (currentIndex < words.length - 1) {
                     history.push(currentIndex);
                     currentIndex++;
                     showWord();
+                    playClickSound(); // Воспроизведение звука при клике на кнопку "Вперед"
                 }
             });
 
+            // Обработчик события для кнопки "Назад"
             document.getElementById("back-icon").addEventListener("click", () => {
                 if (history.length > 0) {
                     currentIndex = history.pop();
                     showWord();
+                    playClickSound(); // Воспроизведение звука при клике на кнопку "Назад"
                 }
             });
+
+
+
 
             document.getElementById("restart-icon").addEventListener("click", () => {
                 location.reload();
             });
 
+
+
+
             document.getElementById("translate-icon").addEventListener("click", () => {
                 const translationElement = document.getElementById("translation");
+
+                playClickSound(); // Воспроизведение звука при клике на кнопку
+
                 if (translationElement.style.visibility === "hidden") {
                     const word = words[currentIndex];
                     translationElement.innerHTML = `
@@ -301,53 +325,45 @@
                 }
             });
 
-            fetchWords();
-        });
 
 
-        // Обработчик звука клика (начало)
-        document.addEventListener('DOMContentLoaded', function () {
-            const clickSound = document.getElementById('click-sound');
 
-            // Воспроизведение звука при загрузке страницы
-            clickSound.play().catch(error => console.error("Ошибка воспроизведения звука при загрузке страницы:", error));
 
-            document.body.addEventListener('click', function (event) {
-                // Ищем ближайший элемент, который необходимо отслеживать
-                const target = event.target.closest('button, a, .play-sound, .translate, #back-icon, #forward-icon, #restart-text, #translate-icon');
 
-                // Убедимся, что наш элемент действительно найден, это не значок звука,
-                // не кнопка с классом .control и не изображения left_not_active/right_not_active
-                const isControlButton = target && target.classList.contains('control') && target.getAttribute('onclick') === "location.href='/setting'";
-                const isInactiveImage = target && (target.src && (target.src.includes('left_not_active.png') || target.src.includes('right_not_active.png')));
-                const isTranslateIcon = target && target.id === 'translate-icon'; // Проверка на элемент с id translate-icon
 
-                if (target && target.id !== 'sound-icon' && !isControlButton && (!isInactiveImage || isTranslateIcon)) {
-                    clickSound.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
-                    console.log('Клик по элементу:', target); // Вывод в консоль для проверки
+
+
+            function playSound(word) {
+                const audio = new Audio(`/sounds/${word}.mp3`);
+                audio.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
+            }
+
+            document.getElementById("sound-icon").addEventListener("click", () => {
+                if (currentIndex >= 0 && currentIndex < words.length) {
+                    playSound(words[currentIndex].word);
                 }
             });
-        });
 
-        // Обработчик звука клика (конец)
+
+            fetchWords();
+
+        });
 
     </script>
 </head>
 
 <body>
 
-<audio id="click-sound" src="/sounds/_click_sound.mp3" preload="auto"></audio>
 
 <div id="central-content">
     <div class="panel-top">
         <div>
-            <button class="control" onclick="location.href='/setting'">Выбрать изучаемые слова</button>
+            <button class="control" onclick="location.href='/setting'">Выбрать изучаемые слова⚙️</button>
         </div>
         <div class="words-left">Осталось слов: <span id="words-left">0</span></div>
     </div>
 
     <div class="panel-central">
-
 
         <div class="paper-display">
 

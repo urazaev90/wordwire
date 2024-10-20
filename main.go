@@ -52,10 +52,44 @@ func main() {
 	router.PathPrefix("/images/").Handler(http.StripPrefix("/images/", http.FileServer(http.Dir("images/"))))
 	router.PathPrefix("/sounds/").Handler(http.StripPrefix("/sounds/", http.FileServer(http.Dir("sounds/"))))
 	router.HandleFunc("/api/get_user_login", GetUserLoginHandler).Methods("GET")
+	router.HandleFunc("/check-login", CheckLoginHandler).Methods("GET", "POST")
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
 }
+
+func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var data struct {
+		Login string `json:"login"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	var existingUser string
+	err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", data.Login).Scan(&existingUser)
+	if err == nil {
+		// Логин занят
+		json.NewEncoder(w).Encode(map[string]bool{"isTaken": true})
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		// Логин свободен
+		json.NewEncoder(w).Encode(map[string]bool{"isTaken": false})
+		return
+	}
+
+	http.Error(w, "Database error", http.StatusInternalServerError)
+} //проверка при регистрации не занят ли логин во всплывающем окне в демонстрационной странице
 
 func RestartSoundHandler(w http.ResponseWriter, r *http.Request) {
 	// Просто возвращаем статус 200 для подтверждения нажатия
