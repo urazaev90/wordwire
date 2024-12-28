@@ -5,153 +5,392 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
     <style>
-        button {
-            cursor: pointer;
+        html {
+            scroll-behavior: smooth;
+            font-family: Arial, sans-serif;
+            color: #333; /* Общий текстовой цвет */
         }
 
-        .header {
-            font-size: 1.5em;
+        body {
+            margin: 0;
+            padding: 0;
         }
 
-        .button-container {
-            display: flex;
-            gap: 10px; /* Промежуток между кнопками */
-        }
-
-        .footer {
+        /* Липкий хедер */
+        .sticky-header {
             position: fixed;
-            bottom: 0;
-            width: 100%;
-            text-align: center; /* Центрирование текста */
-            background-color: #f1f1f1; /* Фоновый цвет для визуализации */
+            top: 0;
+            background-color: #333;
             padding: 10px 0;
+            z-index: 1000;
+            width: 100vw;
+            text-align: center;
         }
 
-        #central-content {
+        .header-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .header-buttons a button {
+            font-size: 0.8em;
+            background-color: #a63ab2;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .header-buttons a button:hover {
+            background-color: #d86ae7;
+        }
+
+        /* Отступ для фиксации заголовка */
+        .header-spacer {
+            height: 50px;
+        }
+
+        .section {
+            padding: 50px 20px;
             text-align: center;
-            position: relative;
+        }
+
+
+        .section-1 {
+            background-color: #dcdcdc;
+            padding: 50px 0; /* Добавляем отступы, чтобы текст не прилипал к краям */
+        }
+
+        .title-container {
+            width: 40%;
+            margin: 0 auto; /* Центрирует содержимое */
+            text-align: center;
+        }
+
+        .subtitle-container {
+            width: 70%;
+            margin: 0 auto; /* Центрирует содержимое */
+            text-align: center;
+        }
+
+        .section-5 {
+            background-color: #793785;
+        }
+
+        .section-5 .content-section {
+            color: #fff;
+            width: 60%;
+            margin: 0 auto; /* Центрирует содержимое */
+        }
+
+        .section-5 .content-section .title-section {
+            font-size: 1em;
+        }
+
+        .section-5 .article-section {
+            font-size: 1.2em;
+        }
+
+        .section-2 {
+            background-color: #dcdcdc;
+        }
+
+        .section-2 .text-section {
+            margin: 0 auto; /* Центрирует содержимое */
+            text-align: left;
+            width: 50%;
+        }
+
+        .section-2 .text-section .list-item img {
+            vertical-align: middle;
+        }
+
+        .section-2 .text-section .list-item {
+            margin: 15px 0;
+            font-size: 1.1em;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .section-3 {
+            background-color: #793785;
+            color: #fff;
+        }
+
+        .section-4 {
+            background-color: #e1e1e1;
+        }
+
+        /* Основное содержание */
+        .header {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .content b {
             font-size: 1.5em;
         }
+
+
+        /* Регистрационная форма */
+        .form-container {
+            background-color: #a63ab2;
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .form-container button {
+            padding: 10px 20px;
+            background-color: #efbb51;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            color: #333;
+            font-weight: bold;
+            width: 250px;
+        }
+
+        .form-container button:hover {
+            background-color: #793785;
+            color: #fff;
+        }
+
+        .modal-text-error {
+            color: #ff0000;
+            font-size: 1.2em;
+            display: block;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Футер */
+        .footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        .check-mark {
+            width: 40px;
+        }
+
+
     </style>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            //валидация полей регистрации (начала)
+            function checkLoginAvailability(login) {
+                return fetch('/check-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({login: login})
+                })
+                    .then(response => response.json());
+            }
+
+            document.getElementById('registration-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const login = document.getElementById('login').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const confirmPassword = document.getElementById('confirm-password').value.trim();
+                const errorMessageDiv = document.getElementById('error-message');
+
+                // Очистка предыдущих сообщений
+                errorMessageDiv.style.display = 'none';
+                errorMessageDiv.textContent = '';
+
+                // Валидация
+                if (!login) {
+                    errorMessageDiv.textContent = 'Логин не должен быть пустым!';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+
+                if (!password) {
+                    errorMessageDiv.textContent = 'Пароль не должен быть пустым!';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    errorMessageDiv.textContent = 'Пароли не совпадают!';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+
+                // Асинхронная проверка логина
+                checkLoginAvailability(login).then(data => {
+                    if (data.isTaken) {
+                        errorMessageDiv.textContent = 'Извините, такой логин занят, придумайте другой';
+                        errorMessageDiv.style.display = 'block';
+                    } else {
+                        // Если логин свободен, отправляем форму
+                        this.submit();
+                    }
+                }).catch(error => {
+                    errorMessageDiv.textContent = 'Ошибка при проверке логина. Попробуйте позже.';
+                    errorMessageDiv.style.display = 'block';
+                });
+            });
+            //валидация полей регистрации (завершено)
+
+        });
+
+    </script>
 </head>
 <body>
-<div id="central-content">
 
-    <h1 class="header">WordWire</h1>
+<div class="sticky-header">
+    <div class="header-buttons">
+        <a href="/demonstration">
+            <button>Демонстрация приложения</button>
+        </a>
+        <a href="/login">
+            <button>Войти в свой аккаунт</button>
+        </a>
+        <a href="#registration-section">
+            <button>Зарегистрироваться</button>
+        </a>
+    </div>
+</div>
 
-    <div>
-        WordWire - это бесплатный сервис, который упрощает изучение английского языка.</br>
-        </br>
-        </br>
-        </br>
-        Исследования показывают, что владея определенным словарным запасов слов, а именно:</br>
-        </br>
-        <b>1 000 слов</b></br>
-        </br>
-        Освоение 1000 наиболее часто используемых английских слов обеспечивает понимание 80% разговорной
-        речи и позволяет вести элементарные беседы. Этого уровня достаточно для знакомства с новыми людьми, путешествий,
-        простых переписок в интернете и совершения покупок.</br>
-        </br>
-        <b>3 000 слов</b></br>
-        </br>
-        Знание 3000 слов позволяет понимать 95% устной речи и различных текстов. Это помогает решать
-        бытовые задачи, смотреть фильмы и телепередачи, а также совершать длительные поездки и командировки.</br>
-        </br>
-        <b>5 000 слов</b></br>
-        </br>
-        Владеющий 5000 словами способен к жизни и работе за границей, понимая 98% услышанного и
-        прочитанного. Такой уровень позволяет читать художественную литературу и газеты, вести личную и деловую
-        переписку,
-        учиться и получать услуги. Однако могут возникнуть сложности с обсуждением узкоспециализированных
-        профессиональных
-        тем.</br>
-        </br>
-        <b>10 000 слов</b></br>
-        </br>
-        Лексический запас в 10 000 слов даёт возможность понимать 99% устной речи, анализируя оставшийся
-        1% по контексту. Этот уровень знаний сравним с образованным молодым носителем английского языка.</br>
-        </br>
-        </br>
-        </br>
-        </br>
-        <b>С WordWire вы сможете:</b></br>
-        </br>
-        </br>
-        Наблюдать за уровнем своего словарного запаса</br>
-        </br>
-        <b>***</b></br>
-        Самостоятельно избирать слова, которые хотите учить</br>
-        </br>
-        <b>***</b></br>
-        Начнете изучение с самых распространных слов и уже почувствуете знание английского в быту</br>
-        </br>
-        <b>***</b></br>
-        Убирать в архив те слова, которые и так знаете (чтобы не тратить на них время)</br>
-        </br>
-        <b>***</b></br>
-        В свой аккаунт сможете заходить с любого устройства и продолжать обучение</br>
-        </br>
-        <b>***</b></br>
-        Смотреть не только перевод, но и транскрипцию, чтобы также изучать правильное произношение</br>
-        </br>
-        <b>***</b></br>
-        Листать слова в рандомном порядке (чтобы ваша память не привыкала к последовательности)</br>
-        </br>
-        </br>
-        </br>
-        </br>
-        </br>
-        <b>Как происходит обучение?</b></br>
-        </br>
-        Обучение происходит по принципу листания отобранных незнакомых английских слов по одному, и если глядя на
-        какое-то
-        слово вы не можете вспомнить перевод, достаточно просто в один клик подглядеть произношение и перевод, запомнить
-        и
-        продолжить листание дальше.</br>
-        </br>
-        Учите английский с нашим сервисом в любом месте, в перерыве за компьютером, в метро, на остановке и т.д.</br>
-        </br>
-        </br>
-        </br>
-        </br>
-        <b>Регистрация</b></br>
-        </br>
-        После регистрации, вы сразу попадете на страницу бесплатного обучения английского</br>
-        </br>
-        Регистрация очень простая, нужно лишь придумайть свой уникальный логин и пароль</br>
-        </br>
-        <form method="post" action="/">
-            <input type="hidden" name="source" value="index">
+<div class="header-spacer"></div>
+
+<div class="section section-1">
+    <div class="title-container">
+        <h1 class="header">WordWire – бесплатное приложение для обучения английского</h1>
+    </div>
+    <div class="subtitle-container">
+        <p class="content">При помощи этого приложения вы быстро увеличите свой словарный запас английского.
+            А именно в ближайшее время сможете читать тексты на английском языке, также смотреть фильмы и поддерживать
+            беседу с носителями языка на базовом уровне.</p>
+    </div>
+</div>
+
+
+<div class="section section-5">
+    <div class="content-section">
+        <div class="title-section">
+            <h2>Исследования показывают, что владея определенным словарным запасом слов, а именно:</h2>
+        </div>
+        <div class="article-section">
+            <div><b>1 000 слов</b></div>
+            <p>Освоение 1000 наиболее часто используемых английских слов обеспечивает понимание 80% разговорной речи и
+                позволяет
+                вести элементарные беседы.</p>
+            <div><b>3 000 слов</b></div>
+            <p>Знание 3000 слов позволяет понимать 95% устной речи и различных текстов.</p>
+            <div><b>5 000 слов</b></div>
+            <p>Владеющий 5000 словами способен к жизни и работе за границей, понимая 98% услышанного и прочитанного.</p>
+            <div><b>10 000 слов</b></div>
+            <p>Лексический запас в 10 000 слов даёт возможность понимать 99% устной речи.</p>
+        </div>
+    </div>
+</div>
+
+<div class="section section-2">
+    <div class="title-section">
+        <h2>С WordWire вы сможете:</h2>
+    </div>
+    <div class="text-section">
+        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+            Наблюдать за уровнем своего словарного запаса</p>
+
+        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+            Самостоятельно избирать те слова, которые хотите учить</p>
+
+        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+            Начать изучение с самых распространённых слов и уже почувствовать знание английского
+        </p>
+
+        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+            Сможете убрать в архив те слова, которые и так знаете</p>
+
+        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+            Смотреть не только перевод, но и слушать произношение +видеть транскрипцию</p>
+
+        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+            Листать слова в рандомном порядке, чтобы ваша память не привыкала к
+            последовательности</p>
+    </div>
+</div>
+
+<div class="section section-3">
+    <div class="title-section">
+        <h2>Как происходит обучение?</h2>
+    </div>
+    <div class="content">
+        <p>Обучение происходит по принципу листания отобранных незнакомых английских слов по одному. А если вы не
+            можете вспомнить перевод, достаточно просто в один клик его подсмотреь, чтобы запомнить и продолжить
+            обучение
+            дальше.</p>
+        <p>Учите английский с нашим сервисом в любом месте — в перерыве за компьютером, в метро, на остановке и
+            т.д.!</p>
+    </div>
+</div>
+
+<div class="section section-4">
+    <div class="title-section">
+        <h2 id="registration-section">Регистрация</h2>
+    </div>
+    <p class="content">
+        После регистрации вы сразу попадете на страницу бесплатного обучения английскому. Регистрация очень простая,
+        нужно лишь придумать свой уникальный логин и пароль.
+    </p>
+    <div class="form-container">
+        <form id="registration-form" action="/" method="POST">
+            <input type="hidden" name="source" value="modal">
             <div>
-                <label for="login">Логин:</label>
-                <input type="text" id="login" name="login" required>
+                <label for="login">Придумайте уникальный логин</label>
+                <input type="text" id="login" name="login">
             </div>
             <div>
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" required>
+                <label for="password">Придумайте свой пароль</label>
+                <input type="password" id="password" name="password">
             </div>
-            {{if .Error}}
-            <div style="color: red;">
-                {{.Error}}
-            </div>
-            {{end}}
             <div>
-                <p></p>
+                <label for="confirm-password">Повторите пароль</label>
+                <input type="password" id="confirm-password" name="confirm-password">
             </div>
-            <div class="button-container">
+            <div style="display: flex; gap: 10px;">
                 <button type="submit">Зарегистрироваться</button>
                 <a href="/login">
                     <button type="button">Я уже зарегистрирован</button>
                 </a>
             </div>
+            <div class="modal-text-error" id="error-message"></div>
         </form>
     </div>
 </div>
-<div>
-    <p><br><br><br><br><br></p>
-</div>
+
 <div class="footer">
-    <p>WordWire. Powered by Urazaev Amir © 2024</p>
+    <p>Created by Urazaev Amir<br>WordWire © 2024</p>
 </div>
 </body>
 </html>

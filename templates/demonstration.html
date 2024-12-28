@@ -204,21 +204,22 @@
 
         /* Стили для модального окна */
 
-             /* Стили для модального окна */
-         #registration-modal {
-             display: none;
-             position: fixed;
-             top: 50%;
-             left: 50%;
-             transform: translate(-50%, -50%);
-             padding: 20px;
-             border-radius: 10px;
-             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-             z-index: 1001;
-             width: 400px;
-             max-width: 100%;
-             background-color: #7b007a;
-         }
+        /* Стили для модального окна */
+        #registration-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+            z-index: 1001;
+            width: 400px;
+            max-width: 100%;
+            background-color: #7b007a;
+            border: 2px solid #dadada;
+        }
 
         #registration-modal h2 {
             text-align: center;
@@ -267,7 +268,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgb(197 147 0 / 50%);
+            text-shadow: 2px 2px 4px rgb(18 18 18 / 50%);
         }
 
         #registration-modal button:hover {
@@ -277,20 +278,30 @@
         /* Стили для кнопки закрытия */
         #registration-modal .close-btn {
             text-align: right;
-            margin-bottom: 15px;
+
         }
 
         #registration-modal .close-btn button {
             background-color: transparent;
-            color: #333;
+            color: #aaa;
             border: none;
-            font-size: 1.5em;
+            /* font-size: 1.5em; */
             cursor: pointer;
             font-weight: bold;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+
+
+            position: absolute;
+            top: 0px;
+            right: 15px;
+            font-size: 50px;
+
+
         }
 
         #registration-modal .close-btn button:hover {
-            color: #f44336;
+            color: #e7e7e7;
+
         }
 
         /* Стили для текста "Приложение абсолютно бесплатное!" */
@@ -315,16 +326,33 @@
         }
 
         .modal-text-error {
-            color: #73ffee;
+            color: #ff0000;
             font-size: 1.2em;
             display: block;
             font-weight: bold;
             text-align: center;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 1);
         }
 
 
+        #close-modal {
+            position: fixed; /* Фиксированное позиционирование относительно окна */
+            top: 10px; /* Отступ сверху */
+            right: 10px; /* Отступ справа */
+            background-color: transparent;
+            color: #aaa;
+            border: none;
+            font-size: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 1002; /* Чтобы быть поверх всех элементов */
+            display: none; /* Скрываем крестик по умолчанию */
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
 
+        #close-modal:hover {
+            color: #e7e7e7;
+        }
 
 
 
@@ -354,7 +382,12 @@
             clickSoundError.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
         }
 
-
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", function () {
             let words = [
@@ -364,6 +397,10 @@
                 {"word": "room", "transcription": "[ru:m]", "translation": "комната"},
                 {"word": "place", "transcription": "[pleis]", "translation": "место; помещать"}
             ];
+
+            // Перемешивание массива слов
+            shuffleArray(words);
+
             let currentIndex = 0;
             let history = [];
 
@@ -454,6 +491,7 @@
                 event.preventDefault(); // Отключаем стандартное действие кнопки
                 modal.style.display = 'block';
                 overlay.style.display = 'block';
+                closeModalButton.style.display = 'block'; // Показываем крестик
             });
 
             // Закрытие модального окна по клику на крестик
@@ -461,6 +499,7 @@
                 playClickSound();
                 modal.style.display = 'none';
                 overlay.style.display = 'none';
+                closeModalButton.style.display = 'none'; // Скрываем крестик
             });
 
             // Закрытие модального окна по клику на затемненный фон
@@ -468,6 +507,7 @@
                 playClickSound();
                 modal.style.display = 'none';
                 overlay.style.display = 'none';
+                closeModalButton.style.display = 'none'; // Скрываем крестик
             });
 
 
@@ -580,7 +620,7 @@
 
         <div class="paper-display">
 
-            <div class="commentary-on-training"><p>Прочтите правильно это слово и переведите его:</p></div>
+            <div class="commentary-on-training"><p>Прочтите правильно слово и переведите его. Если справились жмите стрелку вправо, если нет нажимайте на подсказки:</p></div>
 
             <div id="word-view">
                 <p id="current-word"></p>
@@ -608,21 +648,19 @@
     </div>
 </div>
 
-
+<button id="close-modal">&times;</button>
 
 <!-- Затемнение фона -->
 <div id="modal-overlay"></div>
 
 <!-- Всплывающее окно для регистрации -->
 <div id="registration-modal">
-    <div class="close-btn">
-        <button id="close-modal">&times;</button>
-    </div>
-    <h2>Чтобы добавить слова, необходимо создать учетную запись</h2>
+
+    <h2>Чтобы добавить слова из базы, необходимо создать учетную запись</h2>
     <form id="registration-form" action="/" method="POST">
         <input type="hidden" name="source" value="modal">
         <div>
-            <label for="login">Придумайте свой уникальный логин</label>
+            <label for="login">Придумайте уникальный логин</label>
             <input type="text" id="login" name="login">
         </div>
         <div>
@@ -639,13 +677,15 @@
         <div class="modal-text-error" id="error-message"></div>
 
     </form>
-    <p>ПРИЛОЖЕНИЕ БЕСПЛАТНОЕ</p>
-</div>
+    <!--
+        <p>ПРИЛОЖЕНИЕ БЕСПЛАТНОЕ</p>
+    -->
+    </div>
 
 
 
 
 
-</body>
+    </body>
 
-</html>
+    </html>

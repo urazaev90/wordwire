@@ -813,9 +813,7 @@ func DemonstrationTeachingPageHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Words: demonstrationWords,
 	})
-}
-
-//1 Демонстративная страница обучения
+} //1 Демонстративная страница обучения
 
 func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
