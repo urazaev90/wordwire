@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	_ "github.com/lib/pq"
@@ -53,69 +54,12 @@ func main() {
 	router.PathPrefix("/sounds/").Handler(http.StripPrefix("/sounds/", http.FileServer(http.Dir("sounds/"))))
 	router.HandleFunc("/api/get_user_login", GetUserLoginHandler).Methods("GET")
 	router.HandleFunc("/check-login", CheckLoginHandler).Methods("GET", "POST")
+	router.HandleFunc("/captcha", CaptchaHandler).Methods("GET", "POST")
+	router.HandleFunc("/verify-captcha", VerifyCaptchaHandler).Methods("POST")
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
 }
-
-func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var data struct {
-		Login string `json:"login"`
-	}
-
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
-		return
-	}
-
-	var existingUser string
-	err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", data.Login).Scan(&existingUser)
-	if err == nil {
-		// Логин занят
-		json.NewEncoder(w).Encode(map[string]bool{"isTaken": true})
-		return
-	}
-
-	if err == sql.ErrNoRows {
-		// Логин свободен
-		json.NewEncoder(w).Encode(map[string]bool{"isTaken": false})
-		return
-	}
-
-	http.Error(w, "Database error", http.StatusInternalServerError)
-} //проверка при регистрации не занят ли логин во всплывающем окне в демонстрационной странице
-
-func RestartSoundHandler(w http.ResponseWriter, r *http.Request) {
-	// Просто возвращаем статус 200 для подтверждения нажатия
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-}
-
-func isAuthorized(r *http.Request) bool {
-	session, _ := store.Get(r, "session-name")
-	userID, ok := session.Values["user_id"].(int)
-	if ok {
-		updateLastVisitDate(userID)
-	}
-	return ok
-} //сообщает статус посетителя на авторизацию
-
-func updateLastVisitDate(userID int) {
-	_, err := Database.Exec(`
-		UPDATE user_accounts 
-		SET last_visit_date = $1 
-		WHERE id = $2`,
-		time.Now().Format("2006-01-02"), userID)
-	if err != nil {
-		log.Println("Error updating last visit date:", err)
-	}
-} //записывает дату последнего посещения пользователя (в SQL)
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if isAuthorized(r) {
@@ -147,6 +91,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		source := r.FormValue("source") // Получаем значение поля source
 
 		var existingUser string
+
 		err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
 		if err == nil {
 			log.Println("Register: User already exists")
@@ -214,6 +159,114 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 } // 1 Регистрация нового пользователя (главная стр.)
+
+func CaptchaHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Checking if custom store is set before generating captcha...")
+	captchaID := captcha.New() // Генерация нового идентификатора капчи
+	log.Printf("Generated captcha ID: %s", captchaID)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "captcha_id",
+		Value:    captchaID,
+		Path:     "/",
+		HttpOnly: true,
+	})
+
+	// Проверяем, существует ли капча в хранилище сразу после генерации
+	if captcha.VerifyString(captchaID, "") {
+		log.Printf("Captcha ID %s successfully stored in memory immediately after generation", captchaID)
+	} else {
+		log.Printf("Captcha ID %s not stored in memory immediately after generation", captchaID)
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	if err := captcha.WriteImage(w, captchaID, 240, 80); err != nil {
+		log.Println("CaptchaHandler: Failed to write captcha image:", err)
+	}
+}
+
+func VerifyCaptchaHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var requestData struct {
+		CaptchaSolution string `json:"captcha_solution"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	captchaID, err := r.Cookie("captcha_id")
+	if err != nil || !captcha.VerifyString(captchaID.Value, requestData.CaptchaSolution) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Числа с картинки введены не верно!"})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"success": "Числа с картинки верны"})
+}
+
+func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var data struct {
+		Login string `json:"login"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	var existingUser string
+	err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", data.Login).Scan(&existingUser)
+	if err == nil {
+		// Логин занят
+		json.NewEncoder(w).Encode(map[string]bool{"isTaken": true})
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		// Логин свободен
+		json.NewEncoder(w).Encode(map[string]bool{"isTaken": false})
+		return
+	}
+
+	http.Error(w, "Database error", http.StatusInternalServerError)
+} //проверка при регистрации не занят ли логин во всплывающем окне в демонстрационной странице
+
+func RestartSoundHandler(w http.ResponseWriter, r *http.Request) {
+	// Просто возвращаем статус 200 для подтверждения нажатия
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
+func isAuthorized(r *http.Request) bool {
+	session, _ := store.Get(r, "session-name")
+	userID, ok := session.Values["user_id"].(int)
+	if ok {
+		updateLastVisitDate(userID)
+	}
+	return ok
+} //сообщает статус посетителя на авторизацию
+
+func updateLastVisitDate(userID int) {
+	_, err := Database.Exec(`
+		UPDATE user_accounts 
+		SET last_visit_date = $1 
+		WHERE id = $2`,
+		time.Now().Format("2006-01-02"), userID)
+	if err != nil {
+		log.Println("Error updating last visit date:", err)
+	}
+} //записывает дату последнего посещения пользователя (в SQL)
 
 func loadNextWordForUser(userID int) error {
 	// Выполняем запрос для добавления следующего слова

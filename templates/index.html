@@ -214,18 +214,21 @@
                     .then(response => response.json());
             }
 
-            document.getElementById('registration-form').addEventListener('submit', function (event) {
-                event.preventDefault();
+
+            document.getElementById('registration-form').addEventListener('submit', async function (event) {
+                event.preventDefault(); // Останавливаем стандартное поведение формы
+
                 const login = document.getElementById('login').value.trim();
                 const password = document.getElementById('password').value.trim();
                 const confirmPassword = document.getElementById('confirm-password').value.trim();
+                const captchaSolution = document.getElementById('captcha').value.trim();
                 const errorMessageDiv = document.getElementById('error-message');
 
-                // Очистка предыдущих сообщений
+                // Очистка предыдущего сообщения об ошибке
                 errorMessageDiv.style.display = 'none';
                 errorMessageDiv.textContent = '';
 
-                // Валидация
+                // Валидация на стороне клиента
                 if (!login) {
                     errorMessageDiv.textContent = 'Логин не должен быть пустым!';
                     errorMessageDiv.style.display = 'block';
@@ -244,23 +247,61 @@
                     return;
                 }
 
-                // Асинхронная проверка логина
-                checkLoginAvailability(login).then(data => {
-                    if (data.isTaken) {
+                if (!captchaSolution) {
+                    errorMessageDiv.textContent = 'Введите числа с картинки!';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    // Асинхронная проверка капчи
+                    const captchaResponse = await fetch('/verify-captcha', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ captcha_solution: captchaSolution }),
+                    });
+
+                    const captchaData = await captchaResponse.json();
+
+                    if (captchaData.error) {
+                        // Если капча неверна
+                        errorMessageDiv.textContent = captchaData.error;
+                        errorMessageDiv.style.display = 'block';
+                        reloadCaptcha(); // Обновляем капчу
+                        return;
+                    }
+                } catch (error) {
+                    errorMessageDiv.textContent = 'Ошибка проверки чисел. Попробуйте позже.';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    // Асинхронная проверка логина
+                    const loginResponse = await checkLoginAvailability(login);
+                    if (loginResponse.isTaken) {
                         errorMessageDiv.textContent = 'Извините, такой логин занят, придумайте другой';
                         errorMessageDiv.style.display = 'block';
-                    } else {
-                        // Если логин свободен, отправляем форму
-                        this.submit();
+                        return;
                     }
-                }).catch(error => {
+                } catch (error) {
                     errorMessageDiv.textContent = 'Ошибка при проверке логина. Попробуйте позже.';
                     errorMessageDiv.style.display = 'block';
-                });
+                    return;
+                }
+
+                // Если все проверки прошли успешно, отправляем форму
+                this.submit();
             });
-            //валидация полей регистрации (завершено)
 
         });
+        function reloadCaptcha() {
+            console.log("Обновление капчи вызвано"); // Проверяем вызов функции
+            const captchaImg = document.getElementById('captcha-img');
+            captchaImg.src = '/captcha?' + new Date().getTime(); // Добавляем метку времени, чтобы избежать кеширования
+        }
 
     </script>
 </head>
@@ -378,13 +419,27 @@
                 <label for="confirm-password">Повторите пароль</label>
                 <input type="password" id="confirm-password" name="confirm-password">
             </div>
+
+            <div>
+                <img id="captcha-img" src="/captcha" alt="Captcha">
+                <button type="button" onclick="reloadCaptcha()">Обновить картинку</button>
+            </div>
+
+            <div>
+                <label for="captcha">Введите числа с картинки</label>
+                <input type="text" id="captcha" name="captcha_solution">
+            </div>
+
+
             <div style="display: flex; gap: 10px;">
                 <button type="submit">Зарегистрироваться</button>
                 <a href="/login">
                     <button type="button">Я уже зарегистрирован</button>
                 </a>
             </div>
-            <div class="modal-text-error" id="error-message"></div>
+
+            <div class="modal-text-error" id="error-message">{{.Error}}</div>
+
         </form>
     </div>
 </div>
