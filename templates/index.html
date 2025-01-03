@@ -170,7 +170,7 @@
         }
 
         .modal-text-error {
-            color: #ff0000;
+            color: #f4ff00;
             font-size: 1.2em;
             display: block;
             font-weight: bold;
@@ -195,6 +195,10 @@
             width: 40px;
         }
 
+        .captcha-reload-btn {
+            position: relative;
+            top: -30px;
+        }
 
     </style>
 
@@ -248,7 +252,7 @@
                 }
 
                 if (!captchaSolution) {
-                    errorMessageDiv.textContent = 'Введите числа с картинки!';
+                    errorMessageDiv.textContent = 'Введите число с картинки!';
                     errorMessageDiv.style.display = 'block';
                     return;
                 }
@@ -422,14 +426,13 @@
 
             <div>
                 <img id="captcha-img" src="/captcha" alt="Captcha">
-                <button type="button" onclick="reloadCaptcha()">Обновить картинку</button>
+                <button type="button" class="captcha-reload-btn" onclick="reloadCaptcha()">Обновить картинку</button>
             </div>
 
             <div>
-                <label for="captcha">Введите числа с картинки</label>
+                <label for="captcha">Введите число с картинки</label>
                 <input type="text" id="captcha" name="captcha_solution">
             </div>
-
 
             <div style="display: flex; gap: 10px;">
                 <button type="submit">Зарегистрироваться</button>

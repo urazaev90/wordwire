@@ -202,11 +202,11 @@ func VerifyCaptchaHandler(w http.ResponseWriter, r *http.Request) {
 	captchaID, err := r.Cookie("captcha_id")
 	if err != nil || !captcha.VerifyString(captchaID.Value, requestData.CaptchaSolution) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Числа с картинки введены не верно!"})
+		json.NewEncoder(w).Encode(map[string]string{"error": "Число с картинки введено не верно!"})
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"success": "Числа с картинки верны"})
+	json.NewEncoder(w).Encode(map[string]string{"success": "Число с картинки верно"})
 }
 
 func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
