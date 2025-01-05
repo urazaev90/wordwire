@@ -54,159 +54,11 @@ func main() {
 	router.PathPrefix("/sounds/").Handler(http.StripPrefix("/sounds/", http.FileServer(http.Dir("sounds/"))))
 	router.HandleFunc("/api/get_user_login", GetUserLoginHandler).Methods("GET")
 	router.HandleFunc("/check-login", CheckLoginHandler).Methods("GET", "POST")
-	router.HandleFunc("/captcha", CaptchaHandler).Methods("GET", "POST")
-	router.HandleFunc("/verify-captcha", VerifyCaptchaHandler).Methods("POST")
+	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
+	router.HandleFunc("/generate-captcha", GenerateCaptchaHandler).Methods("GET")
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
-}
-
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	if isAuthorized(r) {
-		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
-		return
-	}
-
-	if r.Method == http.MethodGet {
-		// Вставляем код из renderRegisterTemplate
-		tmpl, err := template.ParseFiles("templates/index.html")
-		if err != nil {
-			http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-			return
-		}
-		tmpl.Execute(w, nil)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		err := r.ParseForm()
-		if err != nil {
-			log.Println("Register: Error parsing form:", err)
-			http.Error(w, "Invalid form data", http.StatusBadRequest)
-			return
-		}
-
-		login := r.FormValue("login")
-		password := r.FormValue("password")
-		source := r.FormValue("source") // Получаем значение поля source
-
-		var existingUser string
-
-		err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", login).Scan(&existingUser)
-		if err == nil {
-			log.Println("Register: User already exists")
-			// Вставляем код из renderRegisterTemplate
-			tmpl, err := template.ParseFiles("templates/index.html")
-			if err != nil {
-				http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-				return
-			}
-			tmpl.Execute(w, map[string]string{"Error": "Извините, такой логин занят, придумайте другой"})
-			return
-		}
-
-		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		if err != nil {
-			log.Println("Register: Error hashing password:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-
-		var userID int
-		err = Database.QueryRow(` 
-			INSERT INTO user_accounts (login, password_hash, registration_date) 
-			VALUES ($1, $2, $3) RETURNING id`,
-			login, passwordHash, time.Now().Format("2006-01-02")).Scan(&userID)
-		if err != nil {
-			log.Println("Register: Error inserting user to database:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-
-		_, err = Database.Exec(`
-    		WITH ranked_words AS (
-        	SELECT id,
-               ROW_NUMBER() OVER (ORDER BY usage_per_billion DESC) as rank
-        	FROM english_words
-    		)
-    		INSERT INTO user_word_labels (user_id, word_id, label)
-    		SELECT $1, id, CASE WHEN rank <= 5 THEN 2 ELSE 1 END
-    		FROM ranked_words
-    		WHERE rank <= 10
-			`, userID)
-		if err != nil {
-			log.Println("Register: Error inserting labels:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-
-		session, _ := store.Get(r, "session-name")
-		session.Values["user_id"] = userID
-		err = session.Save(r, w)
-		if err != nil {
-			log.Println("Register: Error saving session:", err)
-			http.Error(w, "Cannot save session", http.StatusInternalServerError)
-			return
-		}
-
-		// Проверяем источник регистрации и перенаправляем на нужную страницу
-		if source == "modal" {
-			// Если регистрация из модального окна
-			http.Redirect(w, r, "/setting", http.StatusSeeOther)
-		} else {
-			// Если регистрация с главной страницы
-			http.Redirect(w, r, "/teaching", http.StatusSeeOther)
-		}
-	}
-} // 1 Регистрация нового пользователя (главная стр.)
-
-func CaptchaHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Checking if custom store is set before generating captcha...")
-	captchaID := captcha.New() // Генерация нового идентификатора капчи
-	log.Printf("Generated captcha ID: %s", captchaID)
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "captcha_id",
-		Value:    captchaID,
-		Path:     "/",
-		HttpOnly: true,
-	})
-
-	// Проверяем, существует ли капча в хранилище сразу после генерации
-	if captcha.VerifyString(captchaID, "") {
-		log.Printf("Captcha ID %s successfully stored in memory immediately after generation", captchaID)
-	} else {
-		log.Printf("Captcha ID %s not stored in memory immediately after generation", captchaID)
-	}
-
-	w.Header().Set("Content-Type", "image/png")
-	if err := captcha.WriteImage(w, captchaID, 240, 80); err != nil {
-		log.Println("CaptchaHandler: Failed to write captcha image:", err)
-	}
-}
-
-func VerifyCaptchaHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var requestData struct {
-		CaptchaSolution string `json:"captcha_solution"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-
-	captchaID, err := r.Cookie("captcha_id")
-	if err != nil || !captcha.VerifyString(captchaID.Value, requestData.CaptchaSolution) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Число с картинки введено не верно!"})
-		return
-	}
-
-	json.NewEncoder(w).Encode(map[string]string{"success": "Число с картинки верно"})
 }
 
 func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -267,6 +119,123 @@ func updateLastVisitDate(userID int) {
 		log.Println("Error updating last visit date:", err)
 	}
 } //записывает дату последнего посещения пользователя (в SQL)
+
+func GenerateCaptchaHandler(w http.ResponseWriter, r *http.Request) {
+	captchaID := captcha.New() // Создаем новую капчу
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"captchaID":  captchaID,                        // Отправляем клиенту ID капчи
+		"captchaURL": "/captcha/" + captchaID + ".png", // Ссылка на изображение капчи
+	})
+}
+
+func VerifyCaptcha(captchaID, captchaValue string) bool {
+	return captcha.VerifyString(captchaID, captchaValue) // Проверяем правильность введенного значения
+}
+
+func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	// Проверяем, авторизован ли пользователь
+	session, _ := store.Get(r, "session-name")
+
+	if _, ok := session.Values["username"].(string); ok {
+		// Если пользователь уже авторизован, перенаправляем его в профиль
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == http.MethodGet { // Здесь мы ему говорим: "Если запрос GET"
+		tmpl, err := template.ParseFiles("templates/index.html") // Загружаем шаблон
+		if err != nil {
+			log.Printf("Error parsing template: %v", err)                          // Если ошибка, пишем в лог
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError) // Отправляем клиенту сообщение об ошибке
+			return
+		}
+		tmpl.Execute(w, nil) // Отправляем шаблон клиенту
+		return
+	}
+
+	// Если запрос POST
+	username := r.FormValue("username") // Получаем значение поля "username"
+	password := r.FormValue("password") // Получаем значение поля "password"
+	captchaID := r.FormValue("captchaID")
+	captchaValue := r.FormValue("captchaValue")
+
+	// Проверяем капчу
+	if !VerifyCaptcha(captchaID, captchaValue) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Число с картинки введено не правильно!"})
+		return
+	}
+
+	// Проверяем, существует ли пользователь
+	var exists bool
+	err := Database.QueryRow("SELECT EXISTS (SELECT 1 FROM user_accounts WHERE login = $1)", username).Scan(&exists)
+	if err != nil {
+		log.Printf("Error checking user existence: %v", err)                   // Если ошибка, пишем в лог
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError) // Сообщаем об ошибке
+		return
+	}
+
+	if exists {
+		// Возвращаем ошибку в формате JSON
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Извините, такой логин занят, придумайте другой"})
+		return
+	}
+
+	// Хэшируем пароль
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("Error hashing password: %v", err)                          // Если ошибка, пишем в лог
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError) // Сообщаем об ошибке
+		return
+	}
+
+	// Сохраняем нового пользователя в базе
+	var userID int
+	err = Database.QueryRow(` 
+			INSERT INTO user_accounts (login, password_hash, registration_date) 
+			VALUES ($1, $2, $3) RETURNING id`,
+		username, hashedPassword, time.Now().Format("2006-01-02")).Scan(&userID)
+	if err != nil {
+		log.Println("Register: Error inserting user to database:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = Database.Exec(`
+    		WITH ranked_words AS (
+        	SELECT id,
+               ROW_NUMBER() OVER (ORDER BY usage_per_billion DESC) as rank
+        	FROM english_words
+    		)
+    		INSERT INTO user_word_labels (user_id, word_id, label)
+    		SELECT $1, id, CASE WHEN rank <= 5 THEN 2 ELSE 1 END
+    		FROM ranked_words
+    		WHERE rank <= 10
+			`, userID)
+	if err != nil {
+		log.Println("Register: Error inserting labels:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	session.Values["user_id"] = userID
+	err = session.Save(r, w)
+	if err != nil {
+		log.Println("Register: Error saving session:", err)
+		http.Error(w, "Cannot save session", http.StatusInternalServerError)
+		return
+	}
+
+	// Как только регистрация прошла успешно, возвращаем успешный JSON-ответ, чтобы там javascript обработал эту команду
+	// о успешной регистрации и делал что ему там дальше велено
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
+} // 1 Регистрация нового пользователя (главная стр.)
 
 func loadNextWordForUser(userID int) error {
 	// Выполняем запрос для добавления следующего слова
