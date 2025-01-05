@@ -171,13 +171,12 @@
         }
 
         .modal-text-error {
-            height: 10px;
             color: #f4ff00;
             font-size: 1.2em;
-            display: block;
             font-weight: bold;
             text-align: center;
-            margin-top: 20px;
+            margin-top: -15px;
+            padding-bottom: 20px;
         }
 
         /* Футер */
@@ -414,6 +413,8 @@
             <input type="text" id="captchaValue" name="captchaValue" required><br>
             <input type="hidden" id="captchaID" name="captchaID"><br>
 
+            <div class="modal-text-error" id="error-message"></div>
+
             <div style="display: flex; gap: 10px;">
                 <button type="submit">Зарегистрироваться</button>
                 <a href="/login">
@@ -422,7 +423,7 @@
             </div>
 
         </form>
-        <div class="modal-text-error" id="error-message"></div>
+
     </div>
 </div>
 

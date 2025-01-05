@@ -327,13 +327,14 @@
         }
 
         .modal-text-error {
-            height: 25px;
             color: #f4ff00;
             font-size: 1.2em;
             display: block;
             font-weight: bold;
             text-align: center;
             text-shadow: 1px 1px 4px rgba(0, 0, 0, 1);
+            margin-top: 0px;
+            padding-bottom: 10px;
         }
 
 
@@ -362,10 +363,6 @@
 
         #captcha-image {
             width: 250px;
-        }
-
-        .button-enter {
-            margin-top: -50px;
         }
 
     </style>
@@ -702,8 +699,10 @@
             <button type="button" onclick="reloadCaptcha()">Обновить картинку</button>
         </div>
         <label for="password">Введите число с картинки</label>
-        <input type="text" id="captchaValue" name="captchaValue" required><br>
-        <input type="hidden" id="captchaID" name="captchaID"><br>
+        <input type="text" id="captchaValue" name="captchaValue" required>
+        <input type="hidden" id="captchaID" name="captchaID">
+
+        <div class="modal-text-error" id="error-message"></div>
 
         <div class="button-enter">
             <button type="submit">Создать и войти</button>
@@ -711,16 +710,10 @@
 
     </form>
 
-    <div class="modal-text-error" id="error-message"></div>
-
     <!--
         <p>ПРИЛОЖЕНИЕ БЕСПЛАТНОЕ</p>
     -->
     </div>
-
-
-
-
 
     </body>
 
