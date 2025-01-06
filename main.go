@@ -265,48 +265,78 @@ func loadNextPageWordsForUser(userID int) error {
 	return err
 }
 
+var loginAttempts = make(map[string]int) // Карта для отслеживания попыток логина по IP
+
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	if isAuthorized(r) {
-		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+	if r.Method == http.MethodGet {
+		tmpl, err := template.ParseFiles("templates/login.html")
+		if err != nil {
+			log.Printf("Error parsing template: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
 		return
 	}
 
-	// Функция для рендеринга шаблона встроена
-	renderTemplate := func(data interface{}) {
-		tmpl, err := template.ParseFiles("templates/login.html")
-		if err != nil {
-			http.Error(w, "Cannot parse template", http.StatusInternalServerError)
-			return
-		}
-		tmpl.Execute(w, data)
-	}
-
-	if r.Method == http.MethodGet {
-		renderTemplate(nil)
-	} else if r.Method == http.MethodPost {
-		r.ParseForm()
-		login := r.FormValue("login")
+	if r.Method == http.MethodPost {
+		username := r.FormValue("username")
 		password := r.FormValue("password")
+		captchaID := r.FormValue("captchaID")
+		captchaValue := r.FormValue("captchaValue")
+		clientIP := r.RemoteAddr
 
-		var dbPasswordHash string
+		// Проверяем капчу, если нужно
+		if loginAttempts[clientIP] >= 3 {
+			if !VerifyCaptcha(captchaID, captchaValue) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				json.NewEncoder(w).Encode(map[string]string{"error": "Число с картинки введено не правильно!", "showCaptcha": "true"})
+				return
+			}
+		}
+
+		var storedHashedPassword string
 		var userID int
-		err := Database.QueryRow("SELECT id, password_hash FROM user_accounts WHERE login=$1", login).Scan(&userID, &dbPasswordHash)
+		err := Database.QueryRow("SELECT id, password_hash FROM user_accounts WHERE login = $1", username).Scan(&userID, &storedHashedPassword)
 		if err != nil {
-			renderTemplate(map[string]string{"Error": "Такого логина не существует"})
+			log.Printf("Login: Error fetching user: %v", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			showCaptcha := "false"
+			if loginAttempts[clientIP] >= 2 {
+				showCaptcha = "true"
+			}
+			json.NewEncoder(w).Encode(map[string]string{"error": "Неверный логин или пароль", "showCaptcha": showCaptcha})
+			loginAttempts[clientIP]++
 			return
 		}
 
-		err = bcrypt.CompareHashAndPassword([]byte(dbPasswordHash), []byte(password))
-		if err != nil {
-			renderTemplate(map[string]string{"Error": "Неверный пароль"})
+		// Проверяем пароль
+		if bcrypt.CompareHashAndPassword([]byte(storedHashedPassword), []byte(password)) != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			showCaptcha := "false"
+			if loginAttempts[clientIP] >= 2 {
+				showCaptcha = "true"
+			}
+			json.NewEncoder(w).Encode(map[string]string{"error": "Неверный логин или пароль", "showCaptcha": showCaptcha})
+			loginAttempts[clientIP]++
 			return
 		}
 
+		// Сбрасываем счетчик попыток при успешном входе
+		loginAttempts[clientIP] = 0
+
+		// Создаем сессию
 		session, _ := store.Get(r, "session-name")
 		session.Values["user_id"] = userID
 		session.Save(r, w)
 
-		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		// Успешный ответ
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"success": "true"})
 	}
 } // 1 Вход в аккаунт
 

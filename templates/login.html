@@ -6,14 +6,22 @@
     <title>Войти</title>
     <style>
 
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
             background-color: #e1e1e1;
             text-align: center;
             font-family: Arial, sans-serif;
+            height: 100%;
         }
 
         .section-1 {
             padding: 60px 20px;
+            flex: 1
         }
 
         .entry-block {
@@ -23,6 +31,7 @@
             border-radius: 15px;
             max-width: 500px;
             margin: 0 auto;
+            text-align: left;
         }
 
         .entry-block input {
@@ -56,7 +65,7 @@
         }
 
         .footer {
-            position: fixed;
+
             width: 100%;
             background-color: #333;
             color: #fff;
@@ -66,48 +75,127 @@
             left: 0;
         }
 
+        .modal-text-error {
+            color: #f4ff00;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            padding-bottom: 15px;
+        }
+
+        .button-submit {
+            text-align: center;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%; /* Обеспечивает высоту на 100% окна */
+        }
+
+        #captcha-image {
+            width: 200px;
+        }
+
+        #reload-captcha-button {
+            width: 200px;
+        }
+
+        .captcha-and-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
 
+    <script>
+        async function validateLoginForm(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const errorMessage = document.getElementById("error-message");
+            try {
+                const response = await fetch(form.action, {
+                    method: form.method,
+                    body: formData,
+                });
+
+                const result = await response.json();
+                if (result.error) {
+                    errorMessage.textContent = result.error;
+
+                    // Показываем капчу, если сервер сообщил, что она нужна
+                    if (result.showCaptcha === "true") {
+
+                        document.getElementById("captcha-container").style.display = "block";
+                        reloadCaptcha();
+                    }
+                } else {
+                    window.location.href = "/teaching";
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+                errorMessage.textContent = "Ошибка соединения. Попробуйте позже.";
+            }
+        }
+
+        async function loadCaptcha() {
+            try {
+                const response = await fetch("/generate-captcha");
+                const data = await response.json();
+                document.getElementById("captchaID").value = data.captchaID;
+                document.getElementById("captcha-image").src = data.captchaURL;
+            } catch (error) {
+                console.error("Ошибка загрузки капчи:", error);
+            }
+        }
+
+        function reloadCaptcha() {
+            loadCaptcha();
+        }
+    </script>
 
 </head>
 <body>
+<div class="wrapper">
+    <div class="section-1">
+        <h1>Вход в аккаунт</h1>
+        <div class="entry-block">
 
-<div class="section-1">
-    <h1>Вход в аккаунт</h1>
-    <div class="entry-block">
+            <form method="POST" action="/login" onsubmit="validateLoginForm(event)">
+                <div>
+                    <label for="username">Введите логин:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div>
+                    <label for="password">Введите пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
 
-        <form method="post" action="/login">
+                <div id="captcha-container" style="display: none;">
+                    <div class="captcha-and-button">
+                    <img id="captcha-image" alt="Captcha"/>
+                    <button id="reload-captcha-button" type="button" onclick="reloadCaptcha()">Обновить картинку</button><br>
+                    </div>
+                    <label for="captchaValue">Введите число с картинки:</label>
+                    <input type="text" id="captchaValue" name="captchaValue"><br>
+                    <input type="hidden" id="captchaID" name="captchaID"><br>
+                </div>
 
-            <div>
-                <label for="login">Введите логин:</label>
-                <input type="text" id="login" name="login" required>
-            </div>
-            <div>
-                <label for="password">Введите пароль:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            {{if .Error}}
-            <div style="color: red;">
-                {{.Error}}
-            </div>
-            {{end}}
+                <div id="error-message" class="modal-text-error"></div>
+                <div class="button-submit">
+                    <button type="submit">Войти</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-            <div class="button-entry-block">
-                <button type="submit">Войти</button>
-                <a href="/#registration-section">
-                    <button type="button">Зарегистрироваться</button>
-                </a>
-            </div>
 
-        </form>
+    <div class="footer">
+        <p>Created by Urazaev Amir<br>WordWire © 2024</p>
     </div>
 </div>
-
-
-<div class="footer">
-    <p>Created by Urazaev Amir<br>WordWire © 2024</p>
-</div>
-
 
 </body>
 </html>
