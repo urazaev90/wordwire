@@ -268,6 +268,26 @@ func loadNextPageWordsForUser(userID int) error {
 var loginAttempts = make(map[string]int) // Карта для отслеживания попыток логина по IP
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodGet {
+		clientIP := r.RemoteAddr
+		showCaptcha := false
+
+		if loginAttempts[clientIP] >= 3 {
+			showCaptcha = true
+		}
+
+		tmpl, err := template.ParseFiles("templates/login.html")
+		if err != nil {
+			log.Printf("Error parsing template: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		tmpl.Execute(w, map[string]bool{"ShowCaptcha": showCaptcha})
+		return
+	}
+
 	if r.Method == http.MethodGet {
 		tmpl, err := template.ParseFiles("templates/login.html")
 		if err != nil {

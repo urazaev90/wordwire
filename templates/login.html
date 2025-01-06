@@ -50,7 +50,7 @@
             cursor: pointer;
             color: #333;
             font-weight: bold;
-            width: 250px;
+            width: 200px;
         }
 
         .entry-block button:hover {
@@ -58,14 +58,7 @@
             color: #fff;
         }
 
-        .button-entry-block {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
         .footer {
-
             width: 100%;
             background-color: #333;
             color: #fff;
@@ -83,8 +76,9 @@
             padding-bottom: 15px;
         }
 
-        .button-submit {
-            text-align: center;
+        .button-login-page {
+            display: flex;
+            gap: 15px;
         }
 
         .wrapper {
@@ -109,6 +103,16 @@
     </style>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const showCaptcha = document.getElementById("showCaptcha").value === "true";
+            const captchaContainer = document.getElementById("captcha-container");
+
+            if (showCaptcha) {
+                captchaContainer.style.display = "block";
+                loadCaptcha();
+            }
+        });
+
         async function validateLoginForm(event) {
             event.preventDefault();
             const form = event.target;
@@ -180,12 +184,18 @@
                     </div>
                     <label for="captchaValue">Введите число с картинки:</label>
                     <input type="text" id="captchaValue" name="captchaValue"><br>
-                    <input type="hidden" id="captchaID" name="captchaID"><br>
+                    <input type="hidden" id="captchaID" name="captchaID">
                 </div>
 
+                <!-- Скрытый индикатор -->
+                <input type="hidden" id="showCaptcha" value="{{if .ShowCaptcha}}true{{else}}false{{end}}">
+
                 <div id="error-message" class="modal-text-error"></div>
-                <div class="button-submit">
-                    <button type="submit">Войти</button>
+                <div class="button-login-page">
+                    <button class="common-button" type="submit">Войти</button>
+                    <a href="/#registration-section">
+                        <button class="common-button" type="button">Зарегистрироваться</button>
+                    </a>
                 </div>
             </form>
         </div>
