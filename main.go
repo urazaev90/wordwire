@@ -137,7 +137,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, авторизован ли пользователь
 	session, _ := store.Get(r, "session-name")
 
-	if _, ok := session.Values["username"].(string); ok {
+	if _, ok := session.Values["user_id"].(int); ok {
 		// Если пользователь уже авторизован, перенаправляем его в профиль
 		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
 		return
@@ -165,6 +165,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Число с картинки введено не правильно!"})
+		return
+	}
+
+	// Проверка, чтобы пароль был длинной не менее 4 символа
+	if len(password) < 4 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Минимальная длинна пароля - 4 символа!"})
 		return
 	}
 
@@ -269,6 +277,14 @@ var loginAttempts = make(map[string]int) // Карта для отслежива
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
+	session, _ := store.Get(r, "session-name")
+
+	if _, ok := session.Values["user_id"].(int); ok {
+		// Если пользователь уже авторизован, перенаправляем его в профиль
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+		return
+	}
+
 	if r.Method == http.MethodGet {
 		clientIP := r.RemoteAddr
 		showCaptcha := false
@@ -349,7 +365,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		loginAttempts[clientIP] = 0
 
 		// Создаем сессию
-		session, _ := store.Get(r, "session-name")
+
 		session.Values["user_id"] = userID
 		session.Save(r, w)
 
