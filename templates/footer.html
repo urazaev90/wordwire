@@ -1,7 +1,6 @@
 <footer>
     <script>
-
-            document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
             // Открытие модального окна
             document.getElementById('logout-link').addEventListener('click', function () {
                 // Получаем логин пользователя и вставляем его в модальное окно
@@ -17,38 +16,35 @@
             });
 
             // Закрытие модального окна при нажатии на крестик
-            document.querySelector('.close').addEventListener('click', function() {
-            document.getElementById('logout-modal').style.display = 'none';
+            document.querySelector('.close').addEventListener('click', function () {
+                document.getElementById('logout-modal').style.display = 'none';
                 playClickSound();
-        });
+            });
 
             // Закрытие модального окна при нажатии на "Отмена"
-            document.getElementById('cancel-logout').addEventListener('click', function() {
+            document.getElementById('cancel-logout').addEventListener('click', function () {
                 playClickSound();
-            document.getElementById('logout-modal').style.display = 'none';
-        });
+                document.getElementById('logout-modal').style.display = 'none';
+            });
 
             // Подтверждение выхода
-            document.getElementById('confirm-logout').addEventListener('click', function() {
+            document.getElementById('confirm-logout').addEventListener('click', function () {
                 playClickSound();
-            fetch('/logout', {method: 'POST'})  // Обращаемся к вашему обработчику выхода
-            .then(() => {
-            window.location.href = '/';  // Перенаправляем пользователя на главную страницу после выхода
-        });
-        });
+                fetch('/logout', {method: 'POST'})  // Обращаемся к вашему обработчику выхода
+                    .then(() => {
+                        window.location.href = '/';  // Перенаправляем пользователя на главную страницу после выхода
+                    });
+            });
 
             // Закрытие модального окна при клике вне его
-            window.onclick = function(event) {
-            if (event.target == document.getElementById('logout-modal')) {
-                playClickSound();
-            document.getElementById('logout-modal').style.display = 'none';
-        }
-        };
+            window.onclick = function (event) {
+                if (event.target == document.getElementById('logout-modal')) {
+                    playClickSound();
+                    document.getElementById('logout-modal').style.display = 'none';
+                }
+            };
         });
-
-
     </script>
-
 
     <div class="contentfooter">
         <div class="wordwire-footer">
@@ -57,12 +53,12 @@
         </div>
     </div>
 
-    <!-- Модальное окно -->
     <div id="logout-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p>Если вы действительно хотите произвести выход из аккаунта на этом устройстве, запомните ваш логин "<span
-                    id="user-login"></span>" (а свой пароль вы должны помнить) и подтвердите выход нажатием на кнопку "Хочу выйти".</p>
+            <p>Если вы действительно хотите выйти из аккаунта на этом устройстве, запомните ваш логин "<span
+                    id="user-login"></span>" (а свой пароль вы должны знать). Подтвердите выход нажатием на кнопку "Хочу
+                выйти".</p>
             <div class="modal-footer">
                 <button id="confirm-logout" class="btn btn-confirm">Хочу выйти</button>
                 <button id="cancel-logout" class="btn btn-cancel">Отмена</button>

@@ -2,299 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/global.css">
+    <link rel="stylesheet" href="/static/css/home.css">
+    <script src="/static/js/home.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
-    <style>
-        html {
-            scroll-behavior: smooth;
-            font-family: Arial, sans-serif;
-            color: #333; /* Общий текстовой цвет */
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Липкий хедер */
-        .sticky-header {
-            position: fixed;
-            top: 0;
-            background-color: #333;
-            padding: 10px 0;
-            z-index: 1000;
-            width: 100vw;
-            text-align: center;
-        }
-
-        .header-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .header-buttons a button {
-            font-size: 0.8em;
-            background-color: #a63ab2;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .header-buttons a button:hover {
-            background-color: #d86ae7;
-        }
-
-        /* Отступ для фиксации заголовка */
-        .header-spacer {
-            height: 50px;
-        }
-
-        .section {
-            padding: 50px 20px;
-            text-align: center;
-        }
-
-
-        .section-1 {
-            background-color: #dcdcdc;
-            padding: 50px 0; /* Добавляем отступы, чтобы текст не прилипал к краям */
-        }
-
-        .title-container {
-            width: 40%;
-            margin: 0 auto; /* Центрирует содержимое */
-            text-align: center;
-        }
-
-        .subtitle-container {
-            width: 70%;
-            margin: 0 auto; /* Центрирует содержимое */
-            text-align: center;
-        }
-
-        .section-5 {
-            background-color: #793785;
-        }
-
-        .section-5 .content-section {
-            color: #fff;
-            width: 60%;
-            margin: 0 auto; /* Центрирует содержимое */
-        }
-
-        .section-5 .content-section .title-section {
-            font-size: 1em;
-        }
-
-        .section-5 .article-section {
-            font-size: 1.2em;
-        }
-
-        .section-2 {
-            background-color: #dcdcdc;
-        }
-
-        .section-2 .text-section {
-            margin: 0 auto; /* Центрирует содержимое */
-            text-align: left;
-            width: 50%;
-        }
-
-        .section-2 .text-section .list-item img {
-            vertical-align: middle;
-        }
-
-        .section-2 .text-section .list-item {
-            margin: 15px 0;
-            font-size: 1.1em;
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        .section-3 {
-            background-color: #793785;
-            color: #fff;
-        }
-
-        .section-4 {
-            background-color: #e1e1e1;
-        }
-
-        /* Основное содержание */
-        .header {
-            font-size: 1.8em;
-            font-weight: bold;
-        }
-
-        .content b {
-            font-size: 1.5em;
-        }
-
-
-        /* Регистрационная форма */
-        .form-container {
-            text-align: left;
-            background-color: #a63ab2;
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .form-container input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: none;
-        }
-
-        .form-container button {
-            padding: 10px 20px;
-            background-color: #efbb51;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            color: #333;
-            font-weight: bold;
-            width: 250px;
-        }
-
-        .form-container button:hover {
-            background-color: #793785;
-            color: #fff;
-        }
-
-        .modal-text-error {
-            color: #f4ff00;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-align: center;
-            margin-top: -15px;
-            padding-bottom: 20px;
-        }
-
-        /* Футер */
-        .footer {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        .footer p {
-            margin: 0;
-            font-size: 0.9em;
-        }
-
-        .check-mark {
-            width: 40px;
-        }
-
-        #captcha-container {
-            display: flex; /* Устанавливает Flexbox для горизонтального расположения */
-            align-items: center; /* Выравнивает элементы по вертикали */
-            gap: 10px; /* Расстояние между изображением и кнопкой */
-        }
-
-    </style>
-
-    <script>
-        // Тут мы объединяем проверку паролей и отправку формы
-        async function validateAndSubmitForm(event) {
-            // Останавливаем стандартное поведение отправки формы
-            event.preventDefault();
-
-            // Тут получаем значения пароля и подтверждения пароля
-            const password = document.getElementById("password").value;
-            const confirmPassword = document.getElementById("confirmPassword").value;
-
-            // Тут находим элемент для вывода сообщения об ошибке
-            const errorMessage = document.getElementById("error-message");
-
-            // Проверяем, совпадают ли пароли
-            if (password !== confirmPassword) {
-                // Если пароли не совпадают, выводим сообщение и выходим из функции
-                errorMessage.textContent = "Пароли не совпадают!";
-                return; // Тут мы говорим "остановись, не отправляй данные"
-            } else {
-                // Если все нормально, очищаем сообщение об ошибке
-                errorMessage.textContent = "";
-            }
-
-            // Оставновим выполнение кода дальше, если есть ошибка
-            if (errorMessage.textContent) {
-                return;
-            }
-
-
-            // отправка формы на сервер джаваскриптом через formdata, а если есть ошибки сервер нам шлет их через json
-            // Собираем данные из формы
-            const form = event.target;
-            const formData = new FormData(form);
-
-            try {
-                // Тут мы отправляем запрос на сервер
-                const response = await fetch(form.action, {
-                    method: form.method,
-                    body: formData, // Передаем данные из формы
-                });
-
-                // Проверяем успешность ответа от сервера
-                if (response.ok) {
-                    // Получаем результат в формате JSON
-                    const result = await response.json();
-
-                    // Проверяем, есть ли ошибка в результате
-                    if (result.error) {
-                        // Если ошибка есть, показываем сообщение
-                        errorMessage.textContent = result.error;
-                        reloadCaptcha();
-                    } else {
-                        // Если ошибки нет, перенаправляем на страницу профиля
-                        window.location.href = "/teaching";
-                    }
-                } else {
-                    // Если сервер вернул ошибку, показываем сообщение
-                    errorMessage.textContent = "Ошибка на сервере. Попробуйте позже.";
-                    reloadCaptcha();
-                }
-            } catch (error) {
-                // Тут мы обрабатываем ошибки соединения
-                console.error("Ошибка:", error);
-                errorMessage.textContent = "Ошибка. Проверьте подключение к интернету.";
-                reloadCaptcha();
-            }
-        }
-
-        async function loadCaptcha() {
-            try {
-                const response = await fetch("/generate-captcha");
-                const data = await response.json();
-                document.getElementById("captchaID").value = data.captchaID;
-                document.getElementById("captcha-image").src = data.captchaURL;
-            } catch (error) {
-                console.error("Ошибка загрузки капчи:", error);
-            }
-        }
-
-        function reloadCaptcha() {
-            loadCaptcha();
-        }
-
-        document.addEventListener("DOMContentLoaded", loadCaptcha);
-
-    </script>
 </head>
-<body>
-
+<body class="home">
 <div class="sticky-header">
-    <div class="header-buttons">
+    <div class="sticky-header-buttons">
         <a href="/demonstration">
             <button>Демонстрация приложения</button>
         </a>
@@ -306,86 +22,61 @@
         </a>
     </div>
 </div>
-
-<div class="header-spacer"></div>
-
-<div class="section section-1">
-    <div class="title-container">
-        <h1 class="header">WordWire – бесплатное приложение для обучения английского</h1>
-    </div>
-    <div class="subtitle-container">
-        <p class="content">При помощи этого приложения вы быстро увеличите свой словарный запас английского.
-            А именно в ближайшее время сможете читать тексты на английском языке, также смотреть фильмы и поддерживать
-            беседу с носителями языка на базовом уровне.</p>
+<div class="sticky-header-spacer"></div>
+<div class="section-main">
+    <h1>WordWire – бесплатное приложение для обучения английского</h1>
+    <h2>При помощи этого приложения вы быстро увеличите свой словарный запас английского.
+        А именно в ближайшее время сможете читать тексты на английском языке, также смотреть фильмы и
+        поддерживать
+        беседу с носителями языка на базовом уровне.</h2>
+</div>
+<div class="section section-about-research">
+    <h2>Исследования показывают, что владея определенным словарным запасом слов, а именно:</h2>
+    <div class="article">
+        <div><b>1 000 слов</b></div>
+        <p>Освоение 1000 наиболее часто используемых английских слов обеспечивает понимание 80% разговорной речи
+            и
+            позволяет
+            вести элементарные беседы.</p>
+        <div><b>3 000 слов</b></div>
+        <p>Знание 3000 слов позволяет понимать 95% устной речи и различных текстов.</p>
+        <div><b>5 000 слов</b></div>
+        <p>Владеющий 5000 словами способен к жизни и работе за границей, понимая 98% услышанного и
+            прочитанного.</p>
+        <div><b>10 000 слов</b></div>
+        <p>Лексический запас в 10 000 слов даёт возможность понимать 99% устной речи.</p>
     </div>
 </div>
-
-
-<div class="section section-5">
-    <div class="content-section">
-        <div class="title-section">
-            <h2>Исследования показывают, что владея определенным словарным запасом слов, а именно:</h2>
-        </div>
-        <div class="article-section">
-            <div><b>1 000 слов</b></div>
-            <p>Освоение 1000 наиболее часто используемых английских слов обеспечивает понимание 80% разговорной речи и
-                позволяет
-                вести элементарные беседы.</p>
-            <div><b>3 000 слов</b></div>
-            <p>Знание 3000 слов позволяет понимать 95% устной речи и различных текстов.</p>
-            <div><b>5 000 слов</b></div>
-            <p>Владеющий 5000 словами способен к жизни и работе за границей, понимая 98% услышанного и прочитанного.</p>
-            <div><b>10 000 слов</b></div>
-            <p>Лексический запас в 10 000 слов даёт возможность понимать 99% устной речи.</p>
-        </div>
-    </div>
-</div>
-
-<div class="section section-2">
-    <div class="title-section">
-        <h2>С WordWire вы сможете:</h2>
-    </div>
-    <div class="text-section">
-        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+<div class="section section-peculiarities">
+    <h2>С WordWire вы сможете:</h2>
+    <div class="article">
+        <p class="list-item"><img src="/static/images/check_mark.png" alt="Check mark">
             Наблюдать за уровнем своего словарного запаса</p>
-
-        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+        <p class="list-item"><img src="/static/images/check_mark.png" alt="Check mark">
             Самостоятельно избирать те слова, которые хотите учить</p>
-
-        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+        <p class="list-item"><img src="/static/images/check_mark.png" alt="Check mark">
             Начать изучение с самых распространённых слов и уже почувствовать знание английского
         </p>
-
-        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+        <p class="list-item"><img src="/static/images/check_mark.png" alt="Check mark">
             Сможете убрать в архив те слова, которые и так знаете</p>
-
-        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+        <p class="list-item"><img src="/static/images/check_mark.png" alt="Check mark">
             Смотреть не только перевод, но и слушать произношение +видеть транскрипцию</p>
-
-        <p class="list-item"><img src="/images/check_mark.png" class="check-mark" alt="Check mark">
+        <p class="list-item"><img src="/static/images/check_mark.png" alt="Check mark">
             Листать слова в рандомном порядке, чтобы ваша память не привыкала к
             последовательности</p>
     </div>
 </div>
-
-<div class="section section-3">
-    <div class="title-section">
-        <h2>Как происходит обучение?</h2>
-    </div>
-    <div class="content">
-        <p>Обучение происходит по принципу листания отобранных незнакомых английских слов по одному. А если вы не
-            можете вспомнить перевод, достаточно просто в один клик его подсмотреь, чтобы запомнить и продолжить
-            обучение
-            дальше.</p>
-        <p>Учите английский с нашим сервисом в любом месте — в перерыве за компьютером, в метро, на остановке и
-            т.д.!</p>
-    </div>
+<div class="section section-about-process">
+    <h2>Как происходит обучение?</h2>
+    <p>Обучение происходит по принципу листания отобранных незнакомых английских слов по одному. А если вы не
+        можете вспомнить перевод, достаточно просто в один клик его подсмотреь, чтобы запомнить и продолжить
+        обучение
+        дальше.</p>
+    <p>Учите английский с нашим сервисом в любом месте — в перерыве за компьютером, в метро, на остановке и
+        т.д.!</p>
 </div>
-
-<div class="section section-4">
-    <div class="title-section">
-        <h2 id="registration-section">Регистрация</h2>
-    </div>
+<div class="section section-registration">
+    <h2 id="registration-section">Регистрация</h2>
     <p class="content">
         После регистрации вы сразу попадете на страницу обучения английскому. Регистрация очень простая,
         нужно лишь придумать свой уникальный логин и пароль.
@@ -404,7 +95,6 @@
                 <label for="confirmPassword">Повторите пароль</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
-
             <div id="captcha-container">
                 <img id="captcha-image" alt="Captcha"/>
                 <button type="button" onclick="reloadCaptcha()">Обновить картинку</button>
@@ -412,21 +102,18 @@
             <label for="password">Введите число с картинки</label>
             <input type="text" id="captchaValue" name="captchaValue" required><br>
             <input type="hidden" id="captchaID" name="captchaID"><br>
-
             <div class="modal-text-error" id="error-message"></div>
-
-            <div style="display: flex; gap: 10px;">
+            <div class="block-button-login">
+                <div class="button-login-page">
                 <button type="submit">Зарегистрироваться</button>
                 <a href="/login">
                     <button type="button">Я уже зарегистрирован</button>
                 </a>
             </div>
-
+            </div>
         </form>
-
     </div>
 </div>
-
 <div class="footer">
     <p>Created by Urazaev Amir<br>WordWire © 2024</p>
 </div>

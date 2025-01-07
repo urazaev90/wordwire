@@ -3,200 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/global.css">
+    <link rel="stylesheet" href="/static/css/teaching.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
-
-    <style>
-        /* Стили остаются такими же, как были */
-        button {
-            cursor: pointer;
-        }
-
-        /* Стили для кнопок "Настроить изучаемые слова" и "Выйти из аккаунта" */
-        .control {
-            font-size: 1.5em;
-            padding: 5px 40px;
-            cursor: pointer;
-            margin-left: 0;
-            margin-right: 0;
-            background-color: #efbb51;
-            border-radius: 10px;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            font-weight: bold;
-            transition-delay: 0.8s;
-            transition: box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Переход с измененной длительностью и функцией времени */
-        }
-
-        .control:hover {
-            background-color: #efca86;
-            transform: scale(1.1);
-        }
-
-        .words-left {
-            text-decoration: none;
-            font-size: 1.7em;
-            color: #e1e1e1; /* Цвет для неактивных ссылок */
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Смещения, размытие и цвет тени */
-            padding: 10px;
-        }
-
-        body {
-            background-color: #da9bff;
-            color: white;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-        }
-
-        #central-content {
-            text-align: center;
-            position: relative;
-        }
-
-        .dinamik-and-translate {
-            padding: 10px;
-        }
-
-        #word-view #current-word { /* Стиль английского слова" */
-            font-size: 5em;
-            font-weight: bold;
-            margin: 2px;
-            color: #333; /* Цвет текста для лучшей читаемости на "бумаге" */
-        }
-
-        #transcription {
-            font-size: 2em;
-            color: #793785;
-            margin: 0px;
-        }
-
-        #translation-text {
-            font-size: 2.2em;
-            margin-top: 0px;
-            color: #3600c7;
-        }
-
-        #translation { /* Блок транскрипции и перевода */
-            margin-top: 20px;
-            visibility: hidden;
-            min-height: 100px; /* Минимальная высота для резервирования пространства */
-        }
-
-
-        .paper-display {
-            position: relative; /* Для использования псевдоэлемента */
-            background-color: white; /* Ярко выраженный белый фон */
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 0 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2d3ba;
-            margin: 10px auto;
-            width: 80%;
-            max-width: 600px;
-            font-family: 'Georgia', serif;
-            z-index: 1; /* Для обеспечения видимости текста над псевдоэлементом */
-            min-height: 220px; /* Задание начальной высоты */
-            height: auto; /* Позволяет блоку увеличиваться по мере добавления содержимого */
-
-        }
-
-        .paper-display::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('/images/paper-texture.png');
-            background-size: 350px 350px;
-            background-repeat: repeat;
-            opacity: 0.3; /* Прозрачность текстуры */
-            z-index: -1; /* Чтобы текстура была за текстом */
-            border-radius: 10px; /* Повторяем закругление углов */
-        }
-
-        img.button {
-            width: 120px;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-        img.button:hover {
-            opacity: 0.8;
-        }
-
-        img.not-active {
-            cursor: default;
-            opacity: 0.5;
-        }
-
-        #sound-icon {
-            width: 180px;
-            cursor: pointer;
-            display: block;
-            margin: 0 auto;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-
-        #sound-icon:hover {
-            opacity: 0.8;
-        }
-
-        #translate-icon {
-            width: 180px; /* Устанавливаем ширину только для этой иконки */
-            height: auto; /* Высота будет рассчитываться пропорционально ширине */
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-
-        .panel-top {
-            background-color: #a63ab2;
-            border-radius: 15px;
-            padding-top: 15px;
-            padding-bottom: 5px;
-            margin: 12px;
-            width: auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 3px solid #2d2d2d;
-        }
-
-        .panel-central {
-            background-color: #efbb51;
-            border-radius: 15px;
-            margin: 12px;
-            width: auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 3px solid #2d2d2d;
-            min-height: 520px;
-        }
-
-        .flipping {
-            height: 100px;
-        }
-
-        img.button, /* кнопка "Показать перевод*/
-        img.not-active {
-            width: 120px;
-            height: auto;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-        img.not-active {
-            cursor: default;
-            opacity: 0.5;
-        }
-
-        img.button:hover {
-            opacity: 0.8;
-        }
-
-    </style>
 
     <script>
 
         // Создаем глобальный объект для звука клика
-        const clickSound = new Audio('/sounds/_click_sound.mp3');
+        const clickSound = new Audio('/static/sounds/_click_sound.mp3');
 
         // Функция для воспроизведения звука с предотвращением многократного запуска
         function playClickSound() {
@@ -247,9 +62,6 @@
                 }
             }
 
-
-
-
             // Функция для отображения текущего слова и изменения состояния иконок
             function showWord() {
                 if (words.length === 0) {
@@ -262,11 +74,11 @@
 
                 if (currentIndex < words.length) {
                     // Проверка и смена иконки для кнопки "Назад"
-                    backIcon.src = currentIndex > 0 ? '/images/left.png' : '/images/left_not_active.png';
+                    backIcon.src = currentIndex > 0 ? '/static/images/left.png' : '/static/images/left_not_active.png';
                     backIcon.className = currentIndex > 0 ? 'button' : 'not-active';
 
                     // Проверка и смена иконки для кнопки "Вперед"
-                    forwardIcon.src = currentIndex < words.length - 1 ? '/images/right.png' : '/images/right_not_active.png';
+                    forwardIcon.src = currentIndex < words.length - 1 ? '/static/images/right.png' : '/static/images/right_not_active.png';
                     forwardIcon.className = currentIndex < words.length - 1 ? 'button' : 'not-active';
                 }
 
@@ -298,15 +110,9 @@
                 }
             });
 
-
-
-
             document.getElementById("restart-icon").addEventListener("click", () => {
                 location.reload();
             });
-
-
-
 
             document.getElementById("translate-icon").addEventListener("click", () => {
                 const translationElement = document.getElementById("translation");
@@ -325,16 +131,8 @@
                 }
             });
 
-
-
-
-
-
-
-
-
             function playSound(word) {
-                const audio = new Audio(`/sounds/${word}.mp3`);
+                const audio = new Audio(`/static/sounds/${word}.mp3`);
                 audio.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
             }
 
@@ -344,9 +142,7 @@
                 }
             });
 
-
             fetchWords();
-
         });
 
     </script>
@@ -354,11 +150,10 @@
 
 <body>
 
-
 <div id="central-content">
     <div class="panel-top">
         <div>
-            <button class="control" onclick="location.href='/setting'">Выбрать изучаемые слова⚙️</button>
+            <button class="control" onclick="location.href='/setting'">Изменить изучаемые слова⚙️</button>
         </div>
         <div class="words-left">Осталось слов: <span id="words-left">0</span></div>
     </div>
@@ -378,17 +173,17 @@
         </div>
 
         <div class="flipping">
-            <img id="back-icon" src="/images/left_not_active.png" alt="Back" class="not-active">
-            <img id="restart-icon" src="/images/restart.png" alt="Restart" class="button">
-            <img id="forward-icon" src="/images/right_not_active.png" alt="Forward" class="not-active">
+            <img id="back-icon" src="/static/images/left_not_active.png" alt="Back" class="not-active">
+            <img id="restart-icon" src="/static/images/restart.png" alt="Restart" class="button">
+            <img id="forward-icon" src="/static/images/right_not_active.png" alt="Forward" class="not-active">
         </div>
 
         <div class="dinamik-and-translate" style="text-align: center;">
             <div style="display: inline-block;">
-                <img id="sound-icon" src="/images/dinamik.png" alt="Play Sound">
+                <img id="sound-icon" src="/static/images/dinamik.png" alt="Play Sound">
             </div>
             <div style="display: inline-block;">
-                <img id="translate-icon" src="/images/translate.png" alt="Посмотреть перевод" class="button">
+                <img id="translate-icon" src="/static/images/translate.png" alt="Посмотреть перевод" class="button">
             </div>
         </div>
     </div>

@@ -71,7 +71,7 @@
             <div class="pagination-item">
                 {{if .HasPrev}}
                 <a href="{{.CurrentURL}}?page={{sub .Page 1}}" class="arrow-link arrow-link-left">
-                    <img src="/images/arrow_left.png" alt="Previous">
+                    <img src="/static/images/arrow_left.png" alt="Previous">
                 </a>
                 {{else}}
                 <span class="arrow-placeholder"></span>
@@ -90,7 +90,7 @@
             <div class="pagination-item">
                 {{if .HasNext}}
                 <a href="{{.CurrentURL}}?page={{add .Page 1}}" class="arrow-link arrow-link-right">
-                    <img src="/images/arrow_right.png" alt="Next">
+                    <img src="/static/images/arrow_right.png" alt="Next">
                 </a>
                 {{else}}
                 <span class="arrow-placeholder"></span>

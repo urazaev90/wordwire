@@ -1,0 +1,337 @@
+body {
+    background-color: #da9bff;
+    color: #e1e1e1;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.contentheader {
+    background-color: #a63ab2;
+    border-radius: 15px;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    margin: 12px;
+    width: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 3px solid #2d2d2d;
+}
+
+.contentfooter {
+    background-color: #a63ab2;
+    border-radius: 15px;
+    padding-bottom: 20px;
+    margin: 12px;
+    width: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 3px solid #2d2d2d;
+}
+
+.top-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    top: 0;
+}
+
+.large-button {
+    font-size: 1.5em;
+    padding: 5px 40px;
+    cursor: pointer;
+    margin-left: 0;
+    margin-right: 0;
+    background-color: #efbb51;
+    border-radius: 10px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-weight: bold;
+    transition-delay: 0.8s;
+    transition: box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.large-button:hover, .exit-button:hover {
+    background-color: #efca86;
+    transform: scale(1.1);
+}
+
+.exit-button {
+    font-size: 1em;
+    padding: 5px 15px;
+    cursor: pointer;
+    margin-left: 0;
+    margin-right: 0;
+    background-color: #efbb51;
+    border-radius: 10px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-weight: bold;
+    transition: box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.settings-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0px;
+}
+
+.container-height {
+    height: 370px;
+}
+
+table {
+    margin: 0 auto;
+}
+
+.row-number {
+    font-size: 1.3em;
+    color: #282828;
+    font-weight: bold;
+    font-style: italic;
+}
+
+table td label {
+    font-size: 1.5em;
+    color: #793785;
+    font-weight: bold;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+input[type="checkbox"]:hover {
+    cursor: pointer;
+}
+
+.content {
+    background-color: #efbb51;
+    border-radius: 15px;
+    padding: 10px;
+    margin: 12px;
+    width: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 3px solid #2d2d2d;
+}
+
+.active-link {
+    font-size: 1.3em;
+    color: #efbb51;
+    text-decoration: none;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: blink 1s infinite;
+}
+
+.active-link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 4px;
+}
+
+.inactive-link {
+    text-decoration: none;
+    font-size: 1.3em;
+    color: #e1e1e1;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.inactive-link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 4px;
+}
+
+.archive-link {
+    font-size: 1.1em;
+    font-style: italic;
+    color: #3600c7;
+}
+
+.archive-link:hover {
+    color: #dcdcdc;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.fixed-width {
+    width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: green;
+}
+
+.pagination {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+}
+
+.pagination-item-start {
+    font-size: 1em;
+    font-style: italic;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    width: 130px;
+    margin-bottom: 17px;
+}
+
+.arrow-placeholder2 {
+    display: inline-block;
+    width: 130px;
+}
+
+.pagination-item {
+    font-size: 2em;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.pagination a,
+.pagination .inactive-link {
+    text-decoration: none;
+    color: #3600c7;
+    font-weight: bold;
+    opacity: 0.9;
+}
+
+.pagination .inactive-link {
+    color: transparent;
+}
+
+.pagination a:hover {
+    color: #dcdcdc;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    opacity: 0.8;
+}
+
+.arrow-link {
+    font-size: 1.5em;
+    color: #FF6347;
+    text-decoration: none;
+}
+
+.arrow-link:hover {
+    color: #FF4500;
+}
+
+.wordwire-footer {
+    width: 100%;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.wordwire-footer a:hover {
+    color: #efbb51 !important;
+}
+
+.wordwire-footer a:link {
+    color: #e1e1e1;
+    text-decoration: none;
+}
+
+.wordwire-footer a:visited {
+    text-decoration: none;
+    color: #e1e1e1;
+}
+
+.arrow-link img {
+    width: 80px;
+    transition: opacity 0.3s;
+}
+
+.arrow-placeholder {
+    display: inline-block;
+    width: 80px;
+}
+
+.arrow-link-left img {
+    content: url('/static/images/arrow_left.png');
+}
+
+.arrow-link-right img {
+    content: url('/static/images/arrow_right.png');
+}
+
+.arrow-link-left:hover img {
+    content: url('/static/images/arrow_left_hover.png');
+}
+
+.arrow-link-right:hover img {
+    content: url('/static/images/arrow_right_hover.png');
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #6a0a75;
+    margin: 15% auto;
+    padding: 30px;
+    border: 2px solid #dadada;
+    width: 300px;
+    text-align: center;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #aaa;
+    font-size: 50px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #e7e7e7;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-footer {
+    justify-content: space-between;
+}
+
+.btn {
+    width: 120px;
+    padding: 10px 10px;
+    cursor: pointer;
+    border-radius: 10px;
+
+}
+
+.btn-confirm {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-cancel {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-confirm:hover {
+    background-color: #ff8178;
+}
+
+.btn-cancel:hover {
+    background-color: #8dec91;
+}
+
+#user-login {
+    color: #f5b137;
+    font-size: 1.3em;
+}

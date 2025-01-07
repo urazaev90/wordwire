@@ -17,7 +17,7 @@ import (
 
 var (
 	Database *sql.DB
-	store    = sessions.NewCookieStore([]byte("your-secret-key"))
+	store    = sessions.NewCookieStore([]byte("jdfH=S5Ds+SFg4ff)-dfdWg2gD7D+Ddhdf"))
 )
 
 const wordsPerPage = 10 // Количество слов в списках
@@ -39,6 +39,11 @@ func main() {
 
 	router := mux.NewRouter()
 
+	router.PathPrefix("/static/css/").Handler(http.StripPrefix("/static/css/", http.FileServer(http.Dir("static/css/"))))
+	router.PathPrefix("/static/js/").Handler(http.StripPrefix("/static/js/", http.FileServer(http.Dir("static/js/"))))
+	router.PathPrefix("/static/images/").Handler(http.StripPrefix("/static/images/", http.FileServer(http.Dir("static/images/"))))
+	router.PathPrefix("/static/sounds/").Handler(http.StripPrefix("/static/sounds/", http.FileServer(http.Dir("static/sounds/"))))
+
 	router.HandleFunc("/", RegisterHandler).Methods("GET", "POST")
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
@@ -50,12 +55,11 @@ func main() {
 	router.HandleFunc("/teaching", TeachingPageHandler).Methods("GET")
 	router.HandleFunc("/demonstration", DemonstrationTeachingPageHandler).Methods("GET")
 	router.HandleFunc("/api/words", WordsAPIHandler).Methods("GET")
-	router.PathPrefix("/images/").Handler(http.StripPrefix("/images/", http.FileServer(http.Dir("images/"))))
-	router.PathPrefix("/sounds/").Handler(http.StripPrefix("/sounds/", http.FileServer(http.Dir("sounds/"))))
 	router.HandleFunc("/api/get_user_login", GetUserLoginHandler).Methods("GET")
 	router.HandleFunc("/check-login", CheckLoginHandler).Methods("GET", "POST")
-	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
 	router.HandleFunc("/generate-captcha", GenerateCaptchaHandler).Methods("GET")
+
+	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)

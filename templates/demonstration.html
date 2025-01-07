@@ -3,373 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/global.css">
+    <link rel="stylesheet" href="/static/css/teaching.css">
+    <link rel="stylesheet" href="/static/css/demonstration.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
 
-    <style>
-        /* Стили остаются такими же, как были */
-        button {
-            cursor: pointer;
-        }
-
-        /* Стили для кнопок "Настроить изучаемые слова" и "Выйти из аккаунта" */
-        .control {
-            font-size: 1.5em;
-            padding: 5px 40px;
-            cursor: pointer;
-            margin-left: 0;
-            margin-right: 0;
-            background-color: #efbb51;
-            border-radius: 10px;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            font-weight: bold;
-            transition-delay: 0.8s;
-            transition: box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Переход с измененной длительностью и функцией времени */
-        }
-
-        .control:hover {
-            background-color: #efca86;
-            transform: scale(1.1);
-        }
-
-        .words-left {
-            text-decoration: none;
-            font-size: 1.7em;
-            color: #e1e1e1; /* Цвет для неактивных ссылок */
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Смещения, размытие и цвет тени */
-            padding: 10px;
-        }
-
-        body {
-            background-color: #da9bff;
-            color: white;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-        }
-
-        #central-content {
-            text-align: center;
-            position: relative;
-        }
-
-        .dinamik-and-translate {
-            padding: 10px;
-        }
-
-        #word-view #current-word { /* Стиль английского слова" */
-            font-size: 5em;
-            font-weight: bold;
-            margin: 2px;
-            color: #333; /* Цвет текста для лучшей читаемости на "бумаге" */
-        }
-
-        #transcription {
-            font-size: 2em;
-            color: #793785;
-            margin: 0px;
-        }
-
-        #translation-text {
-            font-size: 2.2em;
-            margin-top: 0px;
-            color: #3600c7;
-        }
-
-        #translation { /* Блок транскрипции и перевода */
-            margin-top: 20px;
-            visibility: hidden;
-            min-height: 100px; /* Минимальная высота для резервирования пространства */
-        }
-
-
-        .paper-display {
-            position: relative; /* Для использования псевдоэлемента */
-            background-color: white; /* Ярко выраженный белый фон */
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 0 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2d3ba;
-            margin: 10px auto;
-            width: 80%;
-            max-width: 600px;
-            font-family: 'Georgia', serif;
-            z-index: 1; /* Для обеспечения видимости текста над псевдоэлементом */
-            min-height: 220px; /* Задание начальной высоты */
-            height: auto; /* Позволяет блоку увеличиваться по мере добавления содержимого */
-
-        }
-
-        .paper-display::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('/images/paper-texture.png');
-            background-size: 350px 350px;
-            background-repeat: repeat;
-            opacity: 0.3; /* Прозрачность текстуры */
-            z-index: -1; /* Чтобы текстура была за текстом */
-            border-radius: 10px; /* Повторяем закругление углов */
-        }
-
-        img.button {
-            width: 120px;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-        img.button:hover {
-            opacity: 0.8;
-        }
-
-        img.not-active {
-            cursor: default;
-            opacity: 0.5;
-        }
-
-        #sound-icon {
-            width: 180px;
-            cursor: pointer;
-            display: block;
-            margin: 0 auto;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-
-        #sound-icon:hover {
-            opacity: 0.8;
-        }
-
-        #translate-icon {
-            width: 180px; /* Устанавливаем ширину только для этой иконки */
-            height: auto; /* Высота будет рассчитываться пропорционально ширине */
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-
-        .panel-top {
-            background-color: #a63ab2;
-            border-radius: 15px;
-            padding-top: 15px;
-            padding-bottom: 5px;
-            margin: 12px;
-            width: auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 3px solid #2d2d2d;
-        }
-
-        .panel-central {
-            background-color: #efbb51;
-            border-radius: 15px;
-            margin: 12px;
-            width: auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 3px solid #2d2d2d;
-            min-height: 520px;
-        }
-
-        .flipping {
-            height: 100px;
-        }
-
-        img.button, /* кнопка "Показать перевод*/
-        img.not-active {
-            width: 120px;
-            height: auto;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-        img.not-active {
-            cursor: default;
-            opacity: 0.5;
-        }
-
-        img.button:hover {
-            opacity: 0.8;
-        }
-
-
-        .commentary-on-training {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            color: #793785;
-            font-weight: bold;
-            padding: 0px;
-        }
-
-
-
-
-        /* Стили для модального окна */
-
-        /* Стили для модального окна */
-        #registration-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
-            z-index: 1001;
-            width: 500px;
-            max-width: 100%;
-            background-color: #7b007a;
-            border: 2px solid #dadada;
-        }
-
-        #registration-modal h2 {
-            text-align: center;
-            margin-top: 0px;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-            color: #ffffff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        #registration-modal form {
-            display: flex;
-            flex-direction: column;
-            gap: 11px;
-        }
-
-        #registration-modal form div {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        #registration-modal label {
-            font-size: 0.9em;
-            color: #ffdf71;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        #registration-modal input[type="text"],
-        #registration-modal input[type="password"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        #registration-modal button {
-            padding: 10px;
-            background-color: #ffd566;
-            color: #141414;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgb(18 18 18 / 50%);
-        }
-
-        #registration-modal button:hover {
-            background-color: #ffe398;
-        }
-
-        /* Стили для кнопки закрытия */
-        #registration-modal .close-btn {
-            text-align: right;
-
-        }
-
-        #registration-modal .close-btn button {
-            background-color: transparent;
-            color: #aaa;
-            border: none;
-            /* font-size: 1.5em; */
-            cursor: pointer;
-            font-weight: bold;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-
-
-            position: absolute;
-            top: 0px;
-            right: 15px;
-            font-size: 50px;
-
-
-        }
-
-        #registration-modal .close-btn button:hover {
-            color: #e7e7e7;
-
-        }
-
-        /* Стили для текста "Приложение абсолютно бесплатное!" */
-        #registration-modal p {
-            text-align: center;
-            color: #ffd74c;
-            font-size: 1.4em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            font-weight: bold;
-        }
-
-        /* Затемнение фона при открытом модальном окне */
-        #modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000; /* Позади модального окна */
-        }
-
-        .modal-text-error {
-            color: #f4ff00;
-            font-size: 1.2em;
-            display: block;
-            font-weight: bold;
-            text-align: center;
-            text-shadow: 1px 1px 4px rgba(0, 0, 0, 1);
-            margin-top: 0px;
-            padding-bottom: 10px;
-        }
-
-
-        #close-modal {
-            position: fixed; /* Фиксированное позиционирование относительно окна */
-            top: 10px; /* Отступ сверху */
-            right: 10px; /* Отступ справа */
-            background-color: transparent;
-            color: #aaa;
-            border: none;
-            font-size: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 1002; /* Чтобы быть поверх всех элементов */
-            display: none; /* Скрываем крестик по умолчанию */
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-        }
-
-        #close-modal:hover {
-            color: #e7e7e7;
-        }
-
-        .captcha-image {
-            align-items: center;
-        }
-
-        #captcha-image {
-            width: 250px;
-        }
-
-    </style>
-
     <script>
 
-        const clickSound = new Audio('/sounds/_click_sound.mp3');
+        const clickSound = new Audio('/static/sounds/_click_sound.mp3');
 
         function playClickSound() {
             clickSound.pause();
@@ -382,8 +24,7 @@
         });
 
 
-
-        const clickSoundError = new Audio('/sounds/_click_error.mp3');
+        const clickSoundError = new Audio('/static/sounds/_click_error.mp3');
 
         function playClickSoundError() {
             clickSoundError.pause();
@@ -423,9 +64,9 @@
                 const forwardIcon = document.getElementById("forward-icon");
 
                 if (currentIndex < words.length) {
-                    backIcon.src = currentIndex > 0 ? '/images/left.png' : '/images/left_not_active.png';
+                    backIcon.src = currentIndex > 0 ? '/static/images/left.png' : '/static/images/left_not_active.png';
                     backIcon.className = currentIndex > 0 ? 'button' : 'not-active';
-                    forwardIcon.src = currentIndex < words.length - 1 ? '/images/right.png' : '/images/right_not_active.png';
+                    forwardIcon.src = currentIndex < words.length - 1 ? '/static/images/right.png' : '/static/images/right_not_active.png';
                     forwardIcon.className = currentIndex < words.length - 1 ? 'button' : 'not-active';
                 }
 
@@ -438,7 +79,7 @@
             }
 
             function playSound(word) {
-                const audio = new Audio(`/sounds/${word}.mp3`);
+                const audio = new Audio(`/static/sounds/${word}.mp3`);
                 audio.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
             }
 
@@ -524,110 +165,97 @@
     </script>
 
     <script>
+        // Тут мы объединяем проверку паролей и отправку формы
+        async function validateAndSubmitForm(event) {
+            // Останавливаем стандартное поведение отправки формы
+            event.preventDefault();
+
+            // Тут получаем значения пароля и подтверждения пароля
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            // Тут находим элемент для вывода сообщения об ошибке
+            const errorMessage = document.getElementById("error-message");
+
+            // Проверяем, совпадают ли пароли
+            if (password !== confirmPassword) {
+                // Если пароли не совпадают, выводим сообщение и выходим из функции
+                playClickSoundError();
+                errorMessage.textContent = "Пароли не совпадают!";
+                return; // Тут мы говорим "остановись, не отправляй данные"
+            } else {
+                // Если все нормально, очищаем сообщение об ошибке
+                errorMessage.textContent = "";
+            }
+
+            // Оставновим выполнение кода дальше, если есть ошибка
+            if (errorMessage.textContent) {
+                return;
+            }
 
 
+            // отправка формы на сервер джаваскриптом через formdata, а если есть ошибки сервер нам шлет их через json
+            // Собираем данные из формы
+            const form = event.target;
+            const formData = new FormData(form);
 
+            try {
+                // Тут мы отправляем запрос на сервер
+                const response = await fetch(form.action, {
+                    method: form.method,
+                    body: formData, // Передаем данные из формы
+                });
 
+                // Проверяем успешность ответа от сервера
+                if (response.ok) {
+                    // Получаем результат в формате JSON
+                    const result = await response.json();
 
-
-
-            // Тут мы объединяем проверку паролей и отправку формы
-            async function validateAndSubmitForm(event) {
-                // Останавливаем стандартное поведение отправки формы
-                event.preventDefault();
-
-                // Тут получаем значения пароля и подтверждения пароля
-                const password = document.getElementById("password").value;
-                const confirmPassword = document.getElementById("confirmPassword").value;
-
-                // Тут находим элемент для вывода сообщения об ошибке
-                const errorMessage = document.getElementById("error-message");
-
-                // Проверяем, совпадают ли пароли
-                if (password !== confirmPassword) {
-                    // Если пароли не совпадают, выводим сообщение и выходим из функции
-                    playClickSoundError();
-                    errorMessage.textContent = "Пароли не совпадают!";
-                    return; // Тут мы говорим "остановись, не отправляй данные"
-                } else {
-                    // Если все нормально, очищаем сообщение об ошибке
-                    errorMessage.textContent = "";
-                }
-
-                // Оставновим выполнение кода дальше, если есть ошибка
-                if (errorMessage.textContent) {
-                    return;
-                }
-
-
-                // отправка формы на сервер джаваскриптом через formdata, а если есть ошибки сервер нам шлет их через json
-                // Собираем данные из формы
-                const form = event.target;
-                const formData = new FormData(form);
-
-                try {
-                    // Тут мы отправляем запрос на сервер
-                    const response = await fetch(form.action, {
-                        method: form.method,
-                        body: formData, // Передаем данные из формы
-                    });
-
-                    // Проверяем успешность ответа от сервера
-                    if (response.ok) {
-                        // Получаем результат в формате JSON
-                        const result = await response.json();
-
-                        // Проверяем, есть ли ошибка в результате
-                        if (result.error) {
-                            // Если ошибка есть, показываем сообщение
-                            playClickSoundError();
-                            errorMessage.textContent = result.error;
-                            reloadCaptcha();
-                        } else {
-                            // Если ошибки нет, перенаправляем на страницу профиля
-                            window.location.href = "/setting";
-                        }
-                    } else {
-                        // Если сервер вернул ошибку, показываем сообщение
+                    // Проверяем, есть ли ошибка в результате
+                    if (result.error) {
+                        // Если ошибка есть, показываем сообщение
                         playClickSoundError();
-                        errorMessage.textContent = "Ошибка на сервере. Попробуйте позже.";
+                        errorMessage.textContent = result.error;
                         reloadCaptcha();
+                    } else {
+                        // Если ошибки нет, перенаправляем на страницу профиля
+                        window.location.href = "/setting";
                     }
-                } catch (error) {
-                    // Тут мы обрабатываем ошибки соединения
-                    console.error("Ошибка:", error);
+                } else {
+                    // Если сервер вернул ошибку, показываем сообщение
                     playClickSoundError();
-                    errorMessage.textContent = "Ошибка. Проверьте подключение к интернету.";
+                    errorMessage.textContent = "Ошибка на сервере. Попробуйте позже.";
                     reloadCaptcha();
                 }
+            } catch (error) {
+                // Тут мы обрабатываем ошибки соединения
+                console.error("Ошибка:", error);
+                playClickSoundError();
+                errorMessage.textContent = "Ошибка. Проверьте подключение к интернету.";
+                reloadCaptcha();
             }
+        }
 
-            async function loadCaptcha() {
-                try {
-                    const response = await fetch("/generate-captcha");
-                    const data = await response.json();
-                    document.getElementById("captchaID").value = data.captchaID;
-                    document.getElementById("captcha-image").src = data.captchaURL;
-                } catch (error) {
-                    console.error("Ошибка загрузки капчи:", error);
-                }
+        async function loadCaptcha() {
+            try {
+                const response = await fetch("/generate-captcha");
+                const data = await response.json();
+                document.getElementById("captchaID").value = data.captchaID;
+                document.getElementById("captcha-image").src = data.captchaURL;
+            } catch (error) {
+                console.error("Ошибка загрузки капчи:", error);
             }
+        }
 
-            function reloadCaptcha() {
-                loadCaptcha();
-            }
+        function reloadCaptcha() {
+            loadCaptcha();
+        }
 
-            document.addEventListener("DOMContentLoaded", loadCaptcha);
-
-
+        document.addEventListener("DOMContentLoaded", loadCaptcha);
     </script>
-
 </head>
 
-<body>
-
-<audio id="click-sound" src="/sounds/_click_sound.mp3" preload="auto"></audio>
-
+<body class="teaching">
 <div id="central-content">
     <div class="panel-top">
         <div>
@@ -635,35 +263,29 @@
         </div>
         <div class="words-left">Осталось слов: <span id="words-left">0</span></div>
     </div>
-
     <div class="panel-central">
-
-
         <div class="paper-display">
-
-            <div class="commentary-on-training"><p>Прочтите правильно слово и переведите его. Если справились жмите стрелку вправо, если нет нажимайте на подсказки:</p></div>
-
+            <div class="commentary-on-training"><p>Прочтите правильно слово и переведите его. Если справились жмите
+                стрелку вправо, если нет нажимайте на подсказки:</p></div>
             <div id="word-view">
                 <p id="current-word"></p>
             </div>
 
-            <!-- Перенесенный блок для перевода -->
             <div id="translation"></div>
-
         </div>
 
         <div class="flipping">
-            <img id="back-icon" src="/images/left_not_active.png" alt="Back" class="not-active">
-            <img id="restart-icon" src="/images/restart.png" alt="Restart" class="button">
-            <img id="forward-icon" src="/images/right_not_active.png" alt="Forward" class="not-active">
+            <img id="back-icon" src="/static/images/left_not_active.png" alt="Back" class="not-active">
+            <img id="restart-icon" src="/static/images/restart.png" alt="Restart" class="button">
+            <img id="forward-icon" src="/static/images/right_not_active.png" alt="Forward" class="not-active">
         </div>
 
         <div class="dinamik-and-translate" style="text-align: center;">
             <div style="display: inline-block;">
-                <img id="sound-icon" src="/images/dinamik.png" alt="Play Sound">
+                <img id="sound-icon" src="/static/images/dinamik.png" alt="Play Sound">
             </div>
             <div style="display: inline-block;">
-                <img id="translate-icon" src="/images/translate.png" alt="Посмотреть перевод" class="button">
+                <img id="translate-icon" src="/static/images/translate.png" alt="Посмотреть перевод" class="button">
             </div>
         </div>
     </div>
@@ -671,13 +293,11 @@
 
 <button id="close-modal">&times;</button>
 
-<!-- Затемнение фона -->
 <div id="modal-overlay"></div>
 
-<!-- Всплывающее окно для регистрации -->
 <div id="registration-modal">
 
-    <h2>Чтобы добавить слова из базы, необходимо создать учетную запись</h2>
+    <h2>Чтобы избрать слова из базы, необходимо создать учетную запись</h2>
     <form method="POST" action="/" onsubmit="validateAndSubmitForm(event)">
         <div>
             <label for="login">Придумайте уникальный логин</label>
@@ -694,7 +314,7 @@
 
         <div id="captcha-container">
             <div class="captcha-image">
-            <img id="captcha-image" alt="Captcha"/>
+                <img id="captcha-image" alt="Captcha"/>
             </div>
             <button type="button" onclick="reloadCaptcha()">Обновить картинку</button>
         </div>
@@ -707,14 +327,10 @@
         <div class="button-enter">
             <button type="submit">Создать и войти</button>
         </div>
-
     </form>
-
     <!--
         <p>ПРИЛОЖЕНИЕ БЕСПЛАТНОЕ</p>
     -->
-    </div>
-
-    </body>
-
-    </html>
+</div>
+</body>
+</html>

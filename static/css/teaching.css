@@ -1,0 +1,180 @@
+body {
+    background-color: #da9bff;
+    color: white;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+#central-content {
+    text-align: center;
+    position: relative;
+}
+
+.control {
+    font-size: 1.5em;
+    padding: 5px 40px;
+    margin-left: 0;
+    margin-right: 0;
+    background-color: #efbb51;
+    border-radius: 10px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-weight: bold;
+    transition-delay: 0.8s;
+    transition: box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Переход с измененной длительностью и функцией времени */
+}
+
+.control:hover {
+    background-color: #efca86;
+    transform: scale(1.1);
+}
+
+.panel-top {
+    background-color: #a63ab2;
+    border-radius: 15px;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    margin: 12px;
+    width: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 3px solid #2d2d2d;
+}
+
+.words-left {
+    text-decoration: none;
+    font-size: 1.7em;
+    color: #e1e1e1;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+}
+
+.panel-central {
+    background-color: #efbb51;
+    border-radius: 15px;
+    margin: 12px;
+    width: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 3px solid #2d2d2d;
+    min-height: 520px;
+}
+
+.paper-display {
+    position: relative;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 0 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2d3ba;
+    margin: 10px auto;
+    width: 80%;
+    max-width: 600px;
+    font-family: 'Georgia', serif;
+    z-index: 1;
+    min-height: 220px;
+    height: auto;
+}
+
+.paper-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/static/images/paper-texture.png');
+    background-size: 350px 350px;
+    background-repeat: repeat;
+    opacity: 0.3;
+    z-index: -1;
+    border-radius: 10px;
+}
+
+.commentary-on-training {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    color: #793785;
+    font-weight: bold;
+    padding: 0px;
+}
+
+#word-view #current-word {
+    font-size: 5em;
+    font-weight: bold;
+    margin: 2px;
+    color: #333;
+}
+
+#transcription {
+    font-size: 2em;
+    color: #793785;
+    margin: 0px;
+}
+
+.flipping {
+    height: 100px;
+}
+
+.dinamik-and-translate {
+    padding: 10px;
+}
+
+#translation-text {
+    font-size: 2.2em;
+    margin-top: 0px;
+    color: #3600c7;
+}
+
+#translation {
+    margin-top: 20px;
+    visibility: hidden;
+    min-height: 100px;
+}
+
+img.button {
+    width: 120px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+img.button:hover {
+    opacity: 0.8;
+}
+
+img.not-active {
+    cursor: default;
+    opacity: 0.5;
+}
+
+#sound-icon {
+    width: 180px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#sound-icon:hover {
+    opacity: 0.8;
+}
+
+#translate-icon {
+    width: 180px;
+    height: auto;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+img.button,
+img.not-active {
+    width: 120px;
+    height: auto;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+img.not-active {
+    cursor: default;
+    opacity: 0.5;
+}
+
+img.button:hover {
+    opacity: 0.8;
+}
