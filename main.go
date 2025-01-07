@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -908,12 +909,18 @@ func DemonstrationTeachingPageHandler(w http.ResponseWriter, r *http.Request) {
 } //1 Демонстративная страница обучения
 
 func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthorized(r) {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
+	var userID int
+
+	fmt.Println(userID)
+
+	// Проверка авторизации
+	if isAuthorized(r) {
+		userID = getUserIDFromSession(r) // Получение userID из сессии
+	} else {
+		userID = 86 // Значение по умолчанию для незарегистрированных пользователей
 	}
 
-	userID := getUserIDFromSession(r)
+	fmt.Println(userID)
 
 	rows, err := Database.Query(`
 		SELECT ew.word, ew.transcription, ew.translation

@@ -60,7 +60,7 @@ body {
 .paper-display {
     position: relative;
     background-color: white;
-    padding: 20px;
+    padding: 5px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 0 15px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2d3ba;
