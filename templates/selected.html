@@ -19,7 +19,6 @@
             </table>
         </div>
         <div class="pagination">
-            <!-- Влево -->
             <div class="pagination-item">
                 {{if .HasPrev}}
                 <a href="{{.CurrentURL}}?page={{sub .Page 1}}" class="arrow-link arrow-link-left">
@@ -29,7 +28,6 @@
                 <span class="arrow-placeholder"></span>
                 {{end}}
             </div>
-            <!-- Новый элемент для "В начало" -->
             <div class="pagination-item-start">
                 {{if gt .Page 0}}
                 <a href="{{.CurrentURL}}?page=0" class="arrow-link">В начало</a>
@@ -38,7 +36,6 @@
                 <span class="arrow-placeholder2"></span>
                 {{end}}
             </div>
-            <!-- Вправо -->
             <div class="pagination-item">
                 {{if .HasNext}}
                 <a href="{{.CurrentURL}}?page={{add .Page 1}}" class="arrow-link arrow-link-right">

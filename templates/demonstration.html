@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/static/css/global.css">
@@ -11,7 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire - учим английский легко</title>
 </head>
-
 <body class="teaching">
 <div id="central-content">
     <div class="panel-top">
@@ -20,29 +18,21 @@
         </div>
         <div class="words-left">Осталось слов: <span id="words-left">0</span></div>
     </div>
-
     <div class="panel-central">
-
         <div class="paper-display">
-
             <div class="commentary-on-training"><p>Прочтите правильно слово и переведите его. Если справились жмите
                 стрелку вправо, если нет нажимайте на подсказки.</p></div>
             <div id="word-view">
-
                 <p id="current-word"></p>
                 <p id="loading">Загрузка данных...</p>
             </div>
-
             <div id="translation"></div>
-
         </div>
-
         <div class="flipping">
             <img id="back-icon" src="/static/images/left_not_active.png" alt="Back" class="not-active">
             <img id="restart-icon" src="/static/images/restart.png" alt="Restart" class="button">
             <img id="forward-icon" src="/static/images/right_not_active.png" alt="Forward" class="not-active">
         </div>
-
         <div class="dinamik-and-translate" style="text-align: center;">
             <div style="display: inline-block;">
                 <img id="sound-icon" src="/static/images/dinamik.png" alt="Play Sound">
@@ -53,13 +43,9 @@
         </div>
     </div>
 </div>
-
 <button id="close-modal">&times;</button>
-
 <div id="modal-overlay"></div>
-
 <div id="registration-modal">
-
     <h2>Чтобы избрать слова из базы, необходимо создать учетную запись</h2>
     <form method="POST" action="/" onsubmit="validateAndSubmitForm(event)">
         <div>
@@ -74,7 +60,6 @@
             <label for="confirmPassword">Повторите пароль</label>
             <input type="password" id="confirmPassword" name="confirm-password" required>
         </div>
-
         <div id="captcha-container">
             <div class="captcha-image">
                 <img id="captcha-image" alt="Captcha"/>
@@ -84,9 +69,7 @@
         <label for="password">Введите число с картинки</label>
         <input type="text" id="captchaValue" name="captchaValue" required>
         <input type="hidden" id="captchaID" name="captchaID">
-
         <div class="modal-text-error" id="error-message"></div>
-
         <div class="button-enter">
             <button type="submit">Создать и войти</button>
         </div>
