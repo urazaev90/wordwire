@@ -1,19 +1,11 @@
-h1 {
-    width: 40%;
-    margin: 0 auto;
-    text-align: center;
-    font-size: 1.8em;
-    font-weight: bold;
-}
-
 h2 {
-    font-size: 1.5em;
+    font-size: 2em;
     font-weight: bold;
 }
 
 body {
     scroll-behavior: smooth;
-    font-family: Arial, sans-serif;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
     color: #333;
     margin: 0;
     padding: 0;
@@ -60,17 +52,36 @@ body {
 }
 
 .section-main {
-    background-color: #dcdcdc;
+    background: linear-gradient(to bottom, #96713d, #f5e5b4);
     padding: 50px 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.section-main .text {
+    flex: 1;
+    text-align: left;
+    padding-left: 70px;
+}
+
+.section-main h1 {
+    margin: 0 auto;
+    font-size: 2.3em;
+    font-weight: bold;
 }
 
 .section-main h2 {
     font-weight: normal;
-    width: 70%;
-    margin: 0 auto;
-    text-align: center;
-    padding: 20px;
-    font-size: 1.4em;
+    width: 90%;
+    text-align: left;
+    font-size: 1.5em;
+}
+
+.section-main .image {
+    width: 500px;
+    height: auto;
+    transform: translateX(-100px);
 }
 
 .section-about-research {
@@ -78,10 +89,34 @@ body {
     background-color: #793785;
 }
 
+.section-about-research h2 {
+    font-size: 2em;
+    font-weight: bold;
+    color: #ffcc00;
+}
+
 .section-about-research .article {
-    width: 60%;
     margin: 0 auto;
-    font-size: 1.3em;
+    font-size: 1.6em;
+    display: grid;
+    place-items: center;
+}
+
+.section-about-research .article .paragraph {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 250px;
+}
+
+.section-about-research .article .text {
+    flex: 1;
+    max-width: 800px;
+    text-align: left;
+}
+
+.section-about-research .article .paragraph .image {
+    width: 220px;
 }
 
 .section-peculiarities {
@@ -96,12 +131,13 @@ body {
 
 .section-peculiarities .article .list-item img {
     vertical-align: middle;
-    width: 40px;
+    width: 70px;
 }
 
 .section-peculiarities .article .list-item {
-    margin: 15px 0;
-    font-size: 1.1em;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    font-size: 1.6em;
     display: inline-block;
     vertical-align: middle;
 }
@@ -109,10 +145,22 @@ body {
 .section-about-process {
     background-color: #793785;
     color: #fff;
+    display: grid;
+    place-items: center;
+}
+
+.section-about-process .article {
+    width: 70%;
+    font-size: 1.6em;
 }
 
 .section-registration {
     background-color: #e1e1e1;
+}
+
+.section-registration .text {
+    font-size: 1.6em;
+    padding-bottom: 50px;
 }
 
 .form-container {

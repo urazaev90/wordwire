@@ -1,13 +1,13 @@
 const clickSound = new Audio('/static/sounds/_click_sound.mp3');
 
 function playClickSound() {
-    clickSound.pause(); // Останавливаем звук, если он уже воспроизводится
-    clickSound.currentTime = 0; // Сбрасываем звук в начало
+    clickSound.pause();
+    clickSound.currentTime = 0;
     clickSound.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
 }
 
 window.addEventListener("load", () => {
-    playClickSound(); // Воспроизведение звука при загрузке страницы
+    playClickSound();
 });
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('confirm-logout').addEventListener('click', function () {
         playClickSound();
-        fetch('/logout', {method: 'POST'})  // Обращаемся к вашему обработчику выхода
+        fetch('/logout', {method: 'POST'})
             .then(() => {
-                window.location.href = '/';  // Перенаправляем пользователя на главную страницу после выхода
+                window.location.href = '/';
             });
     });
 

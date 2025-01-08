@@ -40,6 +40,14 @@ func main() {
 
 	router := mux.NewRouter()
 
+	router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "robots.txt")
+	}).Methods("GET")
+
+	router.HandleFunc("/sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "sitemap.xml")
+	}).Methods("GET")
+
 	router.PathPrefix("/static/css/").Handler(http.StripPrefix("/static/css/", http.FileServer(http.Dir("static/css/"))))
 	router.PathPrefix("/static/js/").Handler(http.StripPrefix("/static/js/", http.FileServer(http.Dir("static/js/"))))
 	router.PathPrefix("/static/images/").Handler(http.StripPrefix("/static/images/", http.FileServer(http.Dir("static/images/"))))
@@ -62,80 +70,10 @@ func main() {
 
 	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
 
+	router.NotFoundHandler = http.HandlerFunc(customNotFoundHandler)
+
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
-}
-
-func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var data struct {
-		Login string `json:"login"`
-	}
-
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
-		return
-	}
-
-	var existingUser string
-	err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", data.Login).Scan(&existingUser)
-	if err == nil {
-		// Логин занят
-		json.NewEncoder(w).Encode(map[string]bool{"isTaken": true})
-		return
-	}
-
-	if err == sql.ErrNoRows {
-		// Логин свободен
-		json.NewEncoder(w).Encode(map[string]bool{"isTaken": false})
-		return
-	}
-
-	http.Error(w, "Database error", http.StatusInternalServerError)
-} //проверка при регистрации не занят ли логин во всплывающем окне в демонстрационной странице
-
-func RestartSoundHandler(w http.ResponseWriter, r *http.Request) {
-	// Просто возвращаем статус 200 для подтверждения нажатия
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-}
-
-func isAuthorized(r *http.Request) bool {
-	session, _ := store.Get(r, "session-name")
-	userID, ok := session.Values["user_id"].(int)
-	if ok {
-		updateLastVisitDate(userID)
-	}
-	return ok
-} //сообщает статус посетителя на авторизацию
-
-func updateLastVisitDate(userID int) {
-	_, err := Database.Exec(`
-		UPDATE user_accounts 
-		SET last_visit_date = $1 
-		WHERE id = $2`,
-		time.Now().Format("2006-01-02"), userID)
-	if err != nil {
-		log.Println("Error updating last visit date:", err)
-	}
-} //записывает дату последнего посещения пользователя (в SQL)
-
-func GenerateCaptchaHandler(w http.ResponseWriter, r *http.Request) {
-	captchaID := captcha.New() // Создаем новую капчу
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"captchaID":  captchaID,                        // Отправляем клиенту ID капчи
-		"captchaURL": "/captcha/" + captchaID + ".png", // Ссылка на изображение капчи
-	})
-}
-
-func VerifyCaptcha(captchaID, captchaValue string) bool {
-	return captcha.VerifyString(captchaID, captchaValue) // Проверяем правильность введенного значения
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -250,6 +188,80 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
 } // 1 Регистрация нового пользователя (главная стр.)
 
+func GenerateCaptchaHandler(w http.ResponseWriter, r *http.Request) {
+	captchaID := captcha.New() // Создаем новую капчу
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"captchaID":  captchaID,                        // Отправляем клиенту ID капчи
+		"captchaURL": "/captcha/" + captchaID + ".png", // Ссылка на изображение капчи
+	})
+} //генератор капчи
+
+func VerifyCaptcha(captchaID, captchaValue string) bool {
+	return captcha.VerifyString(captchaID, captchaValue) // Проверяем правильность введенного значения
+} //проверка капчи
+
+func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var data struct {
+		Login string `json:"login"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	var existingUser string
+	err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", data.Login).Scan(&existingUser)
+	if err == nil {
+		// Логин занят
+		json.NewEncoder(w).Encode(map[string]bool{"isTaken": true})
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		// Логин свободен
+		json.NewEncoder(w).Encode(map[string]bool{"isTaken": false})
+		return
+	}
+
+	http.Error(w, "Database error", http.StatusInternalServerError)
+} //проверка при регистрации не занят ли логин во всплывающем окне в демонстрационной странице
+
+func isAuthorized(r *http.Request) bool {
+	session, _ := store.Get(r, "session-name")
+	userID, ok := session.Values["user_id"].(int)
+	if ok {
+		updateLastVisitDate(userID)
+	}
+	return ok
+} //обработчик проверяющий авторизирован ли посетитель или нет
+
+func customNotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	if isAuthorized(r) {
+		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+} //обработчик при переходах на несуществующие ссылки
+
+func updateLastVisitDate(userID int) {
+	_, err := Database.Exec(`
+		UPDATE user_accounts 
+		SET last_visit_date = $1 
+		WHERE id = $2`,
+		time.Now().Format("2006-01-02"), userID)
+	if err != nil {
+		log.Println("Error updating last visit date:", err)
+	}
+} //записывает дату последнего посещения пользователя (в SQL)
+
 func loadNextWordForUser(userID int) error {
 	// Выполняем запрос для добавления следующего слова
 	_, err := Database.Exec(`
@@ -262,7 +274,7 @@ func loadNextWordForUser(userID int) error {
     `, userID)
 
 	return err
-}
+} //пагинатор архива (надо уточнить)
 
 func loadNextPageWordsForUser(userID int) error {
 	// Выполняем запрос для добавления 10 следующих слов
@@ -276,9 +288,9 @@ func loadNextPageWordsForUser(userID int) error {
     `, userID)
 
 	return err
-}
+} //пагинатор основного словаря (надо уточнить)
 
-var loginAttempts = make(map[string]int) // Карта для отслеживания попыток логина по IP
+var loginAttempts = make(map[string]int) // Карта для отслеживания попыток авторизации
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -379,7 +391,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{"success": "true"})
 	}
-} // 1 Вход в аккаунт
+} // 1 авторизация
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
@@ -388,7 +400,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Изменяем перенаправление на "/"
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-} //1 Выйти из аккаунта
+} //1 деавториция
 
 func getUserIDFromSession(r *http.Request) int {
 	session, _ := store.Get(r, "session-name")
@@ -981,4 +993,4 @@ func GetUserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	response := map[string]string{"login": login}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
-}
+} //получение имени логина клиенту
