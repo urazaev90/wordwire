@@ -931,7 +931,7 @@ func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	if isAuthorized(r) {
 		userID = getUserIDFromSession(r) // Получение userID из сессии
 	} else {
-		userID = 86 // Значение по умолчанию для незарегистрированных пользователей
+		userID = 1 // Значение по умолчанию для незарегистрированных пользователей
 	}
 
 	rows, err := Database.Query(`
