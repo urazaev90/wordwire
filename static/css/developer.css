@@ -1,0 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+    place-items: center;
+}
+
+h1 {
+    font-size: 1.5em;
+}
+
+.article {
+    text-align: center;
+    width: 50%;
+    font-size: 1.2em;
+}
+
+.image {
+    width: 300px;
+}
+
+.article div {
+    margin-bottom: 1em;
+}
+
+p {
+    margin: 1px;
+}
+
+.container {
+    padding-bottom: 50px;
+}

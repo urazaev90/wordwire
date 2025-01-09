@@ -70,7 +70,10 @@ func main() {
 
 	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
 
-	router.NotFoundHandler = http.HandlerFunc(customNotFoundHandler)
+	router.HandleFunc("/developer", func(w http.ResponseWriter, r *http.Request) {
+		tmpl := template.Must(template.ParseFiles("templates/developer.html"))
+		tmpl.Execute(w, nil)
+	})
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", router)

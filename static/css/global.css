@@ -16,10 +16,21 @@ button {
     background-color: #333;
     color: #fff;
     text-align: center;
-    padding: 20px 0;
+    padding: 40px 0;
 }
 
 .footer p {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
     margin: 0;
     font-size: 0.9em;
+}
+
+.footer a {
+    color: inherit; /* Наследовать цвет текста */
+    text-decoration: none; /* Убрать подчеркивание */
+}
+
+.footer a:hover {
+
+    opacity: 0.6; /* Сделать прозрачным на 60% */
 }
