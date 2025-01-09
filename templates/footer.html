@@ -1,20 +1,42 @@
 <footer>
     <div class="contentfooter">
         <div class="wordwire-footer">
-            <p><a href="javascript:void(0)" id="logout-link">Выйти из аккаунта</a></p>
+            <p><a href="javascript:void(0)" id="thankyou">Поблагодарить разработчика</a> |
+            <a href="javascript:void(0)" id="logout-link">Выйти из аккаунта</a>
             <p>Created by Urazaev Amir. Powered by Golang, PostgreSQL.<br>WordWire © 2025</p>
         </div>
     </div>
-    <div id="logout-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <p>Если вы действительно хотите выйти из аккаунта на этом устройстве, запомните ваш логин "<span
-                    id="user-login"></span>" (а свой пароль вы должны знать). Подтвердите выход нажатием на кнопку "Хочу
-                выйти".</p>
-            <div class="modal-footer">
-                <button id="confirm-logout" class="btn btn-confirm">Хочу выйти</button>
-                <button id="cancel-logout" class="btn btn-cancel">Отмена</button>
+
+    <div class="logout-link">
+        <script src="/static/js/modal-logout.js" defer></script>
+        <div id="logout-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <p>Если вы действительно хотите выйти из аккаунта на этом устройстве, запомните ваш логин "<span
+                        id="user-login"></span>" (а свой пароль вы должны знать). Подтвердите выход нажатием на кнопку
+                    "Хочу
+                    выйти".</p>
+                <div class="modal-footer">
+                    <button id="confirm-logout" class="btn btn-confirm">Хочу выйти</button>
+                    <button id="cancel-logout" class="btn btn-cancel">Отмена</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="thankyou">
+        <script src="/static/js/modal-thankyou.js" defer></script>
+        <div id="thankyou-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                </p></p>
+                <p><b>Карта Сбербанк:</b></p>
+                <p>2202 2080 0801 8054</p>
+                </p></p>
+                <p><a href="https://yookassa.ru/my/i/Z3-lXRrSfQSl/l" target="_blank">Перевести картой</a></p>
+                </p></p>
+            </div>
+        </div>
+    </div>
+
 </footer>

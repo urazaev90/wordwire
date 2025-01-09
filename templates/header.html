@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/static/css/global.css">
-    <link rel="stylesheet" href="/static/css/setting.css">
+    <link rel="stylesheet" href="/static/css/cabinet.css">
     <script src="/static/js/cabinet.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire – учите английские слова с легкостью</title>
@@ -20,9 +20,9 @@
         <div class="top-buttons">
             <button class="large-button" onclick="location.href='/teaching'">Перейти к обучению🧑‍🎓</button>
         </div>
-        <div class="settings-container">
+        <div class="dictionary-container">
             <p>
-                <a href="/setting" class="{{if eq .CurrentURL "/setting"}}active-link{{else}}inactive-link{{end}}">Весь
+                <a href="/dictionary" class="{{if eq .CurrentURL "/dictionary"}}active-link{{else}}inactive-link{{end}}">Весь
                 словарь</a>
                 <br/>
                 <a href="/archive" class="{{if eq .CurrentURL "/archive"}}active-link{{else}}inactive-link{{end}}">Ваш

@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const wordId = event.target.name;
             const label = event.target.checked ? 2 : 1;
 
-            fetch(`/setting`, {
+            fetch(`/dictionary`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'

@@ -56,7 +56,7 @@ func main() {
 	router.HandleFunc("/", RegisterHandler).Methods("GET", "POST")
 	router.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/logout", LogoutHandler).Methods("POST")
-	router.HandleFunc("/setting", SettingHandler).Methods("GET", "POST")
+	router.HandleFunc("/dictionary", DictionaryHandler).Methods("GET", "POST")
 	router.HandleFunc("/selected", SelectedHandler).Methods("GET", "POST")
 	router.HandleFunc("/archive", ArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/remove_from_archive", RemoveFromArchiveHandler).Methods("GET", "POST")
@@ -414,7 +414,7 @@ func getUserIDFromSession(r *http.Request) int {
 	return userID
 } //вещание id авторизированного пользователя
 
-func SettingHandler(w http.ResponseWriter, r *http.Request) {
+func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -511,10 +511,10 @@ func SettingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, tmplErr := template.New("setting.html").Funcs(template.FuncMap{
+	tmpl, tmplErr := template.New("dictionary.html").Funcs(template.FuncMap{
 		"add": func(a, b int) int { return a + b },
 		"sub": func(a, b int) int { return a - b },
-	}).ParseFiles("templates/header.html", "templates/setting.html", "templates/footer.html")
+	}).ParseFiles("templates/header.html", "templates/dictionary.html", "templates/footer.html")
 	if tmplErr != nil {
 		http.Error(w, "Cannot parse template", http.StatusInternalServerError)
 		return
