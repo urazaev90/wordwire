@@ -77,8 +77,8 @@ func main() {
 		tmpl.Execute(w, nil)
 	})
 
-	log.Println("Server started at :8080")
-	http.ListenAndServe(":8080", router)
+	log.Println("Server started at :8081")
+	http.ListenAndServe(":8081", router)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
