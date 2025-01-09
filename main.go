@@ -68,6 +68,8 @@ func main() {
 	router.HandleFunc("/check-login", CheckLoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/generate-captcha", GenerateCaptchaHandler).Methods("GET")
 
+	router.NotFoundHandler = http.HandlerFunc(customNotFoundHandler)
+
 	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
 
 	router.HandleFunc("/developer", func(w http.ResponseWriter, r *http.Request) {

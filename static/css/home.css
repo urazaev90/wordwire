@@ -55,11 +55,20 @@ body {
 }
 
 .section-main {
-    background: linear-gradient(to bottom, #96713d, #f5e5b4);
+    background: linear-gradient(to bottom, #689afb, #f5e5b4);
     padding: 50px 0;
     display: flex;
     align-items: center;
     gap: 20px;
+    justify-content: center
+}
+
+.section-main .content-text {
+    text-align: right;
+}
+
+.section-main .content-image {
+    text-align: left;
 }
 
 .section-main .text {

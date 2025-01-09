@@ -1,14 +1,15 @@
 <footer>
+    <script src="/static/js/modal-window.js" defer></script>
+    <script src="/static/js/setup-modal-window.js" defer></script>
+
     <div class="contentfooter">
         <div class="wordwire-footer">
             <p><a href="javascript:void(0)" id="thankyou">Поблагодарить разработчика</a> |
             <a href="javascript:void(0)" id="logout-link">Выйти из аккаунта</a>
-            <p>Created by Urazaev Amir. Powered by Golang, PostgreSQL.<br>WordWire © 2025</p>
+            <p>Created by <a href="/developer" target="_blank">Urazaev Amir</a>. Powered by Golang, PostgreSQL.<br>WordWire © 2025</p>
         </div>
     </div>
 
-    <div class="logout-link">
-        <script src="/static/js/modal-logout.js" defer></script>
         <div id="logout-modal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -22,10 +23,7 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="thankyou">
-        <script src="/static/js/modal-thankyou.js" defer></script>
         <div id="thankyou-modal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -37,6 +35,5 @@
                 </p></p>
             </div>
         </div>
-    </div>
 
 </footer>
