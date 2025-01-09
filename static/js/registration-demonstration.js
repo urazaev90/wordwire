@@ -4,6 +4,8 @@ async function validateAndSubmitForm(event) {
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
     const errorMessage = document.getElementById("error-message");
+    const form = event.target;
+    const formData = new FormData(form);
 
     if (password !== confirmPassword) {
         playClickSoundError();
@@ -16,9 +18,6 @@ async function validateAndSubmitForm(event) {
     if (errorMessage.textContent) {
         return;
     }
-
-    const form = event.target;
-    const formData = new FormData(form);
 
     try {
         const response = await fetch(form.action, {
