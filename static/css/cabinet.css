@@ -1,7 +1,18 @@
+@media (min-width: 640px) {
+    body {
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+}
+
+@media (max-width: 639px) {
+    body {
+        font-family: 'Montserrat', sans-serif;
+    }
+}
+
 body {
     background-color: #da9bff;
     color: #e1e1e1;
-    font-family: 'Montserrat', sans-serif;
 }
 
 .contentheader {
@@ -35,15 +46,34 @@ body {
     top: 0;
 }
 
+@media (min-width: 640px) {
+    .large-button {
+        font-size: 1.5em;
+        padding: 5px 40px;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+
+    .large-button:hover {
+        transform: scale(1.1);
+    }
+}
+
+@media (max-width: 639px) {
+    .large-button {
+        font-size: 1.1em;
+        padding: 5px 10px;
+        font-family: 'Montserrat', sans-serif;
+    }
+}
+
+
 .large-button {
-    font-size: 1.5em;
-    padding: 5px 40px;
     cursor: pointer;
     margin-left: 0;
     margin-right: 0;
     background-color: #efbb51;
     border-radius: 10px;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+
     font-weight: bold;
     transition-delay: 0.8s;
     transition: box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -51,7 +81,6 @@ body {
 
 .large-button:hover, .exit-button:hover {
     background-color: #efca86;
-    transform: scale(1.1);
 }
 
 .exit-button {

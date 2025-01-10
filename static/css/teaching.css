@@ -14,6 +14,7 @@ body {
     .control {
         font-size: 1.5em;
         padding: 5px 40px;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
     }
 
     .control:hover {
@@ -25,6 +26,7 @@ body {
     .control {
         font-size: 1.1em;
         padding: 5px 10px;
+        font-family: 'Montserrat', sans-serif;
     }
 }
 
@@ -123,6 +125,19 @@ body {
     border-radius: 10px;
 }
 
+@media (min-width: 640px) {
+    .commentary-on-training{
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+}
+
+@media (max-width: 639px) {
+    .commentary-on-training {
+        font-family: 'Montserrat', sans-serif;
+    }
+}
+
+
 .commentary-on-training {
     color: #793785;
     font-weight: bold;
@@ -164,7 +179,6 @@ body {
 }
 
 #translation {
-    margin-top: 20px;
     visibility: hidden;
     min-height: 100px;
 }
