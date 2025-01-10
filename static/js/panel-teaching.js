@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Ошибка:", error);
             document.getElementById("loading").style.display = "none";
             document.getElementById("current-word").style.display = "block";
-            document.getElementById("current-word").textContent = "Не выбрано ни одного слова.";
+            document.getElementById("current-word").textContent = "Добавьте слова";
         }
     }
 
