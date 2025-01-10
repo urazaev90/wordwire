@@ -10,9 +10,25 @@ body {
     place-items: center;
 }
 
+@media (min-width: 640px) {
+    .control {
+        font-size: 1.5em;
+        padding: 5px 40px;
+    }
+
+    .control:hover {
+        transform: scale(1.1);
+    }
+}
+
+@media (max-width: 639px) {
+    .control {
+        font-size: 1.1em;
+        padding: 5px 10px;
+    }
+}
+
 .control {
-    font-size: 1.5em;
-    padding: 5px 40px;
     margin-left: 0;
     margin-right: 0;
     background-color: #efbb51;
@@ -24,7 +40,6 @@ body {
 
 .control:hover {
     background-color: #efca86;
-    transform: scale(1.1);
 }
 
 .panel-top {
@@ -58,6 +73,18 @@ body {
     place-items: center;
 }
 
+@media (min-width: 640px) {
+    .paper-display {
+        max-width: 600px;
+    }
+}
+
+@media (max-width: 639px) {
+    .paper-display {
+        max-width: 85%;
+    }
+}
+
 .paper-display {
     position: relative;
     background-color: white;
@@ -66,11 +93,9 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 0 15px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2d3ba;
     margin: 10px auto;
-    width: 80%;
-    max-width: 600px;
+    width: 85%;
     z-index: 1;
     min-height: 220px;
-    height: auto;
 }
 
 .paper-display::before {
