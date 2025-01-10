@@ -1,11 +1,3 @@
-const clickSoundError = new Audio('/static/sounds/_click_error.mp3');
-
-function playClickSoundError() {
-    clickSoundError.pause();
-    clickSoundError.currentTime = 0;
-    clickSoundError.play().catch(error => console.error("Ошибка воспроизведения звука:", error));
-}
-
 document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById('registration-modal');
     const overlay = document.getElementById('modal-overlay');
