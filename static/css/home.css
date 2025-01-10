@@ -13,36 +13,47 @@ body {
     margin: 0;
     padding: 0;
     font-size: 1em;
+    height: 100%;
 }
 
 .sticky-header {
-    position: fixed;
+    position: sticky;
     top: 0;
-    background-color: #333;
-    padding: 10px 0;
-    z-index: 1000;
-    width: 100vw;
-    text-align: center;
+    background-color: white; /* Цвет фона для липкого хедера */
+    z-index: 1000; /* Убедитесь, что он перекрывает другие элементы */
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Небольшая тень для разделения */
 }
 
 .sticky-header-buttons {
     display: flex;
-    justify-content: center;
-    gap: 20px;
+    gap: 10px; /* Отступы между кнопками */
+    width: 100%;
+    max-width: 800px; /* Опционально: ограничить максимальную ширину */
 }
 
-.sticky-header-buttons a button {
-    font-size: 0.8em;
-    background-color: #a63ab2;
+.sticky-header-buttons button {
+    flex: 1; /* Автоматически делает кнопки одинаковой ширины */
+    padding: 10px 15px; /* Отступы внутри кнопок */
+    font-size: 16px;
+    cursor: pointer;
     border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    color: #fff;
-    font-weight: bold;
+    border-radius: 5px;
+    background-color: #007BFF; /* Цвет фона кнопок */
+    color: white;
+    transition: background-color 0.3s;
 }
 
-.sticky-header-buttons a button:hover {
-    background-color: #d86ae7;
+.sticky-header-buttons button:hover {
+    background-color: #0056b3; /* Цвет фона при наведении */
+}
+
+.sticky-header-buttons a {
+    text-decoration: none; /* Убираем подчеркивание ссылок */
+    display: flex; /* Чтобы кнопки правильно выровнялись */
+    flex: 1; /* Заставляем ссылки занимать всю ширину кнопки */
 }
 
 .sticky-header-spacer {
