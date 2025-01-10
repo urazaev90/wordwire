@@ -54,6 +54,18 @@ body {
     text-align: center;
 }
 
+@media (min-width: 640px) {
+    .section-main {
+
+    }
+}
+
+@media (max-width: 639px) {
+    .section-main {
+        flex-direction: column;
+    }
+}
+
 .section-main {
     background: linear-gradient(to bottom, #689afb, #f5e5b4);
     padding: 50px 0;
@@ -71,10 +83,22 @@ body {
     text-align: left;
 }
 
+@media (min-width: 640px) {
+    .section-main .text {
+        text-align: left;
+        padding-left: 180px;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-main .text {
+        text-align: center;
+        place-items: center;
+    }
+}
+
 .section-main .text {
     flex: 1;
-    text-align: left;
-    padding-left: 180px;
 }
 
 .section-main h1 {
@@ -83,17 +107,40 @@ body {
     font-weight: bold;
 }
 
+@media (min-width: 640px) {
+    .section-main h2 {
+        text-align: left;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-main h2 {
+        text-align: center;
+    }
+}
+
 .section-main h2 {
     font-weight: normal;
     width: 90%;
-    text-align: left;
     font-size: 1.5em;
 }
 
+@media (min-width: 640px) {
+    .section-main .image {
+        padding-right: 200px;
+        width: 500px;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-main .image {
+        width: 300px;
+    }
+}
+
 .section-main .image {
-    width: 500px;
+
     height: auto;
-    padding-right: 200px;
 }
 
 .section-about-research {
