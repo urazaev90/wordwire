@@ -7,6 +7,7 @@ body {
 #central-content {
     text-align: center;
     position: relative;
+    place-items: center;
 }
 
 .control {
@@ -32,7 +33,7 @@ body {
     padding-top: 15px;
     padding-bottom: 5px;
     margin: 12px;
-    width: auto;
+    width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 3px solid #2d2d2d;
 }
@@ -50,10 +51,11 @@ body {
     background-color: #efbb51;
     border-radius: 15px;
     margin: 12px;
-    width: auto;
+    width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 3px solid #2d2d2d;
     min-height: 520px;
+    place-items: center;
 }
 
 .paper-display {
@@ -105,12 +107,16 @@ body {
     margin: 0px;
 }
 
-.flipping {
-    height: 100px;
+@media (min-width: 640px) {
+    .flipping {
+        width: 400px;
+    }
 }
 
-.dinamik-and-translate {
-    padding: 10px;
+@media (max-width: 639px) {
+    .flipping {
+        width: 100%;
+    }
 }
 
 #translation-text {
@@ -126,7 +132,7 @@ body {
 }
 
 img.button {
-    width: 120px;
+    width: 30%;
     cursor: pointer;
     transition: opacity 0.2s ease;
 }
@@ -136,40 +142,13 @@ img.button:hover {
 }
 
 img.not-active {
-    cursor: default;
+    width: 30%;
     opacity: 0.5;
-}
-
-#sound-icon {
-    width: 180px;
-    cursor: pointer;
-    display: block;
-    margin: 0 auto;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-#sound-icon:hover {
-    opacity: 0.8;
-}
-
-#translate-icon {
-    width: 180px;
-    height: auto;
-    cursor: pointer;
     transition: opacity 0.2s ease;
 }
 
-img.button,
-img.not-active {
-    width: 120px;
-    height: auto;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-}
-
-img.not-active {
-    cursor: default;
-    opacity: 0.5;
+#sound-icon, #translate-icon {
+    width: 45%;
 }
 
 img.button:hover {
