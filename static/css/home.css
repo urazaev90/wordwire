@@ -28,8 +28,17 @@ body {
     font-size: 1em;
 }
 
+
+
+
+
+
+
+
+
+
 @media (min-width: 640px) {
-    .sticky-header {
+    .section-sticky-header {
         position: sticky;
         display: flex;
         top: 0;
@@ -40,93 +49,111 @@ body {
 }
 
 @media (max-width: 639px) {
-    .sticky-header {
+    .section-sticky-header {
         display: none;
     }
 }
 
-@media (min-width: 640px) {
-    .sticky-header-mobile {
-        display: none;
-    }
-}
-
-@media (max-width: 639px) {
-    .sticky-header-mobile {
-        display: flex;
-        z-index: 1000;
-        justify-content: center;
-        padding: 10px;
-
-    }
-}
-
-@media (min-width: 640px) {
-    .sticky-header-buttons {
-        opacity: 0.85;
-        font-family: 'Comic Sans MS', cursive, sans-serif;
-    }
-}
-
-@media (max-width: 639px) {
-    .sticky-header-buttons {
-        flex-wrap: wrap;
-        font-family: 'Montserrat', sans-serif;
-    }
-}
-
-.sticky-header-buttons {
+.section-sticky-header .sticky-header {
+    opacity: 0.85;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
     display: flex;
     gap: 10px; /* Отступы между кнопками */
     width: 100%;
     max-width: 800px; /* Опционально: ограничить максимальную ширину */
 }
 
-
-.sticky-header-buttons button {
-
-}
-
-
-@media (min-width: 640px) {
-    .sticky-header-buttons button {
-        background-color: #f4ff00;
-        border-radius: 5px;
-        padding: 10px 15px;
-        font-size: 0.9em;
-    }
-}
-
-@media (max-width: 639px) {
-    .sticky-header-buttons button {
-        background-color: #efbb51;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 25px;
-        font-weight: bold;
-        font-size: 0.85em;
-    }
-}
-
-
-.sticky-header-buttons button {
+.section-sticky-header .sticky-header button {
+    background-color: #f4ff00;
+    border-radius: 5px;
+    padding: 10px 15px;
     flex: 1;
-
-    cursor: pointer;
-    border: 1px solid black;
     color: #000000;
     transition: background-color 0.3s;
+    border: none;
+    font-size: 0.9em;
 }
 
-.sticky-header-buttons button:hover {
-    background-color: #0056b3;
+.section-sticky-header .sticky-header button:hover {
+    background-color: #9ca211;
 }
 
-.sticky-header-buttons a {
+.section-sticky-header .sticky-header a {
     text-decoration: none;
     display: flex;
     flex: 1;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (min-width: 640px) {
+    .section-main .block-demoentryregistration {
+        display: none;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-main .block-demoentryregistration {
+        display: flex;
+        z-index: 1000;
+        justify-content: center;
+        padding: 10px;
+    }
+}
+
+.section-main .block-demoentryregistration .demoentryregistration {
+    flex-wrap: wrap;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    gap: 10px; /* Отступы между кнопками */
+    width: 100%;
+    max-width: 800px; /* Опционально: ограничить максимальную ширину */
+}
+
+.section-main .block-demoentryregistration .demoentryregistration button {
+    background-color: #efbb51;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    flex: 1;
+    border: 1px solid black;
+    color: #000000;
+    transition: background-color 0.3s;
+    font-size: 0.85em;
+}
+
+
+
+.section-main .block-demoentryregistration .demoentryregistration a {
+    text-decoration: none;
+    display: flex;
+    flex: 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .section {
@@ -379,16 +406,6 @@ body {
     font-size: 1.6em;
     padding-bottom: 50px;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 .form-container {
