@@ -5,27 +5,60 @@ h2 {
 
 html {
     scroll-behavior: smooth;
-
 }
 
 body {
     font-family: 'Comic Sans MS', cursive, sans-serif;
     color: #333;
-    margin: 0;
+
     padding: 0;
     font-size: 1em;
-
+    margin: -60px;
 }
 
-.sticky-header {
-    position: sticky !important;
-    top: 0;
-    background-color: white; /* Цвет фона для липкого хедера */
-    z-index: 1000; /* Убедитесь, что он перекрывает другие элементы */
-    display: flex;
-    justify-content: center;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Небольшая тень для разделения */
+@media (min-width: 640px) {
+    .sticky-header {
+        position: sticky;
+        display: flex;
+        top: 0;
+        z-index: 1000;
+        justify-content: center;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 639px) {
+    .sticky-header {
+        display: none;
+    }
+}
+
+@media (min-width: 640px) {
+    .sticky-header2 {
+        display: none;
+    }
+}
+
+@media (max-width: 639px) {
+    .sticky-header2 {
+        display: flex;
+        z-index: 1000;
+        justify-content: center;
+        padding: 10px;
+
+    }
+}
+
+@media (min-width: 640px) {
+    .sticky-header-buttons {
+        opacity: 0.85;
+    }
+}
+
+@media (max-width: 639px) {
+    .sticky-header-buttons {
+        flex-wrap: wrap;
+    }
 }
 
 .sticky-header-buttons {
@@ -40,10 +73,10 @@ body {
     padding: 10px 15px; /* Отступы внутри кнопок */
     font-size: 16px;
     cursor: pointer;
-    border: none;
+    border: 1px solid black;
     border-radius: 5px;
-    background-color: #007BFF; /* Цвет фона кнопок */
-    color: white;
+    background-color: #ff3d00; /* Цвет фона кнопок */
+    color: #000000;
     transition: background-color 0.3s;
 }
 
@@ -57,35 +90,44 @@ body {
     flex: 1; /* Заставляем ссылки занимать всю ширину кнопки */
 }
 
-.sticky-header-spacer {
-    height: 50px;
-}
+
+
+
+
+
 
 .section {
     padding: 50px 20px;
     text-align: center;
 }
 
+
 @media (min-width: 640px) {
     .section-main {
-
+        padding: 100px 0 50px 0;
     }
 }
 
 @media (max-width: 639px) {
     .section-main {
         flex-direction: column;
+        padding: 50px 0;
     }
 }
 
 .section-main {
     background: linear-gradient(to bottom, #689afb, #f5e5b4);
-    padding: 50px 0;
+
     display: flex;
     align-items: center;
     gap: 20px;
     justify-content: center
 }
+
+
+
+
+
 
 .section-main .content-text {
     text-align: right;
@@ -151,9 +193,17 @@ body {
 }
 
 .section-main .image {
-
     height: auto;
 }
+
+
+
+
+
+
+
+
+
 
 .section-about-research {
     color: #fff;
@@ -169,21 +219,54 @@ body {
 .section-about-research .article {
     margin: 0 auto;
     font-size: 1.6em;
-    display: grid;
     place-items: center;
 }
+
+
+
+@media (min-width: 640px) {
+    .section-about-research .article .paragraph {
+        height: 250px;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-about-research .article .paragraph {
+        flex-direction: column;
+    }
+}
+
+
 
 .section-about-research .article .paragraph {
     display: flex;
     align-items: center;
     gap: 20px;
-    height: 250px;
+
 }
+
+
+
+@media (min-width: 640px) {
+    .section-about-research .article .text {
+        text-align: left;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-about-research .article .text {
+        text-align: center;
+        padding-bottom: 50px;
+    }
+}
+
+
+
 
 .section-about-research .article .text {
     flex: 1;
     max-width: 800px;
-    text-align: left;
+
 }
 
 .section-about-research .article .paragraph .image {
@@ -195,10 +278,33 @@ body {
 }
 
 
+
+
+
+
+
+
+@media (min-width: 640px) {
+    .section-peculiarities .article {
+        width: 50%;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-peculiarities .article {
+
+    }
+}
+
+
+
+
+
+
 .section-peculiarities .article {
     margin: 0 auto;
     text-align: left;
-    width: 50%;
+
 }
 
 .section-peculiarities .article .list-item img {
@@ -221,14 +327,57 @@ body {
     place-items: center;
 }
 
+
+
+
+@media (min-width: 640px) {
+    .section-about-process .image {
+        width: 600px;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-about-process .image {
+        width: 300px;
+    }
+}
+
+
+
+
 .section-about-process .image {
     margin-top: -30px;
-    width: 600px;
+
 }
+
+
+
+
+
+
+
+
+
+@media (min-width: 640px) {
+    .section-about-process .article {
+        width: 70%;
+    }
+}
+
+@media (max-width: 639px) {
+    .section-about-process .article {
+
+    }
+}
+
+
+
+
+
 
 .section-about-process .article {
     margin-top: -30px;
-    width: 70%;
+
     font-size: 1.6em;
 }
 

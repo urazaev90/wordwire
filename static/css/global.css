@@ -20,7 +20,7 @@ button {
 }
 
 @media (min-width: 640px) {
-    .footer p{
+    .footer p {
         font-family: 'Comic Sans MS', cursive, sans-serif;
     }
 }
