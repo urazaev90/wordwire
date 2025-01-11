@@ -43,7 +43,6 @@
 <div class="section-main">
 
 
-
     <div class="content-text">
         <div class="text">
             <h1>Изучайте бесплатно английский в платформе WordWire</h1>
@@ -56,7 +55,7 @@
         <img src="/static/images/application.png" alt="Приложение" class="image">
     </div>
 
-    <div class="sticky-header2">
+    <div class="sticky-header-mobile">
         <div class="sticky-header-buttons">
             <a href="/demonstration" target="_blank">
                 <button>Демонстрация приложения</button>
@@ -70,12 +69,7 @@
         </div>
     </div>
 
-    </div>
-
-
-
-
-
+</div>
 
 
 <div class="section section-about-research">
@@ -133,38 +127,43 @@
     <div class="text">
         Заполните простую регистрацию и начните учить английский прямо сейчас БЕСПЛАТНО!
     </div>
-    <div class="form-container">
-        <form method="POST" action="/" onsubmit="validateAndSubmitForm(event)">
-            <div>
-                <label for="login">Придумайте уникальный логин</label>
-                <input type="text" id="login" name="username" required>
-            </div>
-            <div>
-                <label for="password">Придумайте свой пароль</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div>
-                <label for="confirmPassword">Повторите пароль</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
-            </div>
-            <div id="captcha-container">
-                <img id="captcha-image" alt="Captcha"/>
-                <button type="button" onclick="reloadCaptcha()">Обновить картинку</button>
-            </div>
-            <label for="password">Введите число с картинки</label>
-            <input type="text" id="captchaValue" name="captchaValue" required><br>
-            <input type="hidden" id="captchaID" name="captchaID"><br>
-            <div class="modal-text-error" id="error-message"></div>
-            <div class="block-button-login">
-                <div class="button-login-page">
-                    <button type="submit">Зарегистрироваться</button>
-                    <a href="/login">
-                        <button type="button">Я уже зарегистрирован</button>
-                    </a>
-                </div>
-            </div>
-        </form>
-    </div>
+
+
+    <form method="POST" class="form-container" action="/" onsubmit="validateAndSubmitForm(event)">
+
+        <div class="namefield"><label for="login">Придумайте уникальный логин</label></div>
+        <div class="inputfield"><input type="text" id="login" name="username" required></div>
+
+        <div class="namefield"><label for="password">Придумайте свой пароль</label></div>
+        <div class="inputfield"><input type="password" id="password" name="password" required></div>
+
+        <div class="namefield"><label for="confirmPassword">Повторите пароль</label></div>
+        <div class="inputfield"><input type="password" id="confirmPassword" name="confirmPassword" required></div>
+
+        <div id="captcha-container">
+            <img id="captcha-image" alt="Captcha"/>
+            <button type="button" class="formbutton" onclick="reloadCaptcha()">Обновить картинку</button>
+        </div>
+
+        <div class="namefield"><label for="password">Введите число с картинки</label></div>
+        <div class="inputfield"><input type="text" id="captchaValue" name="captchaValue" required></div>
+
+        <div class="modal-text-error" id="error-message"></div>
+
+        <div class="block-button-login">
+
+            <button type="submit" class="formbutton">Зарегистрироваться</button>
+
+            <a href="/login">
+                <button type="button" class="formbutton">Я уже зарегистрирован</button>
+            </a>
+
+        </div>
+
+        <input type="hidden" id="captchaID" name="captchaID">
+
+    </form>
+
 </div>
 <div class="footer">
     <p>Created by <a href="/developer" target="_blank">Urazaev Amir</a>. Powered by Golang, PostgreSQL.<br>WordWire ©

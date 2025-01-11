@@ -2,11 +2,6 @@ button {
     cursor: pointer;
 }
 
-.block-button-login {
-    display: grid;
-    place-items: center;
-}
-
 .button-login-page {
     display: flex;
     gap: 15px;

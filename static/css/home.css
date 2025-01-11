@@ -7,13 +7,25 @@ html {
     scroll-behavior: smooth;
 }
 
-body {
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    color: #333;
 
+@media (min-width: 640px) {
+    body {
+        margin: -60px 0 0 0;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+}
+
+@media (max-width: 639px) {
+    body {
+        margin: 0;
+        font-family: 'Montserrat', sans-serif;
+    }
+}
+
+body {
+    color: #333;
     padding: 0;
     font-size: 1em;
-    margin: -60px;
 }
 
 @media (min-width: 640px) {
@@ -34,13 +46,13 @@ body {
 }
 
 @media (min-width: 640px) {
-    .sticky-header2 {
+    .sticky-header-mobile {
         display: none;
     }
 }
 
 @media (max-width: 639px) {
-    .sticky-header2 {
+    .sticky-header-mobile {
         display: flex;
         z-index: 1000;
         justify-content: center;
@@ -52,12 +64,14 @@ body {
 @media (min-width: 640px) {
     .sticky-header-buttons {
         opacity: 0.85;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
     }
 }
 
 @media (max-width: 639px) {
     .sticky-header-buttons {
         flex-wrap: wrap;
+        font-family: 'Montserrat', sans-serif;
     }
 }
 
@@ -68,32 +82,51 @@ body {
     max-width: 800px; /* Опционально: ограничить максимальную ширину */
 }
 
+
 .sticky-header-buttons button {
-    flex: 1; /* Автоматически делает кнопки одинаковой ширины */
-    padding: 10px 15px; /* Отступы внутри кнопок */
-    font-size: 16px;
+
+}
+
+
+@media (min-width: 640px) {
+    .sticky-header-buttons button {
+        background-color: #f4ff00;
+        border-radius: 5px;
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 639px) {
+    .sticky-header-buttons button {
+        background-color: #efbb51;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 0.85em;
+    }
+}
+
+
+.sticky-header-buttons button {
+    flex: 1;
+
     cursor: pointer;
     border: 1px solid black;
-    border-radius: 5px;
-    background-color: #ff3d00; /* Цвет фона кнопок */
     color: #000000;
     transition: background-color 0.3s;
 }
 
 .sticky-header-buttons button:hover {
-    background-color: #0056b3; /* Цвет фона при наведении */
+    background-color: #0056b3;
 }
 
 .sticky-header-buttons a {
-    text-decoration: none; /* Убираем подчеркивание ссылок */
-    display: flex; /* Чтобы кнопки правильно выровнялись */
-    flex: 1; /* Заставляем ссылки занимать всю ширину кнопки */
+    text-decoration: none;
+    display: flex;
+    flex: 1;
 }
-
-
-
-
-
 
 
 .section {
@@ -123,10 +156,6 @@ body {
     gap: 20px;
     justify-content: center
 }
-
-
-
-
 
 
 .section-main .content-text {
@@ -197,14 +226,6 @@ body {
 }
 
 
-
-
-
-
-
-
-
-
 .section-about-research {
     color: #fff;
     background-color: #793785;
@@ -223,7 +244,6 @@ body {
 }
 
 
-
 @media (min-width: 640px) {
     .section-about-research .article .paragraph {
         height: 250px;
@@ -237,14 +257,12 @@ body {
 }
 
 
-
 .section-about-research .article .paragraph {
     display: flex;
     align-items: center;
     gap: 20px;
 
 }
-
 
 
 @media (min-width: 640px) {
@@ -259,8 +277,6 @@ body {
         padding-bottom: 50px;
     }
 }
-
-
 
 
 .section-about-research .article .text {
@@ -278,12 +294,6 @@ body {
 }
 
 
-
-
-
-
-
-
 @media (min-width: 640px) {
     .section-peculiarities .article {
         width: 50%;
@@ -295,10 +305,6 @@ body {
 
     }
 }
-
-
-
-
 
 
 .section-peculiarities .article {
@@ -328,8 +334,6 @@ body {
 }
 
 
-
-
 @media (min-width: 640px) {
     .section-about-process .image {
         width: 600px;
@@ -343,19 +347,10 @@ body {
 }
 
 
-
-
 .section-about-process .image {
     margin-top: -30px;
 
 }
-
-
-
-
-
-
-
 
 
 @media (min-width: 640px) {
@@ -371,13 +366,8 @@ body {
 }
 
 
-
-
-
-
 .section-about-process .article {
     margin-top: -30px;
-
     font-size: 1.6em;
 }
 
@@ -390,20 +380,39 @@ body {
     padding-bottom: 50px;
 }
 
+
+
+
+
+
+
+
+
+
+
+
 .form-container {
-    text-align: left;
-    background-color: #a63ab2;
-    color: white;
-    padding: 40px;
-    border-radius: 15px;
     max-width: 400px;
     margin: 0 auto;
+    background-color: #a63ab2;
+    padding: 40px;
+    border-radius: 15px;
+    color: white;
+}
+
+.namefield {
+    text-align: left;
+}
+
+.inputfield {
+    display: grid;
+    place-items: center;
+    padding: 10px;
 }
 
 .form-container input {
     width: 100%;
     padding: 10px;
-    margin: 10px 0;
     border-radius: 5px;
     border: none;
 }
@@ -414,26 +423,60 @@ body {
     gap: 10px;
 }
 
-.modal-text-error {
-    color: #f4ff00;
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: center;
-    margin-top: -15px;
-    padding-bottom: 20px;
+#captcha-image {
+    flex: 1;
+    max-width: 50%;
 }
 
-.form-container button {
+@media (min-width: 640px) {
+    .formbutton {
+    }
+}
+
+@media (max-width: 639px) {
+    .formbutton {
+        width: 100%;
+    }
+}
+
+.formbutton {
+    flex: 1;
     padding: 10px 20px;
     background-color: #efbb51;
     border: none;
     border-radius: 25px;
-    color: #333;
     font-weight: bold;
-    width: 200px;
+    font-size: 0.85em;
 }
 
-.form-container button:hover {
+.formbutton:hover {
     background-color: #793785;
     color: #fff;
 }
+
+.modal-text-error {
+    color: #f4ff00;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding-bottom: 10px;
+}
+
+@media (min-width: 640px) {
+    .block-button-login {
+        display: flex;
+    }
+}
+
+@media (max-width: 639px) {
+    .block-button-login {
+        display: grid;
+    }
+}
+
+.block-button-login {
+    gap: 10px;
+}
+
+
+
+
