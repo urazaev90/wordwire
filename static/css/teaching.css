@@ -2,12 +2,11 @@ body {
     background-color: #da9bff;
     color: white;
     font-family: 'Montserrat', sans-serif;
-    margin: 5px;
+    touch-action: manipulation;
 }
 
 #central-content {
     text-align: center;
-
 }
 
 @media (min-width: 640px) {
@@ -31,6 +30,7 @@ body {
 }
 
 .control {
+    touch-action: manipulation;
     margin-left: 0;
     margin-right: 0;
     background-color: #efbb51;

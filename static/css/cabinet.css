@@ -13,6 +13,7 @@
 body {
     background-color: #da9bff;
     color: #e1e1e1;
+    touch-action: manipulation;
 }
 
 .contentheader {
@@ -68,6 +69,7 @@ body {
 
 
 .large-button {
+    touch-action: manipulation;
     cursor: pointer;
     margin-left: 0;
     margin-right: 0;
