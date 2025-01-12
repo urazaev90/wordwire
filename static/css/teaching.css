@@ -3,13 +3,14 @@ body {
     color: white;
     font-family: 'Montserrat', sans-serif;
     touch-action: manipulation;
+    text-align: center;
 }
 
 #central-content {
     text-align: center;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1200px) {
     .control {
         font-size: 1.5em;
         padding: 5px 40px;
@@ -21,7 +22,7 @@ body {
     }
 }
 
-@media (max-width: 639px) {
+@media (max-width: 1199px) {
     .control {
         font-size: 1.1em;
         padding: 5px 10px;
@@ -125,13 +126,13 @@ body {
     border-radius: 10px;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1200px) {
     .commentary-on-training{
         font-family: 'Comic Sans MS', cursive, sans-serif;
     }
 }
 
-@media (max-width: 639px) {
+@media (max-width: 1199px) {
     .commentary-on-training {
         font-family: 'Montserrat', sans-serif;
     }
