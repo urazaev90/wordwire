@@ -187,6 +187,7 @@ img.button {
     width: 32%;
     cursor: pointer;
     transition: opacity 0.2s ease;
+    touch-action: manipulation;
 }
 
 img.button:hover {
@@ -194,12 +195,14 @@ img.button:hover {
 }
 
 img.not-active {
+    touch-action: manipulation;
     width: 32%;
     opacity: 0.5;
     transition: opacity 0.2s ease;
 }
 
 #sound-icon, #translate-icon {
+    touch-action: manipulation;
     width: 49%;
 }
 
