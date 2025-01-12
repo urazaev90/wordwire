@@ -16,6 +16,12 @@ body {
     touch-action: manipulation;
 }
 
+tr {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .contentheader {
     background-color: #a63ab2;
     border-radius: 15px;
@@ -183,7 +189,8 @@ input[type="checkbox"]:hover {
 }
 
 .fixed-width {
-    width: 120px;
+    max-width: 120px;
+    min-width: 120px;
     white-space: nowrap;
     overflow: hidden;
 }
