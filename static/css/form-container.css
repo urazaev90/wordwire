@@ -37,7 +37,7 @@
 
 @media (min-width: 640px) {
     .formbutton {
-        width: 220px;
+
     }
 }
 
@@ -47,7 +47,7 @@
     }
 }
 
-.formbutton {
+.form-container button {
     flex: 1;
     padding: 10px 20px;
     background-color: #efbb51;
@@ -55,12 +55,12 @@
     border-radius: 25px;
     font-weight: bold;
     font-size: 0.85em;
-
+    color: #000000;
+    transition: background-color 0.3s;
 }
 
-.formbutton:hover {
-    background-color: #793785;
-    color: #fff;
+.form-container button:hover {
+    background-color: #9a7930;
 }
 
 .modal-text-error {
@@ -84,4 +84,9 @@
 
 .block-button-login {
     gap: 10px;
+}
+
+.block-button-login .leveling {
+    display: flex;
+    flex: 1;
 }

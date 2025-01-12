@@ -50,6 +50,12 @@ body {
     padding: 10px;
 }
 
+.section-sticky-header .sticky-header .leveling {
+    text-decoration: none;
+    display: flex;
+    flex: 1;
+}
+
 .section-sticky-header .sticky-header button {
     background-color: #f4ff00;
     border-radius: 5px;
@@ -63,12 +69,6 @@ body {
 
 .section-sticky-header .sticky-header button:hover {
     background-color: #9ca211;
-}
-
-.section-sticky-header .sticky-header a {
-    text-decoration: none;
-    display: flex;
-    flex: 1;
 }
 
 .section {
