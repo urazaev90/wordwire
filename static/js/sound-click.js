@@ -1,5 +1,7 @@
 const soundClick = new Audio('/static/sounds/_click_sound.mp3');
 
+soundClick.preload = 'auto';
+
 function playClickSound() {
     soundClick.pause();
     soundClick.currentTime = 0;
