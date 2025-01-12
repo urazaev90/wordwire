@@ -20,10 +20,8 @@
     <meta property="og:image" content="https://wordwire.ru/static/images/preview.jpg">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://wordwire.ru">
-
 </head>
 <body>
-
 
 <div class="section-sticky-header">
     <div class="sticky-header">
@@ -41,9 +39,7 @@
     </div>
 </div>
 
-
 <div class="section-main">
-
     <div class="content-text">
         <div class="text">
             <h1>Изучайте бесплатно английский в платформе WordWire</h1>
@@ -51,11 +47,9 @@
             </h2>
         </div>
     </div>
-
     <div class="content-image">
         <img src="/static/images/application.png" alt="Приложение" class="image">
     </div>
-
     <div class="block-demoentryregistration">
         <div class="demoentryregistration">
             <a href="/demonstration" target="_blank">
@@ -69,9 +63,7 @@
             </a>
         </div>
     </div>
-
 </div>
-
 
 <div class="section section-about-research">
     <h2>Идея платформы – расширение словарного запаса</h2>
@@ -99,6 +91,7 @@
         </div>
     </div>
 </div>
+
 <div class="section section-peculiarities">
     <h2>С WordWire вы сможете</h2>
     <div class="article">
@@ -112,14 +105,13 @@
             С первых практик почувствовать владение языком</p>
     </div>
 </div>
+
 <div class="section section-about-process">
     <h2>Пользуйтесь платформой с любого устройства</h2>
-
     <img src="/static/images/lear-english.png" alt="Словарный запас 1000 слов" class="image">
     <div class="article">
         <p>Заходите в свой аккаунт как с телефона, так и с компьютера.</p>
         <p>Учите английский в удовольствие в офисе, метро, дома и в любом другом месте!</p>
-
     </div>
 </div>
 
@@ -131,44 +123,35 @@
     <div class="text">
         Заполните простую регистрацию и начните учить английский прямо сейчас БЕСПЛАТНО!
     </div>
-
     <form method="POST" class="form-container" action="/" onsubmit="validateAndSubmitForm(event)">
-
         <div class="namefield"><label for="login">Придумайте уникальный логин</label></div>
         <div class="inputfield"><input type="text" id="login" name="username" required></div>
-
         <div class="namefield"><label for="password">Придумайте свой пароль</label></div>
         <div class="inputfield"><input type="password" id="password" name="password" required></div>
-
         <div class="namefield"><label for="confirmPassword">Повторите пароль</label></div>
         <div class="inputfield"><input type="password" id="confirmPassword" name="confirmPassword" required></div>
-
         <div id="captcha-container">
             <img id="captcha-image" alt="Captcha"/>
             <button type="button" class="formbutton" onclick="reloadCaptcha()">Обновить картинку</button>
         </div>
-
         <div class="namefield"><label for="password">Введите число с картинки</label></div>
         <div class="inputfield"><input type="text" id="captchaValue" name="captchaValue" required></div>
-
         <div class="modal-text-error" id="error-message"></div>
-
         <div class="block-button-login">
             <div class="leveling">
-                    <button type="submit">Зарегистрироваться</button>
+                <button type="submit">Зарегистрироваться</button>
             </div>
             <div class="leveling">
-                    <button onclick="location.href='/login';">Я уже зарегистрирован</button>
+                <button type="button" onclick="location.href='/login';">Я уже зарегистрирован</button>
             </div>
         </div>
-
         <input type="hidden" id="captchaID" name="captchaID">
     </form>
 </div>
 
-<div class="footer">
-    <p>Created by <a href="/developer" target="_blank">Urazaev Amir</a>. Powered by Golang, PostgreSQL.<br>WordWire ©
-        2025</p>
+<div class="footer">Created by <a href="/developer" target="_blank"><u>Urazaev Amir</u></a>. Powered by Golang, PostgreSQL.<br>
+    WordWire © 2025
 </div>
+
 </body>
 </html>

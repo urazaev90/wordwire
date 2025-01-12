@@ -17,55 +17,43 @@
     <meta property="og:url" content="https://wordwire.ru">
 </head>
 <body>
-
-<div class="section">
-
-    <h1>Вход в аккаунт</h1>
-
-    <form method="POST" class="form-container" action="/login" onsubmit="validateLoginForm(event)">
-
-        <div class="namefield"><label for="username">Введите логин:</label></div>
-        <div class="inputfield"><input type="text" id="username" name="username" required></div>
-
-        <div class="namefield"><label for="password">Введите пароль:</label></div>
-        <div class="inputfield"><input type="password" id="password" name="password" required></div>
-
-        <div id="captcha-container" style="display: none;">
-
-            <img id="captcha-image" alt="Captcha"/>
-            <button id="reload-captcha-button" class="formbutton" type="button" onclick="reloadCaptcha()">Обновить
-                картинку
-            </button>
-
-            <div class="namefield"><label for="captchaValue">Введите число с картинки:</label></div>
-            <div class="inputfield"><input type="text" id="captchaValue" name="captchaValue"></div>
-
-            <input type="hidden" id="captchaID" name="captchaID">
+<div class="page-login">
+    <div class="wrapper">
+        <div class="section">
+            <h1>Вход в аккаунт</h1>
+            <form method="POST" class="form-container" action="/login" onsubmit="validateLoginForm(event)">
+                <div class="namefield"><label for="username">Введите логин:</label></div>
+                <div class="inputfield"><input type="text" id="username" name="username" required></div>
+                <div class="namefield"><label for="password">Введите пароль:</label></div>
+                <div class="inputfield"><input type="password" id="password" name="password" required></div>
+                <div id="captcha-container" style="display: none;">
+                    <img id="captcha-image" alt="Captcha"/>
+                    <button id="reload-captcha-button" class="formbutton" type="button" onclick="reloadCaptcha()">
+                        Обновить
+                        картинку
+                    </button>
+                    <div class="namefield"><label for="captchaValue">Введите число с картинки:</label></div>
+                    <div class="inputfield"><input type="text" id="captchaValue" name="captchaValue"></div>
+                    <input type="hidden" id="captchaID" name="captchaID">
+                </div>
+                <input type="hidden" id="showCaptcha" value="{{if .ShowCaptcha}}true{{else}}false{{end}}">
+                <div id="error-message" class="modal-text-error"></div>
+                <div class="block-button-login">
+                    <div class="leveling">
+                        <button type="submit">Войти</button>
+                    </div>
+                    <div class="leveling">
+                        <button type="button" onclick="location.href='/#registration-section';">Зарегистрироваться
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
 
-        <input type="hidden" id="showCaptcha" value="{{if .ShowCaptcha}}true{{else}}false{{end}}">
-        <div id="error-message" class="modal-text-error"></div>
-
-
-        <div class="block-button-login">
-
-            <div class="leveling">
-                <button type="submit">Войти</button>
-            </div>
-
-            <div class="leveling">
-                <button class="formbutton" onclick="location.href='/#registration-section';">Зарегистрироваться</button>
-
-            </div>
-
+        <div class="footer">Created by <a href="/developer" target="_blank"><u>Urazaev Amir</u></a>. Powered by Golang, PostgreSQL.
+            <br>WordWire © 2025
         </div>
-    </form>
+    </div>
 </div>
-
-<div class="footer">
-    <p>Created by <a href="/developer" target="_blank">Urazaev Amir</a>. Powered by Golang, PostgreSQL.<br>WordWire
-        © 2025</p>
-</div>
-
 </body>
 </html>
