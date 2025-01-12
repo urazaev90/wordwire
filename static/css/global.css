@@ -1,11 +1,11 @@
-@media (min-width: 640px) {
+@media (min-width: 1200px) {
     html {
         font-family: 'Comic Sans MS', cursive, sans-serif;
         scroll-behavior: smooth;
     }
 }
 
-@media (max-width: 639px) {
+@media (max-width: 1199px) {
     html {
         font-family: 'Montserrat', sans-serif;
     }
