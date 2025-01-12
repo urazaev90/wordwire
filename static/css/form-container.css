@@ -1,0 +1,87 @@
+.form-container {
+    max-width: 450px;
+    margin: 0 auto;
+    background-color: #a63ab2;
+    padding: 40px;
+    border-radius: 15px;
+    color: white;
+}
+
+.namefield {
+    text-align: left;
+}
+
+.inputfield {
+    display: grid;
+    place-items: center;
+    padding: 10px;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+#captcha-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#captcha-image {
+    flex: 1;
+    max-width: 50%;
+}
+
+@media (min-width: 640px) {
+    .formbutton {
+        width: 220px;
+    }
+}
+
+@media (max-width: 639px) {
+    .formbutton {
+        width: 100%;
+    }
+}
+
+.formbutton {
+    flex: 1;
+    padding: 10px 20px;
+    background-color: #efbb51;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 0.85em;
+
+}
+
+.formbutton:hover {
+    background-color: #793785;
+    color: #fff;
+}
+
+.modal-text-error {
+    color: #f4ff00;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding-bottom: 10px;
+}
+
+@media (min-width: 640px) {
+    .block-button-login {
+        display: flex;
+    }
+}
+
+@media (max-width: 639px) {
+    .block-button-login {
+        display: grid;
+    }
+}
+
+.block-button-login {
+    gap: 10px;
+}

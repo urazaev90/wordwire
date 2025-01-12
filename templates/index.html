@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/static/css/global.css">
     <link rel="stylesheet" href="/static/css/home.css">
+    <link rel="stylesheet" href="/static/css/form-container.css">
     <script src="/static/js/smooth-scrolling.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire – учите английский с легкостью</title>
@@ -120,13 +121,15 @@
 
     </div>
 </div>
+
+<div id="registration-section"></div>
+
 <div class="section section-registration">
     <script src="/static/js/registration-from-home.js" defer></script>
-    <h2 id="registration-section">Регистрация</h2>
+    <h2 >Регистрация</h2>
     <div class="text">
         Заполните простую регистрацию и начните учить английский прямо сейчас БЕСПЛАТНО!
     </div>
-
 
     <form method="POST" class="form-container" action="/" onsubmit="validateAndSubmitForm(event)">
 
@@ -160,10 +163,9 @@
         </div>
 
         <input type="hidden" id="captchaID" name="captchaID">
-
     </form>
-
 </div>
+
 <div class="footer">
     <p>Created by <a href="/developer" target="_blank">Urazaev Amir</a>. Powered by Golang, PostgreSQL.<br>WordWire ©
         2025</p>

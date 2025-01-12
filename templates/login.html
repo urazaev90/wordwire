@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/static/css/global.css">
     <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="stylesheet" href="/static/css/form-container.css">
     <script src="/static/js/login.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWire – учите английский с легкостью</title>
@@ -16,46 +17,52 @@
     <meta property="og:url" content="https://wordwire.ru">
 </head>
 <body>
-<div class="wrapper">
-    <div class="section-1">
-        <h1>Вход в аккаунт</h1>
-        <div class="entry-block">
-            <form method="POST" action="/login" onsubmit="validateLoginForm(event)">
-                <div>
-                    <label for="username">Введите логин:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div>
-                    <label for="password">Введите пароль:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div id="captcha-container" style="display: none;">
-                    <div class="captcha-and-button">
-                        <img id="captcha-image" alt="Captcha"/>
-                        <button id="reload-captcha-button" type="button" onclick="reloadCaptcha()">Обновить картинку
-                        </button>
-                        <br>
-                    </div>
-                    <label for="captchaValue">Введите число с картинки:</label>
-                    <input type="text" id="captchaValue" name="captchaValue"><br>
-                    <input type="hidden" id="captchaID" name="captchaID">
-                </div>
-                <input type="hidden" id="showCaptcha" value="{{if .ShowCaptcha}}true{{else}}false{{end}}">
-                <div id="error-message" class="modal-text-error"></div>
-                <div class="block-button-login">
-                    <div class="button-login-page">
-                        <button class="common-button" type="submit">Войти</button>
-                        <a href="/#registration-section">
-                            <button class="common-button" type="button">Зарегистрироваться</button>
-                        </a>
-                    </div>
-                </div>
-            </form>
+
+<div class="section">
+
+    <h1>Вход в аккаунт</h1>
+
+    <form method="POST" class="form-container" action="/login" onsubmit="validateLoginForm(event)">
+
+        <div class="namefield"><label for="username">Введите логин:</label></div>
+        <div class="inputfield"><input type="text" id="username" name="username" required></div>
+
+        <div class="namefield"><label for="password">Введите пароль:</label></div>
+        <div class="inputfield"><input type="password" id="password" name="password" required></div>
+
+        <div id="captcha-container" style="display: none;">
+
+            <img id="captcha-image" alt="Captcha"/>
+            <button id="reload-captcha-button" class="formbutton" type="button" onclick="reloadCaptcha()">Обновить
+                картинку
+            </button>
+
+            <div class="namefield"><label for="captchaValue">Введите число с картинки:</label></div>
+            <div class="inputfield"><input type="text" id="captchaValue" name="captchaValue"></div>
+
+            <input type="hidden" id="captchaID" name="captchaID">
         </div>
-    </div>
-    <div class="footer">
-        <p>Created by <a href="/developer" target="_blank">Urazaev Amir</a>. Powered by Golang, PostgreSQL.<br>WordWire © 2025</p>
-    </div>
+
+        <input type="hidden" id="showCaptcha" value="{{if .ShowCaptcha}}true{{else}}false{{end}}">
+        <div id="error-message" class="modal-text-error"></div>
+
+
+        <div class="block-button-login">
+
+            <button class="formbutton" type="submit">Войти</button>
+
+            <a href="/#registration-section">
+                <button class="formbutton" type="button">Зарегистрироваться</button>
+            </a>
+
+        </div>
+    </form>
 </div>
+
+<div class="footer">
+    <p>Created by <a href="/developer" target="_blank">Urazaev Amir</a>. Powered by Golang, PostgreSQL.<br>WordWire
+        © 2025</p>
+</div>
+
 </body>
 </html>

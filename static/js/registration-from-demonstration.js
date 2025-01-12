@@ -61,6 +61,7 @@ async function loadCaptcha() {
 
 function reloadCaptcha() {
     loadCaptcha();
+    playClickSound();
 }
 
 document.addEventListener("DOMContentLoaded", loadCaptcha);
