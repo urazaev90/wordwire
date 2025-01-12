@@ -2,13 +2,12 @@ body {
     background-color: #da9bff;
     color: white;
     font-family: 'Montserrat', sans-serif;
-
+    margin: 5px;
 }
 
 #central-content {
     text-align: center;
-    position: relative;
-    place-items: center;
+
 }
 
 @media (min-width: 640px) {
@@ -53,7 +52,6 @@ body {
     padding-top: 15px;
     padding-bottom: 5px;
     margin: 12px;
-    width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 3px solid #2d2d2d;
 }
@@ -71,7 +69,6 @@ body {
     background-color: #efbb51;
     border-radius: 15px;
     margin: 12px;
-    width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 3px solid #2d2d2d;
     min-height: 520px;
