@@ -1,10 +1,10 @@
-@media (min-width: 640px) {
+@media (min-width: 1200px) {
     body {
         font-family: 'Comic Sans MS', cursive, sans-serif;
     }
 }
 
-@media (max-width: 639px) {
+@media (max-width: 1199px) {
     body {
         font-family: 'Montserrat', sans-serif;
     }
