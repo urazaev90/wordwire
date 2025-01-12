@@ -73,7 +73,7 @@ body {
     border: 3px solid #2d2d2d;
     min-height: 520px;
     place-items: center;
-    text-align: center;
+    display: grid;
 }
 
 @media (min-width: 640px) {
