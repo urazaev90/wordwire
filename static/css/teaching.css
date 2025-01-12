@@ -36,6 +36,8 @@ body {
     background-color: #efbb51;
     border-radius: 10px;
     font-weight: bold;
+    border: 2px solid black;
+    color: #000000;
     transition-delay: 0.8s;
     transition: box-shadow 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Переход с измененной длительностью и функцией времени */
 }
