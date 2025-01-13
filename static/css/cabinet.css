@@ -282,9 +282,8 @@ input[type="checkbox"] {
 .contentfooter {
     background-color: #a63ab2;
     border-radius: 15px;
-    padding-bottom: 20px;
+    padding: 25px 0 14px 0;
     margin: 12px;
-    width: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 3px solid #2d2d2d;
 }
@@ -293,7 +292,6 @@ input[type="checkbox"] {
     width: 100%;
     text-align: center;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    padding-top: 10px;
 }
 
 .wordwire-footer a:hover {
