@@ -1,3 +1,15 @@
+@media (min-width: 640px) {
+    #registration-modal {
+        width: 500px;
+    }
+}
+
+@media (max-width: 639px) {
+    #registration-modal {
+        width: 80%;
+    }
+}
+
 #registration-modal {
     display: none;
     position: fixed;
@@ -8,7 +20,6 @@
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
     z-index: 1001;
-    width: 500px;
     max-width: 100%;
     background-color: #7b007a;
     border: 2px solid #dadada;
