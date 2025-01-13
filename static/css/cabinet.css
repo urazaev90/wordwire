@@ -48,7 +48,6 @@ tr {
 
 .large-button {
     touch-action: manipulation;
-    cursor: pointer;
     margin-left: 0;
     margin-right: 0;
     background-color: #efbb51;

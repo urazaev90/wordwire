@@ -1,0 +1,25 @@
+@media (min-width: 1200px) {
+    body {
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+}
+
+@media (max-width: 1199px) {
+    body {
+        font-family: 'Montserrat', sans-serif;
+    }
+}
+
+body {
+    background-color: #da9bff;
+    color: #e1e1e1;
+    touch-action: manipulation;
+    -webkit-user-select: none; /* Для Chrome, Safari, Edge */
+    -moz-user-select: none;    /* Для Firefox */
+    -ms-user-select: none;     /* Для старых IE */
+    user-select: none;         /* Стандартное свойство */
+}
+
+button {
+    cursor: pointer;
+}

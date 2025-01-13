@@ -169,8 +169,8 @@
 }
 
 img.button {
-    width: 32%;
     cursor: pointer;
+    width: 32%;
     transition: opacity 0.2s ease;
     touch-action: manipulation;
 }
