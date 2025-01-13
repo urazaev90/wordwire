@@ -3,7 +3,6 @@
 <script src="/static/js/cabinet-dictionary.js"></script>
 <div class="content">
     <div class="dictionary-container">
-        <div class="container-height">
             <table>
                 {{range $index, $word := .Words}}
                 <tr>
@@ -17,7 +16,6 @@
                 </tr>
                 {{end}}
             </table>
-        </div>
         <div class="pagination">
             <div class="pagination-item">
                 {{if .HasPrev}}

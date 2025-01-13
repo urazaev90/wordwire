@@ -68,7 +68,6 @@
     justify-content: center
 }
 
-
 .section-main .content-text {
 
 }
@@ -76,18 +75,6 @@
 .section-main .content-image {
     text-align: left;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 @media (min-width: 1200px) {
     .section-main .text {
@@ -109,11 +96,6 @@
         place-items: center;
     }
 }
-
-
-
-
-
 
 .section-main .text {
     flex: 1;
@@ -143,10 +125,6 @@
     font-size: 1.5em;
 }
 
-
-
-
-
 @media (min-width: 1400px) {
     .section-main .image {
         padding-right: 200px;
@@ -173,10 +151,6 @@
         width: 300px;
     }
 }
-
-
-
-
 
 .section-main .image {
     height: auto;
