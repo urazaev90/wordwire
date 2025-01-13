@@ -10,8 +10,3 @@ document.addEventListener('touchstart', (event) => {
     }
 });
 
-document.addEventListener('touchend', (event) => {
-    if (event.touches.length === 0) {
-        event.preventDefault();
-    }
-});
