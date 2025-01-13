@@ -415,6 +415,32 @@ func getUserIDFromSession(r *http.Request) int {
 	return userID
 } //вещание id авторизированного пользователя
 
+func getWordCountsAsync(userID int, ch chan<- map[string]int) {
+	counts := make(map[string]int)
+
+	var selectedCount, archivedCount int
+
+	err := Database.QueryRow(`
+		SELECT COUNT(*)
+		FROM user_word_labels
+		WHERE user_id = $1 AND label = 2
+	`, userID).Scan(&selectedCount)
+	if err == nil {
+		counts["selected"] = selectedCount
+	}
+
+	err = Database.QueryRow(`
+		SELECT COUNT(*)
+		FROM user_word_labels
+		WHERE user_id = $1 AND label = 3
+	`, userID).Scan(&archivedCount)
+	if err == nil {
+		counts["archived"] = archivedCount
+	}
+
+	ch <- counts
+}
+
 func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -428,22 +454,20 @@ func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID := getUserIDFromSession(r)
 
-	selectedCount, archivedCount, err := getWordCounts(userID)
-	if err != nil {
-		http.Error(w, "Server error: unable to count words", http.StatusInternalServerError)
-		return
-	}
+	countsChan := make(chan map[string]int)
+	go getWordCountsAsync(userID, countsChan)
 
 	var totalWords int
 	dbErr := Database.QueryRow(`
-        SELECT COUNT(*)
-        FROM user_word_labels
-        WHERE user_id = $1 AND label IN (1, 2)
-    `, userID).Scan(&totalWords)
+		SELECT COUNT(*)
+		FROM user_word_labels
+		WHERE user_id = $1 AND label IN (1, 2)
+	`, userID).Scan(&totalWords)
 	if dbErr != nil {
 		http.Error(w, "Server error: unable to count words", http.StatusInternalServerError)
 		return
 	}
+
 	maxPages := (totalWords + wordsPerPage - 1) / wordsPerPage
 
 	var page int
@@ -456,15 +480,8 @@ func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if page >= maxPages-1 {
-		err = loadNextPageWordsForUser(userID)
-		if err != nil {
-			log.Println("Error loading next page words:", err)
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			return
-		}
-		// Обновляем общее количество слов после подгрузки
+		_ = loadNextPageWordsForUser(userID)
 		totalWords += 10
-		// Обновляем количество страниц
 		maxPages = (totalWords + wordsPerPage - 1) / wordsPerPage
 	}
 
@@ -477,38 +494,48 @@ func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 
 	offset := page * wordsPerPage
 
-	rows, queryErr := Database.Query(`
-        SELECT ew.id, ew.word, uwl.label
-        FROM english_words ew
-        INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
-        WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
-        ORDER BY ew.usage_per_billion DESC
-        LIMIT $2 OFFSET $3
-    `, userID, wordsPerPage, offset)
-	if queryErr != nil {
-		http.Error(w, "Server error: unable to fetch words", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
 	type Word struct {
 		ID    int
 		Word  string
 		Label int
 	}
 
-	words := make([]Word, 0, wordsPerPage)
-	for rows.Next() {
-		var word Word
-		if scanErr := rows.Scan(&word.ID, &word.Word, &word.Label); scanErr != nil {
-			http.Error(w, "Server error: unable to scan words", http.StatusInternalServerError)
+	wordsChan := make(chan []Word)
+
+	go func() {
+		rows, queryErr := Database.Query(`
+			SELECT ew.id, ew.word, uwl.label
+			FROM english_words ew
+			INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
+			WHERE uwl.user_id = $1 AND uwl.label IN (1, 2)
+			ORDER BY ew.usage_per_billion DESC
+			LIMIT $2 OFFSET $3
+		`, userID, wordsPerPage, offset)
+		if queryErr != nil {
+			log.Println("Error querying words: ", queryErr)
+			wordsChan <- nil
 			return
 		}
-		words = append(words, word)
-	}
+		defer rows.Close()
 
-	if rowErr := rows.Err(); rowErr != nil {
-		http.Error(w, "Server error: problems with rows", http.StatusInternalServerError)
+		words := make([]Word, 0, wordsPerPage)
+		for rows.Next() {
+			var word Word
+			if scanErr := rows.Scan(&word.ID, &word.Word, &word.Label); scanErr != nil {
+				log.Println("Error scanning word: ", scanErr)
+				wordsChan <- nil
+				return
+			}
+			words = append(words, word)
+		}
+		wordsChan <- words
+	}()
+
+	// Wait for data to arrive
+	counts := <-countsChan
+	words := <-wordsChan
+	if words == nil {
+		http.Error(w, "Server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -530,8 +557,8 @@ func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 		"HasPrev":       page > 0,
 		"FirstNumber":   page*wordsPerPage + 1,
 		"CurrentURL":    r.URL.Path,
-		"SelectedCount": selectedCount,
-		"ArchivedCount": archivedCount,
+		"SelectedCount": counts["selected"],
+		"ArchivedCount": counts["archived"],
 	}
 
 	if execErr := tmpl.Execute(w, data); execErr != nil {
