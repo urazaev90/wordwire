@@ -129,20 +129,8 @@ body {
     border-radius: 10px;
 }
 
-@media (min-width: 1200px) {
-    .commentary-on-training{
-        font-family: 'Comic Sans MS', cursive, sans-serif;
-    }
-}
-
-@media (max-width: 1199px) {
-    .commentary-on-training {
-        font-family: 'Montserrat', sans-serif;
-    }
-}
-
-
 .commentary-on-training {
+    font-family: 'Montserrat', sans-serif;
     color: #793785;
     font-weight: bold;
     padding: 0px;
