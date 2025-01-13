@@ -39,3 +39,44 @@ h2 {
 .footer a:hover {
     opacity: 0.6;
 }
+
+@media (min-width: 640px) {
+    .desktop {
+        display: inline;
+    }
+
+    .mobile {
+        display: none;
+    }
+}
+
+@media (max-width: 639px) {
+    .desktop {
+        display: none;
+    }
+
+    .mobile {
+        padding: 5px;
+    }
+}
+
+@media (min-width: 640px) {
+    .wrapping {
+        display: inline;
+    }
+}
+
+@media (max-width: 639px) {
+    .wrapping {
+    }
+}
+
+@media (max-width: 639px) {
+    .wrapping {
+        display: inline;
+    }
+}
+
+.copyright {
+    padding-top: 20px;
+}
