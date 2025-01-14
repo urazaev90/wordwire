@@ -1,4 +1,4 @@
-// Отключение контекстного меню
+// Отключение контекстного меню на странице
 document.addEventListener('contextmenu', (event) => {
     event.preventDefault();
 });
@@ -8,30 +8,21 @@ document.addEventListener('touchstart', (event) => {
     if (event.touches.length > 1) { // Если больше одного пальца, предотвращаем
         event.preventDefault();
     }
-}, { passive: false });
-
-// Отключение контекстного меню на интерактивных элементах
-const elements = document.querySelectorAll('a, img');
-elements.forEach((element) => {
-    element.addEventListener('touchstart', (event) => {
-        event.preventDefault(); // Отключение действия при долгом нажатии
-    }, { passive: false });
-
-    element.addEventListener('touchend', (event) => {
-        event.preventDefault(); // Убедиться, что нет последствий нажатия
-    }, { passive: false });
-
-    element.addEventListener('contextmenu', (event) => {
-        event.preventDefault(); // Запасной вариант для отключения меню
-    });
 });
 
-// Отключение выделения текста
+// Отключение выделения текста (актуально для iOS)
 document.addEventListener('selectstart', (event) => {
     event.preventDefault();
 });
 
-// Отключение дополнительных действий, таких как масштабирование
+// Отключение всплывающего меню на iOS при длительном нажатии
+document.addEventListener('touchend', (event) => {
+    if (event.touches.length === 1) { // Только один палец
+        event.preventDefault();
+    }
+}, { passive: false });
+
+// Отключение дополнительных действий (например, масштабирование)
 document.addEventListener('gesturestart', (event) => {
     event.preventDefault();
 });
