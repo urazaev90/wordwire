@@ -129,6 +129,10 @@
     padding: 0px;
 }
 
+#loading {
+    color: #000000
+}
+
 #word-view #current-word {
     font-size: 5em;
     font-weight: bold;
@@ -140,9 +144,6 @@
     font-size: 2em;
     color: #793785;
     margin: 0px;
-}
-.flipping {
-
 }
 
 @media (min-width: 640px) {
