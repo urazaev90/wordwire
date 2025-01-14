@@ -9,20 +9,3 @@ document.addEventListener('touchstart', (event) => {
         event.preventDefault();
     }
 });
-
-// Отключение выделения текста (актуально для iOS)
-document.addEventListener('selectstart', (event) => {
-    event.preventDefault();
-});
-
-// Отключение всплывающего меню на iOS при длительном нажатии
-document.addEventListener('touchend', (event) => {
-    if (event.touches.length === 1) { // Только один палец
-        event.preventDefault();
-    }
-}, { passive: false });
-
-// Отключение дополнительных действий (например, масштабирование)
-document.addEventListener('gesturestart', (event) => {
-    event.preventDefault();
-});
