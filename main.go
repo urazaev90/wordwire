@@ -28,18 +28,14 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "robots.txt")
-	}).Methods("GET")
-
-	router.HandleFunc("/sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "sitemap.xml")
-	}).Methods("GET")
-
 	router.PathPrefix("/static/css/").Handler(http.StripPrefix("/static/css/", http.FileServer(http.Dir("static/css/"))))
 	router.PathPrefix("/static/js/").Handler(http.StripPrefix("/static/js/", http.FileServer(http.Dir("static/js/"))))
 	router.PathPrefix("/static/images/").Handler(http.StripPrefix("/static/images/", http.FileServer(http.Dir("static/images/"))))
 	router.PathPrefix("/static/sounds/").Handler(http.StripPrefix("/static/sounds/", http.FileServer(http.Dir("static/sounds/"))))
+
+	router.NotFoundHandler = http.HandlerFunc(core.CustomNotFoundHandler)
+
+	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
 
 	router.HandleFunc("/", core.RegisterHandler).Methods("GET", "POST")
 	router.HandleFunc("/login", core.LoginHandler).Methods("GET", "POST")
@@ -55,9 +51,13 @@ func main() {
 	router.HandleFunc("/check-login", core.CheckLoginHandler).Methods("GET", "POST")
 	router.HandleFunc("/generate-captcha", core.GenerateCaptchaHandler).Methods("GET")
 
-	router.NotFoundHandler = http.HandlerFunc(core.CustomNotFoundHandler)
+	router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "robots.txt")
+	}).Methods("GET")
 
-	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
+	router.HandleFunc("/sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "sitemap.xml")
+	}).Methods("GET")
 
 	router.HandleFunc("/demonstration", func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.ParseFiles("templates/demonstration.html"))
