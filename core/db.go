@@ -56,31 +56,6 @@ func loadNextPageWordsForUser(userID int) error {
 	return err
 }
 
-// подсчет сколько у пользователя слов с label 2, с label 3
-func getWordCounts(userID int) (int, int, error) {
-	var selectedCount, archivedCount int
-
-	err := Database.QueryRow(`
-		SELECT COUNT(*)
-		FROM user_word_labels
-		WHERE user_id = $1 AND label = 2
-	`, userID).Scan(&selectedCount)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	err = Database.QueryRow(`
-		SELECT COUNT(*)
-		FROM user_word_labels
-		WHERE user_id = $1 AND label = 3
-	`, userID).Scan(&archivedCount)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	return selectedCount, archivedCount, nil
-}
-
 // возвращаем количество выбранных и архивированных слов
 func getWordCountsAsync(userID int, ch chan<- map[string]int) {
 	counts := make(map[string]int)
