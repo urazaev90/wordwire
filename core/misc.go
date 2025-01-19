@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-// обработчик при переходах на несуществующие ссылки
+// редиректы при переходах на несуществующие ссылки
 func CustomNotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	if isAuthorized(r) {
 		http.Redirect(w, r, "/teaching", http.StatusSeeOther)
@@ -18,7 +18,7 @@ func CustomNotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// проверка при регистрации не занят ли логин во всплывающем окне в демонстрационной странице
+// проверка уникальности логина при регистрации
 func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -52,7 +52,7 @@ func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Database error", http.StatusInternalServerError)
 }
 
-// узнать свой логин клиенту
+// запрос на отображение своего логина
 func GetUserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)

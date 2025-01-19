@@ -18,7 +18,7 @@ func GenerateCaptchaHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// проверка капчи
+// верификация капчи
 func VerifyCaptcha(captchaID, captchaValue string) bool {
 	return captcha.VerifyString(captchaID, captchaValue) // Проверяем правильность введенного значения
 }

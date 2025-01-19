@@ -56,7 +56,7 @@ func loadNextPageWordsForUser(userID int) error {
 	return err
 }
 
-// считает сколько у пользователя слов с label 2, с label 3
+// подсчет сколько у пользователя слов с label 2, с label 3
 func getWordCounts(userID int) (int, int, error) {
 	var selectedCount, archivedCount int
 

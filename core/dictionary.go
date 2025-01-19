@@ -138,7 +138,7 @@ func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// список избранных слов для обучения (label 2)
+// список избранных слов пользователя (label 2)
 func SelectedHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -258,7 +258,7 @@ func SelectedHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// список архивированных слов (label 3)
+// список архивированных слов пользователя (label 3)
 func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAuthorized(r) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -444,7 +444,7 @@ func RemoveFromArchiveHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// изменения label на 1 или 2 (при удалении и установки галочки в чекбоксах списков)
+// изменения label на 1 или 2 (при удалении или установки галочки в чекбоксах списков)
 func updateWordLabel(w http.ResponseWriter, r *http.Request) {
 	userID := getUserIDFromSession(r)
 

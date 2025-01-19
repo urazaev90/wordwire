@@ -34,7 +34,7 @@ func isAuthorized(r *http.Request) bool {
 	return ok
 }
 
-// регистрация нового пользователя (главная стр.)
+// регистрация нового пользователя
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, авторизован ли пользователь
 	session, _ := store.Get(r, "session-name")
@@ -249,7 +249,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// деавториция (выход из аккаунта)
+// деавторизация
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	delete(session.Values, "user_id")

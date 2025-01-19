@@ -62,11 +62,11 @@ func DemonstrationTeachingPageHandler(w http.ResponseWriter, r *http.Request) {
 func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 	var userID int
 
-	// Проверка авторизации
+	// проверка авторизации
 	if isAuthorized(r) {
-		userID = getUserIDFromSession(r) // Получение userID из сессии
+		userID = getUserIDFromSession(r) // получение userID из сессии
 	} else {
-		userID = 1 // Значение по умолчанию для незарегистрированных пользователей
+		userID = 1 // значение по умолчанию для незарегистрированных пользователей
 	}
 
 	rows, err := Database.Query(`
