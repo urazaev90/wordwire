@@ -14,7 +14,7 @@ var (
 	store    = sessions.NewCookieStore([]byte("jdfH=S5Ds+SFg4ff)-dfdWg2gD7D+Ddhdf"))
 )
 
-// записывает дату последнего посещения пользователя (в SQL)
+// регистрация даты последнего посещения пользователя
 func updateLastVisitDate(userID int) {
 	_, err := Database.Exec(`
 		UPDATE user_accounts 

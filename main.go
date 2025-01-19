@@ -50,7 +50,6 @@ func main() {
 	router.HandleFunc("/remove_from_archive", core.RemoveFromArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/add_to_archive", core.AddToArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/teaching", core.TeachingPageHandler).Methods("GET")
-	router.HandleFunc("/demonstration", core.DemonstrationTeachingPageHandler).Methods("GET")
 	router.HandleFunc("/api/words", core.WordsAPIHandler).Methods("GET")
 	router.HandleFunc("/api/get_user_login", core.GetUserLoginHandler).Methods("GET")
 	router.HandleFunc("/check-login", core.CheckLoginHandler).Methods("GET", "POST")
@@ -59,6 +58,11 @@ func main() {
 	router.NotFoundHandler = http.HandlerFunc(core.CustomNotFoundHandler)
 
 	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
+
+	router.HandleFunc("/demonstration", func(w http.ResponseWriter, r *http.Request) {
+		tmpl := template.Must(template.ParseFiles("templates/demonstration.html"))
+		tmpl.Execute(w, nil)
+	})
 
 	router.HandleFunc("/developer", func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.ParseFiles("templates/developer.html"))
