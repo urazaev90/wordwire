@@ -9,20 +9,14 @@ import (
 	"log"
 	"net/http"
 	"projectWordwire/core"
+	"time"
 )
 
-func main() {
-	connStr := "user=urazaev90 password=Grr(-87He dbname=app_database sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+var db *sql.DB
 
-	err = db.Ping()
-	if err != nil {
-		log.Fatal("Cannot connect to database:", err)
-	}
+func main() {
+	initDB()
+	defer db.Close()
 
 	core.Database = db
 
@@ -71,4 +65,16 @@ func main() {
 
 	log.Println("Server started at :8081")
 	http.ListenAndServe(":8081", router)
+}
+
+func initDB() {
+	var err error
+	db, err = sql.Open("postgres", "user=urazaev90 password=Grr(-87He dbname=app_database sslmode=disable")
+	if err != nil {
+		log.Fatal("Cannot open database:", err)
+	}
+
+	db.SetMaxOpenConns(25)                  // Ограничить количество соединений
+	db.SetMaxIdleConns(5)                   // Сколько соединений можно держать открытыми в неактивном состоянии
+	db.SetConnMaxLifetime(10 * time.Minute) // Время жизни соединения
 }
