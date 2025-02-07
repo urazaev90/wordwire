@@ -3,6 +3,7 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
@@ -80,7 +81,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Проверяем, существует ли пользователь
 	var exists bool
-	err := Database.QueryRow("SELECT EXISTS (SELECT 1 FROM user_accounts WHERE login = $1)", username).Scan(&exists)
+
+	ctx := context.Background() // или переданный контекст
+	err := Database.QueryRow(ctx, "SELECT EXISTS (SELECT 1 FROM user_accounts WHERE login = $1)", username).Scan(&exists)
+
 	if err != nil {
 		log.Printf("Error checking user existence: %v", err)                   // Если ошибка, пишем в лог
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError) // Сообщаем об ошибке
@@ -105,7 +109,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Сохраняем нового пользователя в базе
 	var userID int
-	err = Database.QueryRow(` 
+
+	ctx = context.Background() // Или используйте нужный контекст
+	err = Database.QueryRow(ctx, ` 
 			INSERT INTO user_accounts (login, password_hash, registration_date) 
 			VALUES ($1, $2, $3) RETURNING id`,
 		username, hashedPassword, time.Now().Format("2006-01-02")).Scan(&userID)
@@ -115,17 +121,18 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = Database.Exec(`
-    		WITH ranked_words AS (
-        	SELECT id,
-               ROW_NUMBER() OVER (ORDER BY usage_per_billion DESC) as rank
-        	FROM english_words
-    		)
-    		INSERT INTO user_word_labels (user_id, word_id, label)
-    		SELECT $1, id, CASE WHEN rank <= 5 THEN 2 ELSE 1 END
-    		FROM ranked_words
-    		WHERE rank <= 10
-			`, userID)
+	_, err = Database.Exec(ctx, `
+	INSERT INTO user_word_labels (user_id, word_id, label)
+	WITH ranked_words AS (
+		SELECT id,
+		       ROW_NUMBER() OVER (ORDER BY usage_per_billion DESC) as rank
+		FROM english_words
+	)
+	SELECT $1, id, CASE WHEN rank <= 5 THEN 2 ELSE 1 END
+	FROM ranked_words
+	WHERE rank <= 10
+	`, userID)
+
 	if err != nil {
 		log.Println("Register: Error inserting labels:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
@@ -207,7 +214,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		var storedHashedPassword string
 		var userID int
-		err := Database.QueryRow("SELECT id, password_hash FROM user_accounts WHERE login = $1", username).Scan(&userID, &storedHashedPassword)
+		ctx := context.Background() // Или используйте нужный контекст
+		err := Database.QueryRow(ctx, "SELECT id, password_hash FROM user_accounts WHERE login = $1", username).Scan(&userID, &storedHashedPassword)
 		if err != nil {
 			log.Printf("Login: Error fetching user: %v", err)
 			w.Header().Set("Content-Type", "application/json")

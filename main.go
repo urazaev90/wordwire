@@ -1,9 +1,10 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 	"html/template"
 	"log"
@@ -11,13 +12,16 @@ import (
 	"wordwire/core"
 )
 
-var db *sql.DB
+var Db *pgxpool.Pool
 
 func main() {
-	initDB()
-	defer db.Close()
-
-	core.Database = db
+	var err error
+	Db, err = initDB()
+	if err != nil {
+		log.Fatal("Cannot open database:", err)
+	}
+	defer Db.Close()
+	core.Database = Db
 
 	router := mux.NewRouter()
 
@@ -66,14 +70,10 @@ func main() {
 	http.ListenAndServe(":8081", router)
 }
 
-func initDB() {
-	var err error
-	db, err = sql.Open("postgres", "user=urazaev90 password=Grr(-87He dbname=app_database sslmode=disable")
+func initDB() (*pgxpool.Pool, error) {
+	Db, err := pgxpool.New(context.Background(), "user=urazaev90 password=Grr(-87He dbname=app_database sslmode=disable")
 	if err != nil {
-		log.Fatal("Cannot open database:", err)
+		return nil, err
 	}
-
-	db.SetMaxOpenConns(50)   // Ограничить количество соединений
-	db.SetMaxIdleConns(25)   // Сколько соединений можно держать открытыми в неактивном состоянии
-	db.SetConnMaxLifetime(0) // Время жизни соединения
+	return Db, nil
 }

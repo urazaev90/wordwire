@@ -3,6 +3,7 @@
 package core
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"log"
@@ -36,7 +37,9 @@ func CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var existingUser string
-	err = Database.QueryRow("SELECT login FROM user_accounts WHERE login=$1", data.Login).Scan(&existingUser)
+
+	ctx := context.Background()
+	err = Database.QueryRow(ctx, "SELECT login FROM user_accounts WHERE login=$1", data.Login).Scan(&existingUser)
 	if err == nil {
 		// Логин занят
 		json.NewEncoder(w).Encode(map[string]bool{"isTaken": true})
@@ -62,7 +65,9 @@ func GetUserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	userID := getUserIDFromSession(r)
 
 	var login string
-	err := Database.QueryRow("SELECT login FROM user_accounts WHERE id=$1", userID).Scan(&login)
+
+	ctx := context.Background()
+	err := Database.QueryRow(ctx, "SELECT login FROM user_accounts WHERE id=$1", userID).Scan(&login)
 	if err != nil {
 		log.Println("Error fetching user login:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)

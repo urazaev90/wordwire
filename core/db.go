@@ -3,20 +3,22 @@
 package core
 
 import (
-	"database/sql"
+	"context"
 	"github.com/gorilla/sessions"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"time"
 )
 
 var (
-	Database *sql.DB
+	Database *pgxpool.Pool
 	store    = sessions.NewCookieStore([]byte("jdfH=S5Ds+SFg4ff)-dfdWg2gD7D+Ddhdf"))
 )
 
 // регистрация даты последнего посещения пользователя
 func updateLastVisitDate(userID int) {
-	_, err := Database.Exec(`
+	ctx := context.Background() // Или используйте нужный контекст
+	_, err := Database.Exec(ctx, `
 		UPDATE user_accounts 
 		SET last_visit_date = $1 
 		WHERE id = $2`,
@@ -29,7 +31,8 @@ func updateLastVisitDate(userID int) {
 // запрос для добавления слова в архив (надо уточнить)
 func loadNextWordForUser(userID int) error {
 	// Выполняем запрос для добавления следующего слова
-	_, err := Database.Exec(`
+	ctx := context.Background() // Или используйте нужный контекст
+	_, err := Database.Exec(ctx, `
         INSERT INTO user_word_labels (user_id, word_id, label)
         SELECT $1, id, 1
         FROM english_words
@@ -44,7 +47,8 @@ func loadNextWordForUser(userID int) error {
 // запрос на 10 слов для следующей страницы словаря (надо уточнить)
 func loadNextPageWordsForUser(userID int) error {
 	// Выполняем запрос для добавления 10 следующих слов
-	_, err := Database.Exec(`
+	ctx := context.Background()
+	_, err := Database.Exec(ctx, `
         INSERT INTO user_word_labels (user_id, word_id, label)
         SELECT $1, id, 1
         FROM english_words
@@ -62,7 +66,8 @@ func getWordCountsAsync(userID int, ch chan<- map[string]int) {
 
 	var selectedCount, archivedCount int
 
-	err := Database.QueryRow(`
+	ctx := context.Background()
+	err := Database.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM user_word_labels
 		WHERE user_id = $1 AND label = 2
@@ -71,7 +76,7 @@ func getWordCountsAsync(userID int, ch chan<- map[string]int) {
 		counts["selected"] = selectedCount
 	}
 
-	err = Database.QueryRow(`
+	err = Database.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM user_word_labels
 		WHERE user_id = $1 AND label = 3

@@ -3,6 +3,7 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"html/template"
 	"log"
@@ -37,7 +38,8 @@ func WordsAPIHandler(w http.ResponseWriter, r *http.Request) {
 		userID = 1 // значение по умолчанию для незарегистрированных пользователей
 	}
 
-	rows, err := Database.Query(`
+	ctx := context.Background()
+	rows, err := Database.Query(ctx, `
 		SELECT ew.word, ew.transcription, ew.translation
 		FROM english_words ew
 		INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id

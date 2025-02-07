@@ -3,6 +3,7 @@
 package core
 
 import (
+	"context"
 	"html/template"
 	"log"
 	"net/http"
@@ -30,7 +31,8 @@ func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 	go getWordCountsAsync(userID, countsChan)
 
 	var totalWords int
-	dbErr := Database.QueryRow(`
+	ctx := context.Background()
+	dbErr := Database.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM user_word_labels
 		WHERE user_id = $1 AND label IN (1, 2)
@@ -75,7 +77,8 @@ func DictionaryHandler(w http.ResponseWriter, r *http.Request) {
 	wordsChan := make(chan []Word)
 
 	go func() {
-		rows, queryErr := Database.Query(`
+		ctx = context.Background()
+		rows, queryErr := Database.Query(ctx, `
 			SELECT ew.id, ew.word, uwl.label
 			FROM english_words ew
 			INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
@@ -156,7 +159,8 @@ func SelectedHandler(w http.ResponseWriter, r *http.Request) {
 	go getWordCountsAsync(userID, countsChan)
 
 	var totalWords int
-	dbErr := Database.QueryRow(`
+	ctx := context.Background()
+	dbErr := Database.QueryRow(ctx, `
         SELECT COUNT(*)
         FROM user_word_labels
         WHERE user_id = $1 AND label = 2
@@ -195,7 +199,8 @@ func SelectedHandler(w http.ResponseWriter, r *http.Request) {
 	wordsChan := make(chan []Word)
 
 	go func() {
-		rows, queryErr := Database.Query(`
+		ctx = context.Background()
+		rows, queryErr := Database.Query(ctx, `
 			SELECT ew.id, ew.word, uwl.label
 			FROM english_words ew
 			INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
@@ -276,7 +281,8 @@ func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 	go getWordCountsAsync(userID, countsChan)
 
 	var totalWords int
-	dbErr := Database.QueryRow(`
+	ctx := context.Background()
+	dbErr := Database.QueryRow(ctx, `
         SELECT COUNT(*)
         FROM user_word_labels
         WHERE user_id = $1 AND label = 3
@@ -315,7 +321,8 @@ func ArchiveHandler(w http.ResponseWriter, r *http.Request) {
 	wordsChan := make(chan []Word)
 
 	go func() {
-		rows, queryErr := Database.Query(`
+		ctx = context.Background()
+		rows, queryErr := Database.Query(ctx, `
 			SELECT ew.id, ew.word, uwl.label
 			FROM english_words ew
 			INNER JOIN user_word_labels uwl ON ew.id = uwl.word_id
@@ -399,8 +406,8 @@ func AddToArchiveHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Invalid request", http.StatusBadRequest)
 				return
 			}
-
-			_, err = Database.Exec(`
+			ctx := context.Background()
+			_, err = Database.Exec(ctx, `
 			UPDATE user_word_labels SET label = 3
 			WHERE user_id = $1 AND word_id = $2
 		`, userID, wordID)
@@ -431,7 +438,8 @@ func RemoveFromArchiveHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = Database.Exec(`
+		ctx := context.Background()
+		_, err = Database.Exec(ctx, `
 			UPDATE user_word_labels SET label = 1
 			WHERE user_id = $1 AND word_id = $2
 		`, userID, wordID)
@@ -462,7 +470,8 @@ func updateWordLabel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = Database.Exec(`
+	ctx := context.Background()
+	_, err = Database.Exec(ctx, `
 		UPDATE user_word_labels SET label = $1
 		WHERE user_id = $2 AND word_id = $3
 	`, label, userID, wordID)
