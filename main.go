@@ -74,7 +74,7 @@ func initDB() {
 		log.Fatal("Cannot open database:", err)
 	}
 
-	db.SetMaxOpenConns(25)                  // Ограничить количество соединений
-	db.SetMaxIdleConns(5)                   // Сколько соединений можно держать открытыми в неактивном состоянии
-	db.SetConnMaxLifetime(10 * time.Minute) // Время жизни соединения
+	db.SetMaxOpenConns(50)                  // Ограничить количество соединений
+	db.SetMaxIdleConns(25)                  // Сколько соединений можно держать открытыми в неактивном состоянии
+	db.SetConnMaxLifetime(30 * time.Minute) // Время жизни соединения
 }
