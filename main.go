@@ -8,7 +8,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"time"
 	"wordwire/core"
 )
 
@@ -74,7 +73,7 @@ func initDB() {
 		log.Fatal("Cannot open database:", err)
 	}
 
-	db.SetMaxOpenConns(50)                  // Ограничить количество соединений
-	db.SetMaxIdleConns(25)                  // Сколько соединений можно держать открытыми в неактивном состоянии
-	db.SetConnMaxLifetime(30 * time.Minute) // Время жизни соединения
+	db.SetMaxOpenConns(50)   // Ограничить количество соединений
+	db.SetMaxIdleConns(25)   // Сколько соединений можно держать открытыми в неактивном состоянии
+	db.SetConnMaxLifetime(0) // Время жизни соединения
 }
