@@ -1,10 +1,9 @@
 package main
 
 import (
-	"context"
+	"database/sql"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 	"html/template"
 	"log"
@@ -12,26 +11,30 @@ import (
 	"wordwire/core"
 )
 
-var Db *pgxpool.Pool
-
 func main() {
-	var err error
-	Db, err = initDB()
+	connStr := "user=urazaev90 password=Grr(-87He dbname=app_database sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("Cannot open database:", err)
+		log.Fatal(err)
 	}
-	defer Db.Close()
-	core.Database = Db
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatal("Cannot connect to database:", err)
+	}
+
+	core.Database = db
 
 	router := mux.NewRouter()
 
 	router.NotFoundHandler = http.HandlerFunc(core.CustomNotFoundHandler)
-
 	router.PathPrefix("/static/css/").Handler(http.StripPrefix("/static/css/", http.FileServer(http.Dir("static/css/"))))
 	router.PathPrefix("/static/js/").Handler(http.StripPrefix("/static/js/", http.FileServer(http.Dir("static/js/"))))
 	router.PathPrefix("/static/images/").Handler(http.StripPrefix("/static/images/", http.FileServer(http.Dir("static/images/"))))
 	router.PathPrefix("/static/sounds/").Handler(http.StripPrefix("/static/sounds/", http.FileServer(http.Dir("static/sounds/"))))
 
+	router.NotFoundHandler = http.HandlerFunc(core.CustomNotFoundHandler)
 	router.Handle("/captcha/{captchaID}.png", captcha.Server(captcha.StdWidth, captcha.StdHeight))
 
 	router.HandleFunc("/generate-captcha", core.GenerateCaptchaHandler).Methods("GET")
@@ -47,6 +50,11 @@ func main() {
 	router.HandleFunc("/archive", core.ArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/remove_from_archive", core.RemoveFromArchiveHandler).Methods("GET", "POST")
 	router.HandleFunc("/add_to_archive", core.AddToArchiveHandler).Methods("GET", "POST")
+	router.HandleFunc("/teaching", core.TeachingPageHandler).Methods("GET")
+	router.HandleFunc("/api/words", core.WordsAPIHandler).Methods("GET")
+	router.HandleFunc("/api/get_user_login", core.GetUserLoginHandler).Methods("GET")
+	router.HandleFunc("/check-login", core.CheckLoginHandler).Methods("GET", "POST")
+	router.HandleFunc("/generate-captcha", core.GenerateCaptchaHandler).Methods("GET")
 
 	router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "robots.txt")
@@ -68,12 +76,4 @@ func main() {
 
 	log.Println("Server started at :8081")
 	http.ListenAndServe(":8081", router)
-}
-
-func initDB() (*pgxpool.Pool, error) {
-	Db, err := pgxpool.New(context.Background(), "user=urazaev90 password=Grr(-87He dbname=app_database sslmode=disable")
-	if err != nil {
-		return nil, err
-	}
-	return Db, nil
 }
