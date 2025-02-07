@@ -8,8 +8,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"projectWordwire/core"
 	"time"
+	"wordwire/core"
 )
 
 var db *sql.DB
